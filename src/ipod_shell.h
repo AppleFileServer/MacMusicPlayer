@@ -49,4 +49,8 @@ typedef enum
 /* Hit-tests a point in window coordinates. */
 ShellZone IPodShell_HitTest(Point where);
 
+/* Offset of a window-coordinate point from the wheel centre, doubled so
+   the centre of the even-diameter wheel falls on a whole number. */
+void IPodShell_WheelOffset(Point where, long *dx, long *dy);
+
 #endif

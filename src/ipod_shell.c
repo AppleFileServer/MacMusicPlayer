@@ -53,15 +53,23 @@ void DrawIPodShell(void)
     DrawWheel();
 }
 
+void IPodShell_WheelOffset(Point where, long *dx, long *dy)
+{
+    *dx = 2L * (where.h - kShellMargin - kWheelLeft) - kWheelDiameter;
+    *dy = 2L * (where.v - kShellMargin - kWheelTop) - kWheelDiameter;
+}
+
 ShellZone IPodShell_HitTest(Point where)
 {
-    /* Offsets from the wheel centre, doubled so the centre of an even
-       diameter falls on a whole number. Integer maths only. */
-    long dx = 2L * (where.h - kShellMargin - kWheelLeft) - kWheelDiameter;
-    long dy = 2L * (where.v - kShellMargin - kWheelTop) - kWheelDiameter;
-    long distSq = dx * dx + dy * dy;
-    long absX = dx < 0 ? -dx : dx;
-    long absY = dy < 0 ? -dy : dy;
+    /* Doubled offsets from the wheel centre. Integer maths only. */
+    long dx, dy;
+    long distSq;
+    long absX, absY;
+
+    IPodShell_WheelOffset(where, &dx, &dy);
+    distSq = dx * dx + dy * dy;
+    absX = dx < 0 ? -dx : dx;
+    absY = dy < 0 ? -dy : dy;
 
     if (distSq <= (long)kSelectDiameter * kSelectDiameter)
         return kZoneSelect;

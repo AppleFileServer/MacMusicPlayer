@@ -122,12 +122,22 @@ static void HandleUIEvent(UIEvent uiEvent)
 
 static void HandleContentClick(WindowPtr window, Point where)
 {
+    ShellZone zone;
+
     if (window != gMainWindow)
         return;
 
     SetPort(window);
     GlobalToLocal(&where);
-    HandleUIEvent(Input_FromShellZone(IPodShell_HitTest(where)));
+    zone = IPodShell_HitTest(where);
+
+    /* Select is a separate physical button: it acts on mouse-down and
+       never starts a wheel gesture. The ring tracks rotation and only
+       acts as a button press if it was not dragged. */
+    if (zone == kZoneSelect)
+        HandleUIEvent(kEvtSelect);
+    else if (zone != kZoneNone)
+        Input_TrackWheel(zone, HandleUIEvent);
 }
 
 static void HandleKey(EventRecord *event)
