@@ -4,4 +4,5 @@ project(MacMusicPlayer)
 
 add_application(MacMusicPlayer
     src/main.c
+    resources/MacMusicPlayer.r
 )

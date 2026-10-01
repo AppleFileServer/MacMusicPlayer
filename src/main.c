@@ -5,7 +5,20 @@
 #include <Menus.h>
 #include <TextEdit.h>
 #include <Dialogs.h>
+#include <Devices.h>
 #include <ToolUtils.h>
+
+enum
+{
+    kMenuBar = 128,
+
+    kMenuApple = 128,
+
+    kMenuFile = 129,
+    kItemQuit = 1,
+
+    kMenuEdit = 130
+};
 
 static WindowPtr gMainWindow;
 static Boolean gQuit = false;
@@ -20,6 +33,39 @@ static void InitToolbox(void)
     InitDialogs(nil);
     FlushEvents(everyEvent, 0);
     InitCursor();
+}
+
+static void SetUpMenus(void)
+{
+    SetMenuBar(GetNewMBar(kMenuBar));
+    AppendResMenu(GetMenuHandle(kMenuApple), 'DRVR');
+    DrawMenuBar();
+}
+
+static void HandleMenuChoice(long choice)
+{
+    short menuID = choice >> 16;
+    short menuItem = choice & 0xFFFF;
+    Str255 itemName;
+
+    switch (menuID)
+    {
+        case kMenuApple:
+            GetMenuItemText(GetMenuHandle(kMenuApple), menuItem, itemName);
+            OpenDeskAcc(itemName);
+            break;
+
+        case kMenuFile:
+            if (menuItem == kItemQuit)
+                gQuit = true;
+            break;
+
+        case kMenuEdit:
+            SystemEdit(menuItem - 1);
+            break;
+    }
+
+    HiliteMenu(0);
 }
 
 static void DrawMainWindow(WindowPtr window)
@@ -51,6 +97,14 @@ static void HandleMouseDown(EventRecord *event)
 
     switch (part)
     {
+        case inMenuBar:
+            HandleMenuChoice(MenuSelect(event->where));
+            break;
+
+        case inSysWindow:
+            SystemClick(event, window);
+            break;
+
         case inDrag:
             dragBounds = qd.screenBits.bounds;
             InsetRect(&dragBounds, 4, 4);
@@ -75,6 +129,7 @@ int main(void)
     Rect windowRect;
 
     InitToolbox();
+    SetUpMenus();
 
     SetRect(&windowRect, 40, 40, 440, 240);
 
@@ -97,6 +152,12 @@ int main(void)
             {
                 case mouseDown:
                     HandleMouseDown(&event);
+                    break;
+
+                case keyDown:
+                case autoKey:
+                    if (event.modifiers & cmdKey)
+                        HandleMenuChoice(MenuKey(event.message & charCodeMask));
                     break;
 
                 case updateEvt:
