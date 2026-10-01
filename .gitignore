@@ -1,3 +1,5 @@
 build/
 build-xcode/
 .DS_Store
+# Temporary Mini vMac copies left behind by LaunchAPPL
+/[0-9a-f][0-9a-f][0-9a-f][0-9a-f]-[0-9a-f][0-9a-f][0-9a-f][0-9a-f]-[0-9a-f][0-9a-f][0-9a-f][0-9a-f]-[0-9a-f][0-9a-f][0-9a-f][0-9a-f]/
