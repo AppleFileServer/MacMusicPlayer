@@ -13,11 +13,14 @@ enum
     kMenuBar = 128,
 
     kMenuApple = 128,
+    kItemAbout = 1,
 
     kMenuFile = 129,
     kItemQuit = 1,
 
-    kMenuEdit = 130
+    kMenuEdit = 130,
+
+    kAboutAlert = 128
 };
 
 static WindowPtr gMainWindow;
@@ -42,6 +45,11 @@ static void SetUpMenus(void)
     DrawMenuBar();
 }
 
+static void ShowAboutBox(void)
+{
+    Alert(kAboutAlert, nil);
+}
+
 static void HandleMenuChoice(long choice)
 {
     short menuID = choice >> 16;
@@ -51,8 +59,15 @@ static void HandleMenuChoice(long choice)
     switch (menuID)
     {
         case kMenuApple:
-            GetMenuItemText(GetMenuHandle(kMenuApple), menuItem, itemName);
-            OpenDeskAcc(itemName);
+            if (menuItem == kItemAbout)
+            {
+                ShowAboutBox();
+            }
+            else
+            {
+                GetMenuItemText(GetMenuHandle(kMenuApple), menuItem, itemName);
+                OpenDeskAcc(itemName);
+            }
             break;
 
         case kMenuFile:
