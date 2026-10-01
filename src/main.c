@@ -2,22 +2,83 @@
 #include <Windows.h>
 #include <Events.h>
 #include <Fonts.h>
+#include <Menus.h>
+#include <TextEdit.h>
+#include <Dialogs.h>
 #include <ToolUtils.h>
 
-int main(void)
-{
-    WindowPtr window;
-    EventRecord event;
-    Rect windowRect;
+static WindowPtr gMainWindow;
+static Boolean gQuit = false;
 
+static void InitToolbox(void)
+{
     InitGraf(&qd.thePort);
     InitFonts();
     InitWindows();
+    InitMenus();
+    TEInit();
+    InitDialogs(nil);
+    FlushEvents(everyEvent, 0);
     InitCursor();
+}
+
+static void DrawMainWindow(WindowPtr window)
+{
+    SetPort(window);
+    EraseRect(&window->portRect);
+
+    MoveTo(80, 100);
+    DrawString("\pMacMusicPlayer");
+
+    MoveTo(80, 125);
+    DrawString("\pYour Macintosh music player");
+}
+
+static void HandleUpdate(EventRecord *event)
+{
+    WindowPtr window = (WindowPtr)event->message;
+
+    BeginUpdate(window);
+    DrawMainWindow(window);
+    EndUpdate(window);
+}
+
+static void HandleMouseDown(EventRecord *event)
+{
+    WindowPtr window;
+    short part = FindWindow(event->where, &window);
+    Rect dragBounds;
+
+    switch (part)
+    {
+        case inDrag:
+            dragBounds = qd.screenBits.bounds;
+            InsetRect(&dragBounds, 4, 4);
+            DragWindow(window, event->where, &dragBounds);
+            break;
+
+        case inGoAway:
+            if (TrackGoAway(window, event->where))
+                gQuit = true;
+            break;
+
+        case inContent:
+            if (window != FrontWindow())
+                SelectWindow(window);
+            break;
+    }
+}
+
+int main(void)
+{
+    EventRecord event;
+    Rect windowRect;
+
+    InitToolbox();
 
     SetRect(&windowRect, 40, 40, 440, 240);
 
-    window = NewWindow(
+    gMainWindow = NewWindow(
         nil,
         &windowRect,
         "\pMacMusicPlayer",
@@ -28,32 +89,23 @@ int main(void)
         0
     );
 
-    SetPort(window);
-
-    MoveTo(80, 100);
-    DrawString("\pMacMusicPlayer");
-
-    MoveTo(80, 125);
-    DrawString("\pYour Macintosh music player");
-
-    while (true)
+    while (!gQuit)
     {
         if (WaitNextEvent(everyEvent, &event, 30, nil))
         {
-            if (event.what == mouseDown)
+            switch (event.what)
             {
-                Point where;
-                WindowPtr clickedWindow;
+                case mouseDown:
+                    HandleMouseDown(&event);
+                    break;
 
-                where = event.where;
-
-                if (FindWindow(where, &clickedWindow) == inContent)
-                {
-                    SelectWindow(clickedWindow);
-                }
+                case updateEvt:
+                    HandleUpdate(&event);
+                    break;
             }
         }
     }
 
+    DisposeWindow(gMainWindow);
     return 0;
 }
