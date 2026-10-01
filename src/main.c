@@ -8,6 +8,13 @@
 #include <Devices.h>
 #include <ToolUtils.h>
 
+#include "ipod_shell.h"
+#include "ipod_lcd.h"
+
+/* Top of the window's content area: below the 20-pixel menu bar
+   and the rDocProc title bar. */
+#define kWindowContentTop   39
+
 enum
 {
     kMenuBar = 128,
@@ -85,14 +92,15 @@ static void HandleMenuChoice(long choice)
 
 static void DrawMainWindow(WindowPtr window)
 {
+    Rect lcdRect;
+
     SetPort(window);
     EraseRect(&window->portRect);
 
-    MoveTo(80, 100);
-    DrawString("\pMacMusicPlayer");
+    DrawIPodShell();
 
-    MoveTo(80, 125);
-    DrawString("\pYour Macintosh music player");
+    GetLCDRect(&lcdRect);
+    LCD_CopyToWindow(window, &lcdRect);
 }
 
 static void HandleUpdate(EventRecord *event)
@@ -146,14 +154,23 @@ int main(void)
     InitToolbox();
     SetUpMenus();
 
-    SetRect(&windowRect, 40, 40, 440, 240);
+    if (!LCD_Init())
+    {
+        SysBeep(10);
+        return 0;
+    }
+
+    windowRect.left = (qd.screenBits.bounds.right - kShellWidth) / 2;
+    windowRect.top = kWindowContentTop;
+    windowRect.right = windowRect.left + kShellWidth;
+    windowRect.bottom = windowRect.top + kShellHeight;
 
     gMainWindow = NewWindow(
         nil,
         &windowRect,
         "\pMacMusicPlayer",
         true,
-        documentProc,
+        rDocProc,
         (WindowPtr)-1,
         true,
         0
@@ -183,5 +200,6 @@ int main(void)
     }
 
     DisposeWindow(gMainWindow);
+    LCD_Dispose();
     return 0;
 }
