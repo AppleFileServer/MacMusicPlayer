@@ -52,3 +52,26 @@ void DrawIPodShell(void)
     DrawBezel();
     DrawWheel();
 }
+
+ShellZone IPodShell_HitTest(Point where)
+{
+    /* Offsets from the wheel centre, doubled so the centre of an even
+       diameter falls on a whole number. Integer maths only. */
+    long dx = 2L * (where.h - kShellMargin - kWheelLeft) - kWheelDiameter;
+    long dy = 2L * (where.v - kShellMargin - kWheelTop) - kWheelDiameter;
+    long distSq = dx * dx + dy * dy;
+    long absX = dx < 0 ? -dx : dx;
+    long absY = dy < 0 ? -dy : dy;
+
+    if (distSq <= (long)kSelectDiameter * kSelectDiameter)
+        return kZoneSelect;
+
+    if (distSq > (long)kWheelDiameter * kWheelDiameter)
+        return kZoneNone;
+
+    /* Four 90-degree quarters split along the diagonals. */
+    if (absY >= absX)
+        return dy < 0 ? kZoneMenu : kZonePlayPause;
+
+    return dx < 0 ? kZonePrevious : kZoneNext;
+}

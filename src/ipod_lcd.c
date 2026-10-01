@@ -9,20 +9,24 @@
 static GrafPort gLCDPort;
 static BitMap gLCDBits;
 static Boolean gLCDReady = false;
+static GrafPtr gSavedPort;
+
+void LCD_BeginDraw(void)
+{
+    GetPort(&gSavedPort);
+    SetPort(&gLCDPort);
+}
+
+void LCD_EndDraw(void)
+{
+    SetPort(gSavedPort);
+}
 
 static void LCD_Clear(void)
 {
-    GrafPtr savedPort;
-
-    GetPort(&savedPort);
-    SetPort(&gLCDPort);
-
+    LCD_BeginDraw();
     EraseRect(&gLCDPort.portRect);
-
-    /* Temporary test frame along the exact LCD edges. */
-    FrameRect(&gLCDPort.portRect);
-
-    SetPort(savedPort);
+    LCD_EndDraw();
 }
 
 Boolean LCD_Init(void)
@@ -75,4 +79,14 @@ void LCD_CopyToWindow(WindowPtr window, const Rect *destRect)
 
     CopyBits(&gLCDPort.portBits, &window->portBits,
              &gLCDPort.portRect, destRect, srcCopy, nil);
+}
+
+void LCD_Present(WindowPtr window, const Rect *destRect)
+{
+    GrafPtr savedPort;
+
+    GetPort(&savedPort);
+    SetPort(window);
+    LCD_CopyToWindow(window, destRect);
+    SetPort(savedPort);
 }

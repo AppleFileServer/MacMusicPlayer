@@ -10,6 +10,8 @@
 
 #include "ipod_shell.h"
 #include "ipod_lcd.h"
+#include "ui_nav.h"
+#include "input.h"
 
 /* Top of the window's content area: below the 20-pixel menu bar
    and the rDocProc title bar. */
@@ -103,6 +105,45 @@ static void DrawMainWindow(WindowPtr window)
     LCD_CopyToWindow(window, &lcdRect);
 }
 
+/* Passes an iPod event to the UI and, if the screen changed, redraws the
+   LCD and copies it straight to the window (no update event needed). */
+static void HandleUIEvent(UIEvent uiEvent)
+{
+    Rect lcdRect;
+
+    if (uiEvent == kEvtNone || !UI_HandleEvent(uiEvent))
+        return;
+
+    UI_Render();
+
+    GetLCDRect(&lcdRect);
+    LCD_Present(gMainWindow, &lcdRect);
+}
+
+static void HandleContentClick(WindowPtr window, Point where)
+{
+    if (window != gMainWindow)
+        return;
+
+    SetPort(window);
+    GlobalToLocal(&where);
+    HandleUIEvent(Input_FromShellZone(IPodShell_HitTest(where)));
+}
+
+static void HandleKey(EventRecord *event)
+{
+    char key = event->message & charCodeMask;
+
+    if (event->modifiers & cmdKey)
+    {
+        HandleMenuChoice(MenuKey(key));
+        return;
+    }
+
+    if (FrontWindow() == gMainWindow)
+        HandleUIEvent(Input_FromKey(key, event->what == autoKey));
+}
+
 static void HandleUpdate(EventRecord *event)
 {
     WindowPtr window = (WindowPtr)event->message;
@@ -142,6 +183,8 @@ static void HandleMouseDown(EventRecord *event)
         case inContent:
             if (window != FrontWindow())
                 SelectWindow(window);
+            else
+                HandleContentClick(window, event->where);
             break;
     }
 }
@@ -160,6 +203,9 @@ int main(void)
         return 0;
     }
 
+    UI_Init();
+    UI_Render();
+
     windowRect.left = (qd.screenBits.bounds.right - kShellWidth) / 2;
     windowRect.top = kWindowContentTop;
     windowRect.right = windowRect.left + kShellWidth;
@@ -168,7 +214,7 @@ int main(void)
     gMainWindow = NewWindow(
         nil,
         &windowRect,
-        "\pMacMusicPlayer",
+        (ConstStringPtr)"\pMacMusicPlayer",
         true,
         rDocProc,
         (WindowPtr)-1,
@@ -188,8 +234,7 @@ int main(void)
 
                 case keyDown:
                 case autoKey:
-                    if (event.modifiers & cmdKey)
-                        HandleMenuChoice(MenuKey(event.message & charCodeMask));
+                    HandleKey(&event);
                     break;
 
                 case updateEvt:

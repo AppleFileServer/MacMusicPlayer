@@ -35,4 +35,18 @@ void DrawIPodShell(void);
 /* The LCD rectangle in window coordinates (always kLCDWidth x kLCDHeight). */
 void GetLCDRect(Rect *r);
 
+/* Parts of the Click Wheel a click can land on. */
+typedef enum
+{
+    kZoneNone = 0,
+    kZoneMenu,          /* top quarter of the ring */
+    kZonePrevious,      /* left */
+    kZoneNext,          /* right */
+    kZonePlayPause,     /* bottom */
+    kZoneSelect         /* centre button */
+} ShellZone;
+
+/* Hit-tests a point in window coordinates. */
+ShellZone IPodShell_HitTest(Point where);
+
 #endif
