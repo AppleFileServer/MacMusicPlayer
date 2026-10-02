@@ -1,3 +1,5 @@
+#include <Memory.h>
+
 #include "lcd_draw.h"
 #include "lcd_layout.h"
 #include "ipod_lcd.h"
@@ -39,6 +41,29 @@ static void DrawIcon(const unsigned short *bits, short rowBytes,
     CopyBits(&icon, &qd.thePort->portBits, &icon.bounds, &dest, mode, nil);
 }
 
+/* Mac Roman ellipsis; Chicago 12 has the glyph. */
+#define kEllipsis       ((unsigned char)0xC9)
+
+/* Copies text into out, shortened with an ellipsis if it is wider than
+   maxWidth in the current font (D10, D16). TruncString is not used: it
+   is not available on every System 6 configuration. */
+static void FitText(ConstStringPtr text, short maxWidth, Str255 out)
+{
+    short ellipsisWidth;
+
+    BlockMove(text, out, text[0] + 1);
+    if (StringWidth(out) <= maxWidth)
+        return;
+
+    ellipsisWidth = CharWidth(kEllipsis);
+    while (out[0] > 0 && StringWidth(out) + ellipsisWidth > maxWidth)
+        out[0]--;
+    while (out[0] > 0 && out[out[0]] == ' ')
+        out[0]--;
+
+    out[++out[0]] = kEllipsis;
+}
+
 void LCDDraw_Clear(void)
 {
     PenNormal();
@@ -48,8 +73,11 @@ void LCDDraw_Clear(void)
 
 void LCDDraw_Header(ConstStringPtr title)
 {
-    MoveTo((kLCDWidth - StringWidth(title)) / 2, kHeaderBaseline);
-    DrawString(title);
+    Str255 fitted;
+
+    FitText(title, kHeaderTitleMaxWidth, fitted);
+    MoveTo((kLCDWidth - StringWidth(fitted)) / 2, kHeaderBaseline);
+    DrawString(fitted);
 
     DrawIcon(kBatteryBits, 4, kBatteryWidth, kBatteryHeight,
              kBatteryLeft, kBatteryTop, srcOr);
@@ -63,25 +91,27 @@ void LCDDraw_Row(short position, ConstStringPtr text, Boolean selected,
 {
     short top = kRowTop0 + position * kRowHeight;
     short iconMode = selected ? srcBic : srcOr;
+    short arrowLeft = hasScrollBar ? kArrowLeftWithBar : kArrowLeft;
+    short barRight = hasScrollBar ? kSelRightWithBar : kSelRight;
+    short textRight = (hasArrow ? arrowLeft : barRight) - kTextRightGap;
+    Str255 fitted;
     Rect bar;
 
     if (selected)
     {
-        SetRect(&bar, 0, top,
-                hasScrollBar ? kSelRightWithBar : kSelRight,
-                top + kRowHeight);
+        SetRect(&bar, 0, top, barRight, top + kRowHeight);
         PaintRect(&bar);
         TextMode(srcBic);
     }
 
+    FitText(text, textRight - kTextLeft, fitted);
     MoveTo(kTextLeft, top + kRowBaseline);
-    DrawString(text);
+    DrawString(fitted);
     TextMode(srcOr);
 
     if (hasArrow)
         DrawIcon(kArrowBits, 2, kArrowWidth, kArrowHeight,
-                 hasScrollBar ? kArrowLeftWithBar : kArrowLeft,
-                 top + kArrowTopOffset, iconMode);
+                 arrowLeft, top + kArrowTopOffset, iconMode);
 }
 
 void LCDDraw_ScrollBar(short total, short top)

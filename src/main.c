@@ -10,6 +10,7 @@
 
 #include "ipod_shell.h"
 #include "ipod_lcd.h"
+#include "libsetup.h"
 #include "ui_nav.h"
 #include "input.h"
 
@@ -25,7 +26,9 @@ enum
     kItemAbout = 1,
 
     kMenuFile = 129,
-    kItemQuit = 1,
+    kItemImport = 1,            /* Stage 3b; disabled in the MENU resource */
+    kItemChooseLibrary = 2,
+    kItemQuit = 4,
 
     kMenuEdit = 130,
 
@@ -54,6 +57,8 @@ static void SetUpMenus(void)
     DrawMenuBar();
 }
 
+static void ChooseLibrary(void);
+
 static void ShowAboutBox(void)
 {
     Alert(kAboutAlert, nil);
@@ -80,7 +85,9 @@ static void HandleMenuChoice(long choice)
             break;
 
         case kMenuFile:
-            if (menuItem == kItemQuit)
+            if (menuItem == kItemChooseLibrary)
+                ChooseLibrary();
+            else if (menuItem == kItemQuit)
                 gQuit = true;
             break;
 
@@ -107,17 +114,33 @@ static void DrawMainWindow(WindowPtr window)
 
 /* Passes an iPod event to the UI and, if the screen changed, redraws the
    LCD and copies it straight to the window (no update event needed). */
-static void HandleUIEvent(UIEvent uiEvent)
+static void PresentLCD(void)
 {
     Rect lcdRect;
 
+    GetLCDRect(&lcdRect);
+    LCD_Present(gMainWindow, &lcdRect);
+}
+
+static void HandleUIEvent(UIEvent uiEvent)
+{
     if (uiEvent == kEvtNone || !UI_HandleEvent(uiEvent))
         return;
 
     UI_Render();
+    PresentLCD();
+}
 
-    GetLCDRect(&lcdRect);
-    LCD_Present(gMainWindow, &lcdRect);
+/* File > Choose Library...: list positions refer to the old library, so
+   the iPod returns to its main menu. */
+static void ChooseLibrary(void)
+{
+    if (!LibSetup_ChooseLibrary())
+        return;
+
+    UI_Init();
+    UI_Render();
+    PresentLCD();
 }
 
 static void HandleContentClick(WindowPtr window, Point where)
@@ -212,6 +235,8 @@ int main(void)
         SysBeep(10);
         return 0;
     }
+
+    LibSetup_Startup();
 
     UI_Init();
     UI_Render();

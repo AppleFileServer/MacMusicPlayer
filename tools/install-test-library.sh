@@ -1,0 +1,66 @@
+#!/bin/sh
+# Copies a test library made by make_test_library.py into an existing
+# "iPod Library" folder at the top of the test disk.
+#
+# First let the app create the folder: run tools/run-persistent.sh,
+# choose the MusicTest disk and Save "iPod Library", then quit.
+#
+#     tools/install-test-library.sh HOSTDIR
+#
+# All HFS paths are absolute (volume name first). Do not use hcd here: it
+# changes hfsutils' current folder, which persists between commands, and a
+# path starting with ":" is relative to it.
+
+set -e
+
+PROJECT=$(cd "$(dirname "$0")/.." && pwd)
+TOOLS="$HOME/Retro68-build/toolchain/bin"
+DISK="$PROJECT/testdisks/MusicTest.dsk"
+SRC="$1"
+
+[ -d "$SRC" ] || { echo "usage: $0 HOSTDIR" >&2; exit 1; }
+
+if pgrep -x minivmac >/dev/null; then
+    echo "Quit Mini vMac first." >&2
+    exit 1
+fi
+
+"$TOOLS/hmount" "$DISK" >/dev/null
+
+# hmount leaves the current folder at the volume root, e.g. "MusicTest:".
+ROOT=$("$TOOLS/hpwd")
+LIB="${ROOT}iPod Library"
+
+if ! "$TOOLS/hls" "$LIB" >/dev/null 2>&1 \
+   || ! "$TOOLS/hls" "$LIB:Playlists" >/dev/null 2>&1; then
+    "$TOOLS/humount" >/dev/null
+    echo "No \"iPod Library\" folder (with Playlists) at the top of the test disk." >&2
+    echo "Create it with the app first (File > Choose Library...)." >&2
+    exit 1
+fi
+
+# Copies one host file to an HFS path, replacing any existing file.
+install_file() {
+    "$TOOLS/hdel" "$2" 2>/dev/null || true
+    "$TOOLS/hcopy" -r "$1" "$2"
+    "$TOOLS/hattrib" -t "$3" -c iPdM "$2"
+}
+
+songs=0
+for f in "$SRC"/*; do
+    [ -f "$f" ] || continue
+    install_file "$f" "$LIB:$(basename "$f")" iPdS
+    songs=$((songs + 1))
+done
+
+playlists=0
+for f in "$SRC"/Playlists/*; do
+    [ -f "$f" ] || continue
+    install_file "$f" "$LIB:Playlists:$(basename "$f")" TEXT
+    playlists=$((playlists + 1))
+done
+
+"$TOOLS/hls" -l "$LIB"
+"$TOOLS/humount" >/dev/null
+
+echo "Installed $songs files into iPod Library and $playlists into Playlists."

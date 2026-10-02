@@ -3,3 +3,6 @@ build-xcode/
 .DS_Store
 # Temporary Mini vMac copies left behind by LaunchAPPL
 /[0-9a-f][0-9a-f][0-9a-f][0-9a-f]-[0-9a-f][0-9a-f][0-9a-f][0-9a-f]-[0-9a-f][0-9a-f][0-9a-f][0-9a-f]-[0-9a-f][0-9a-f][0-9a-f][0-9a-f]/
+
+# Persistent Mini vMac test disks (see tools/run-persistent.sh)
+/testdisks/

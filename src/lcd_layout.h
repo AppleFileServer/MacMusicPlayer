@@ -17,6 +17,14 @@
 #define kTextLeft               5
 #define kRowBaseline            12      /* baseline below row top */
 
+/* PROVISIONAL (D16): text that does not fit ends with an ellipsis this
+   far before the arrow, or before the bar's right edge, mirroring the
+   left margin. The 4G's long-name handling is unknown (spec unknown #7). */
+#define kTextRightGap           5
+
+/* Header title must fit between the left edge and the battery, centred. */
+#define kHeaderTitleMaxWidth    (2 * (kBatteryLeft - kTextRightGap - kLCDWidth / 2))
+
 /* Selection bar right edge (exclusive) */
 #define kSelRight               160     /* x 0-159 */
 #define kSelRightWithBar        151     /* x 0-150, beside the scroll bar */
