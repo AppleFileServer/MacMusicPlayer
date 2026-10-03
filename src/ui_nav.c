@@ -99,6 +99,47 @@ static Boolean GoBack(void)
     return true;
 }
 
+short UI_SelectedSong(void)
+{
+    Screen *s = CurrentScreen();
+
+    return UIList_ItemSong(s, s->selected);
+}
+
+/* Rebuilds one screen; the highlight follows its item if still listed,
+   otherwise stays at the same row (clamped). Scrolling keeps it visible. */
+static void RebuildScreen(Screen *s)
+{
+    short oldItem = s->count > 0 ? s->items[s->selected] : kNone;
+    short i;
+
+    UIList_Build(s);
+
+    for (i = 0; i < s->count; i++)
+        if (s->items[i] == oldItem)
+        {
+            s->selected = i;
+            break;
+        }
+    if (s->selected >= s->count)
+        s->selected = s->count > 0 ? s->count - 1 : 0;
+
+    if (s->top > s->selected)
+        s->top = s->selected;
+    if (s->selected >= s->top + kVisibleRows)
+        s->top = s->selected - kVisibleRows + 1;
+    if (s->top > 0 && s->top + kVisibleRows > s->count)
+        s->top = s->count > kVisibleRows ? s->count - kVisibleRows : 0;
+}
+
+void UI_Refresh(void)
+{
+    short i;
+
+    for (i = 0; i < gNavDepth; i++)
+        RebuildScreen(&gNav[i]);
+}
+
 Boolean UI_HandleEvent(UIEvent event)
 {
     switch (event)

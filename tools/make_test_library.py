@@ -8,9 +8,10 @@ the test disk small.
 
     tools/make_test_library.py OUTDIR
 
-OUTDIR gets the song files plus a Playlists folder holding empty playlist
-files (their contents are Stage 3c). tools/install-test-library.sh copies
-it onto the test disk.
+OUTDIR gets the song files plus a Playlists folder of playlist files in
+the Stage 3C format: one song per line, "<song ID><tab><title>", where
+only the ID counts (P1). tools/install-test-library.sh copies it onto
+the test disk.
 """
 
 import os
@@ -72,7 +73,21 @@ VALID = [
 AUDIOBOOK = (14, "A Short History of Clocks", "R. Ellison",
              "A Short History of Clocks", "Audiobook", "", 1)
 
-PLAYLISTS = ["Road Trip", "Quiet", "Reference"]
+# Playlist contents. Each exercises the reader's tolerance (P1, P8):
+#   Quiet:     CR endings; unknown ID 999 (hidden on screen, kept in the
+#              file); a blank line; lines not starting with a digit
+#              (ignored); a stale title for ID 9 (the current title shows).
+#   Road Trip: LF endings and no line ending after the last line.
+#   Reference: CRLF endings, IDs with no title at all.
+PLAYLISTS = {
+    "Quiet": b"5\tNocturne Op. 9 No. 2\r4\tBerceuse Op. 57\r"
+             b"999\tA Song That Is Not In The Library\r\r"
+             b"# not a song line\r  7\tleading space, ignored\r"
+             b"9\tAn Old Title For Midnight Express\r",
+    "Road Trip": b"6\tThe Long Way Home\n10\tThe Extraordinarily Long Song "
+                 b"Title That Never Ends\n11\tNo Album Here",
+    "Reference": b"4\r\n12\r\n13\r\n",
+}
 
 
 def write(outdir, name, data, kind="song"):
@@ -115,8 +130,8 @@ def main():
     for name, data in bad.items():
         write(outdir, name, data, "invalid")
 
-    for name in PLAYLISTS:
-        write(os.path.join(outdir, "Playlists"), name, b"", "playlist")
+    for name, data in PLAYLISTS.items():
+        write(os.path.join(outdir, "Playlists"), name, data, "playlist")
 
     print("\n%d valid songs, 1 audiobook, %d invalid files, %d playlists"
           % (len(VALID), len(bad), len(PLAYLISTS)))

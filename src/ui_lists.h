@@ -43,6 +43,10 @@ void UIList_Build(Screen *screen);
 ConstStringPtr UIList_ItemTitle(const Screen *screen, short index);
 Boolean UIList_ItemHasArrow(const Screen *screen, short index);
 
+/* The song shown in row index, for Songs and Audiobooks lists; kNone for
+   every other kind of row. */
+short UIList_ItemSong(const Screen *screen, short index);
+
 /* Sets kind, menuID, filter and title of the screen that Select on item
    index opens. Returns false if the item opens nothing (yet). */
 Boolean UIList_ItemTarget(const Screen *screen, short index, Screen *next);

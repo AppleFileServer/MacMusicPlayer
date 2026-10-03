@@ -108,6 +108,15 @@ Boolean UIList_ItemHasArrow(const Screen *s, short index)
     }
 }
 
+short UIList_ItemSong(const Screen *s, short index)
+{
+    if (index < 0 || index >= s->count)
+        return kNone;
+    if (s->kind == kScreenSongs || s->kind == kScreenAudiobooks)
+        return s->items[index];
+    return kNone;
+}
+
 Boolean UIList_ItemTarget(const Screen *s, short index, Screen *next)
 {
     short item = s->items[index];

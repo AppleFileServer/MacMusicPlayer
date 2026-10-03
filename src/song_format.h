@@ -99,5 +99,6 @@ static inline unsigned long SongChecksum_Value(const SongChecksum *c)
 #define kAppCreator             'iPdM'
 #define kSongFileType           'iPdS'
 #define kPrefsFileType          'pref'
+#define kPlaylistFileType       'TEXT'  /* P4: readable in TeachText */
 
 #endif

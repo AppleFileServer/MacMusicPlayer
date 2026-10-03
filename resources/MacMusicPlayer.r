@@ -41,7 +41,19 @@ resource 'MENU' (130) {
 };
 
 resource 'MBAR' (128) {
-    { 128, 129, 130 };
+    { 128, 129, 130, 131 };
+};
+
+/* Playlists (Stage 3C, P3/P6). The playlist items after the divider are
+   added and enabled at run time. */
+resource 'MENU' (131) {
+    131, textMenuProc;
+    0x7FFFFFFD, enabled;
+    "Playlists";
+    {
+        "New Playlist\0xC9", noIcon, noKey, noMark, plain;
+        "-", noIcon, noKey, noMark, plain;
+    }
 };
 
 /* About box. System 6 ignores the position field, so the rect is
@@ -217,5 +229,64 @@ resource 'DITL' (132) {
         { 12, 16, 78, 326 },
         StaticText { disabled, "This WAV file\0xD5s audio is already in the "
                                "iPod Library as \0xD2^0\0xD3. Import it again?" };
+    }
+};
+
+/* New Playlist window: name field (item 3) and the default-button
+   outline user item (5). Created invisible, shown when filled. */
+resource 'DLOG' (133) {
+    { 120, 96, 222, 416 },
+    dBoxProc,
+    invisible,
+    noGoAway,
+    0,
+    133,
+    "",
+    noAutoCenter
+};
+
+resource 'DITL' (133) {
+    {
+        { 70, 222, 90, 302 },
+        Button { enabled, "Create" };
+
+        { 70, 126, 90, 206 },
+        Button { enabled, "Cancel" };
+
+        { 38, 18, 54, 302 },
+        EditText { enabled, "" };
+
+        { 10, 16, 28, 302 },
+        StaticText { disabled, "Name of the new playlist:" };
+
+        { 66, 218, 94, 306 },
+        UserItem { disabled };
+    }
+};
+
+/* Song ^0 is already in playlist ^1 (P5). Cancel is the default. */
+resource 'ALRT' (134) {
+    { 116, 96, 226, 416 },
+    134,
+    {
+        OK, visible, sound1;
+        OK, visible, sound1;
+        OK, visible, sound1;
+        OK, visible, sound1;
+    },
+    noAutoCenter
+};
+
+resource 'DITL' (134) {
+    {
+        { 78, 216, 98, 306 },
+        Button { enabled, "Cancel" };
+
+        { 78, 112, 98, 206 },
+        Button { enabled, "Add Again" };
+
+        { 12, 16, 68, 306 },
+        StaticText { disabled, "\0xD2^0\0xD3 is already in the playlist "
+                               "\0xD2^1\0xD3. Add it again?" };
     }
 };

@@ -13,6 +13,7 @@
 #define kMaxSongs       500
 #define kMaxGroups      256     /* per kind: artists, albums, genres... */
 #define kMaxPlaylists   64
+#define kMaxPlaylistEntries 1000    /* songs read from one playlist file */
 #define kNone           (-1)
 
 typedef struct
@@ -39,6 +40,25 @@ long Library_NextSongID(void);      /* one more than the largest ID */
 /* A song whose audio has this length and checksum (D31), or kNone.
    Songs saved without a checksum never match. */
 short Library_FindAudioMatch(long audioLength, unsigned long checksum);
+
+/* ---- Playlists (DECISION P1: membership by song ID only) ---- */
+
+/* The song with this stable ID, or kNone. */
+short Library_SongForID(long id);
+
+/* The playlist with this name (ignoring case, as HFS does), or kNone. */
+short Library_FindPlaylist(ConstStringPtr name);
+
+/* True if the playlist file already lists this song's ID (P5). */
+Boolean Library_PlaylistContains(short playlist, short song);
+
+/* Creates an empty playlist file (TEXT/iPdM) in Playlists. dupFNErr if
+   the name is taken; dirFulErr if there are kMaxPlaylists already. The
+   new playlist's index is returned; existing indexes do not change. */
+OSErr Library_AddPlaylist(ConstStringPtr name, short *playlist);
+
+/* Appends "<id><tab><title><CR>" to the playlist file. */
+OSErr Library_AppendToPlaylist(short playlist, short song);
 
 /* Each List function writes item indexes, in display order, to out
    (at most max) and returns how many it wrote. */

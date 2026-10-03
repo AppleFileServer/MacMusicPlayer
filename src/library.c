@@ -39,10 +39,21 @@ static short gSongCount;
 static long gPoolSize;
 
 static short gSongsByTitle[kMaxSongs];
+static short gSongsByID[kMaxSongs];     /* for Library_SongForID */
 static NameSet gArtists, gAlbums, gGenres, gComposers;
 
-static long gPlaylistNames[kMaxPlaylists];
+/* Playlist names, in the order found or created. Kept out of the string
+   pool so a new playlist can be added without moving anything the UI
+   points at; Library_ListPlaylists returns them sorted. */
+static Str31 gPlaylistNames[kMaxPlaylists];
 static short gPlaylistCount;
+
+/* The scanned folder: playlist files are read and written on demand. */
+static LibraryFolder gFolder;
+static Boolean gHaveFolder;
+
+/* Song IDs read from one playlist file. */
+static long gPlaylistIDs[kMaxPlaylistEntries];
 
 static long gMaxSongID;
 static short gSkipped;
@@ -184,6 +195,7 @@ void Library_Clear(void)
     gPoolSize = 0;
     gArtists.count = gAlbums.count = gGenres.count = gComposers.count = 0;
     gPlaylistCount = 0;
+    gHaveFolder = false;
     gMaxSongID = 0;
     gSkipped = 0;
 }
@@ -351,13 +363,13 @@ static Boolean ScanSongs(const LibraryFolder *folder)
     return true;
 }
 
-/* Collects playlist names: the names of the files in Playlists. Their
-   contents are read in a later stage (3c). */
+/* Collects playlist names: the names of the files in Playlists
+   (DECISION P10: any file there is a playlist). Contents are read when a
+   playlist is opened. */
 static Boolean ScanPlaylists(const LibraryFolder *folder)
 {
     CInfoPBRec pb;
     Str63 name;
-    long offset;
     short index;
 
     for (index = 1; gPlaylistCount < kMaxPlaylists; index++)
@@ -372,10 +384,9 @@ static Boolean ScanPlaylists(const LibraryFolder *folder)
         if (pb.hFileInfo.ioFlAttrib & kDirectoryAttribute)
             continue;
 
-        offset = PoolAdd(name);
-        if (offset < 0)
-            return false;
-        gPlaylistNames[gPlaylistCount++] = offset;
+        if (name[0] > 31)
+            continue;                   /* HFS names never are */
+        BlockMove(name, gPlaylistNames[gPlaylistCount++], name[0] + 1);
     }
     return true;
 }
@@ -384,8 +395,7 @@ static Boolean ScanPlaylists(const LibraryFolder *folder)
    pool is locked, since it compares strings in place. */
 static void IndexSongs(void)
 {
-    long names[kMaxPlaylists];
-    short count, i;
+    short i, j, s;
     SongRec *song;
 
     /* PROVISIONAL (D18): audiobooks appear only under Audiobooks.
@@ -430,13 +440,14 @@ static void IndexSongs(void)
         gSongsByTitle[i] = i;
     SortSongsByTitle(gSongsByTitle, gSongCount);
 
-    /* Playlists: sorted by name (D11), re-using the offset list sort. */
-    count = 0;
-    for (i = 0; i < gPlaylistCount; i++)
-        InsertName(names, &count, kMaxPlaylists, gPlaylistNames[i]);
-    for (i = 0; i < count; i++)
-        gPlaylistNames[i] = names[i];
-    gPlaylistCount = count;
+    /* Songs sorted by ID, so playlists can find them by binary search. */
+    for (i = 0; i < gSongCount; i++)
+    {
+        s = i;
+        for (j = i; j > 0 && Songs()[gSongsByID[j - 1]].id > Songs()[s].id; j--)
+            gSongsByID[j] = gSongsByID[j - 1];
+        gSongsByID[j] = s;
+    }
 }
 
 Boolean Library_Scan(const LibraryFolder *folder)
@@ -469,6 +480,8 @@ Boolean Library_Scan(const LibraryFolder *folder)
     }
 
     IndexSongs();
+    gFolder = *folder;
+    gHaveFolder = true;
     return true;
 }
 
@@ -498,6 +511,202 @@ short Library_FindAudioMatch(long audioLength, unsigned long checksum)
             return i;
     }
     return kNone;
+}
+
+/* ---- Playlist contents ------------------------------------------------ */
+
+/* A playlist file is text, one song per line: the decimal song ID, a tab,
+   then the title when added (DECISION P1; only the ID is used). Lines
+   end in CR, LF or CRLF; lines not starting with a digit, and IDs <= 0,
+   are ignored. Membership is by ID only, never position or file name. */
+
+short Library_SongForID(long id)
+{
+    short low = 0, high = gSongCount - 1, mid;
+    long midID;
+
+    while (low <= high)
+    {
+        mid = (low + high) / 2;
+        midID = Songs()[gSongsByID[mid]].id;
+        if (midID == id)
+            return gSongsByID[mid];
+        if (midID < id)
+            low = mid + 1;
+        else
+            high = mid - 1;
+    }
+    return kNone;
+}
+
+/* Reads up to max song IDs from a playlist file into gPlaylistIDs. */
+static short ReadPlaylistIDs(short playlist, short max)
+{
+    unsigned char buf[256];
+    long count, id = 0;
+    short refNum, i, n = 0;
+    Boolean lineStart = true, inNumber = false, skipLine = false;
+    unsigned char c;
+    OSErr err;
+
+    if (!gHaveFolder || playlist < 0 || playlist >= gPlaylistCount)
+        return 0;
+    if (OpenDataFork(gFolder.vRefNum, gFolder.playlistsID,
+                     gPlaylistNames[playlist], fsRdPerm, &refNum) != noErr)
+        return 0;
+
+    do
+    {
+        count = sizeof(buf);
+        err = FSRead(refNum, &count, buf);
+        for (i = 0; i < count && n < max; i++)
+        {
+            c = buf[i];
+            if (c == '\r' || c == '\n')
+            {
+                if (inNumber && id > 0)
+                    gPlaylistIDs[n++] = id;
+                lineStart = true;
+                inNumber = skipLine = false;
+                id = 0;
+            }
+            else if (skipLine)
+                ;
+            else if (c >= '0' && c <= '9' && (lineStart || inNumber))
+            {
+                if (id < 100000000L)
+                    id = id * 10 + (c - '0');
+                inNumber = true;
+                lineStart = false;
+            }
+            else
+            {
+                /* Tab (or anything) after the number ends it; a line
+                   that does not start with a digit is ignored. */
+                if (inNumber && id > 0)
+                    gPlaylistIDs[n++] = id;
+                inNumber = false;
+                skipLine = true;
+            }
+        }
+    } while (err == noErr && count > 0 && n < max);
+
+    if (inNumber && id > 0 && n < max)     /* last line without an end */
+        gPlaylistIDs[n++] = id;
+
+    FSClose(refNum);
+    return n;
+}
+
+/* DECISION P8: IDs not in the library are skipped (they stay in the file). */
+static short ListPlaylistSongs(short playlist, short *out, short max)
+{
+    short count = ReadPlaylistIDs(playlist, kMaxPlaylistEntries);
+    short i, song, n = 0;
+
+    for (i = 0; i < count && n < max; i++)
+    {
+        song = Library_SongForID(gPlaylistIDs[i]);
+        if (song != kNone)
+            out[n++] = song;
+    }
+    return n;
+}
+
+Boolean Library_PlaylistContains(short playlist, short song)
+{
+    short count = ReadPlaylistIDs(playlist, kMaxPlaylistEntries);
+    short i;
+
+    for (i = 0; i < count; i++)
+        if (gPlaylistIDs[i] == Songs()[song].id)
+            return true;
+    return false;
+}
+
+short Library_FindPlaylist(ConstStringPtr name)
+{
+    short i;
+
+    /* HFS names ignore case, so playlists do too. */
+    for (i = 0; i < gPlaylistCount; i++)
+        if (EqualString(gPlaylistNames[i], name, false, true))
+            return i;
+    return kNone;
+}
+
+OSErr Library_AddPlaylist(ConstStringPtr name, short *playlist)
+{
+    OSErr err;
+
+    if (!gHaveFolder)
+        return fnfErr;
+    if (gPlaylistCount >= kMaxPlaylists)
+        return dirFulErr;
+    if (Library_FindPlaylist(name) != kNone)
+        return dupFNErr;
+
+    err = HCreate(gFolder.vRefNum, gFolder.playlistsID, name,
+                  kAppCreator, kPlaylistFileType);
+    if (err != noErr)
+        return err;
+    FlushVol(nil, gFolder.vRefNum);
+
+    BlockMove(name, gPlaylistNames[gPlaylistCount], name[0] + 1);
+    *playlist = gPlaylistCount++;
+    return noErr;
+}
+
+OSErr Library_AppendToPlaylist(short playlist, short song)
+{
+    unsigned char line[80];
+    unsigned char last;
+    Str255 number;
+    ConstStringPtr title = Library_SongTitle(song);
+    long length = 0, count;
+    short refNum;
+    OSErr err;
+
+    if (!gHaveFolder || playlist < 0 || playlist >= gPlaylistCount)
+        return fnfErr;
+
+    err = OpenDataFork(gFolder.vRefNum, gFolder.playlistsID,
+                       gPlaylistNames[playlist], fsRdWrPerm, &refNum);
+    if (err != noErr)
+        return err;
+
+    /* Start on a new line if the file does not end with one. */
+    err = GetEOF(refNum, &length);
+    if (err == noErr && length > 0)
+    {
+        count = 1;
+        err = SetFPos(refNum, fsFromStart, length - 1);
+        if (err == noErr)
+            err = FSRead(refNum, &count, &last);
+        count = 0;
+        if (err == noErr && last != '\r' && last != '\n')
+            line[count++] = '\r';
+    }
+    else
+        count = 0;
+
+    /* "<id><tab><title><CR>" */
+    NumToString(Songs()[song].id, number);
+    BlockMove(number + 1, line + count, number[0]);
+    count += number[0];
+    line[count++] = '\t';
+    BlockMove(title + 1, line + count, title[0]);
+    count += title[0];
+    line[count++] = '\r';
+
+    if (err == noErr)
+        err = SetFPos(refNum, fsFromLEOF, 0);
+    if (err == noErr)
+        err = FSWrite(refNum, &count, line);
+    FSClose(refNum);
+    if (err == noErr)
+        err = FlushVol(nil, gFolder.vRefNum);
+    return err;
 }
 
 /* ---- Queries ---------------------------------------------------------- */
@@ -532,9 +741,20 @@ short Library_ListComposers(short *out, short max)
     return ListAll(gComposers.count, out, max);
 }
 
+/* Playlists sorted by name (D11, P2). */
 short Library_ListPlaylists(short *out, short max)
 {
-    return ListAll(gPlaylistCount, out, max);
+    short i, j, n = 0;
+
+    for (i = 0; i < gPlaylistCount && n < max; i++)
+    {
+        for (j = n; j > 0 && CompareNames(gPlaylistNames[out[j - 1]],
+                                          gPlaylistNames[i]) > 0; j--)
+            out[j] = out[j - 1];
+        out[j] = i;
+        n++;
+    }
+    return n;
 }
 
 short Library_ListArtists(const LibFilter *filter, short *out, short max)
@@ -569,9 +789,8 @@ short Library_ListSongs(const LibFilter *filter, short *out, short max)
 {
     short i, s, n = 0;
 
-    /* Playlist contents are read in a later stage (3c). */
     if (filter->playlist != kNone)
-        return 0;
+        return ListPlaylistSongs(filter->playlist, out, max);
 
     for (i = 0; i < gSongCount && n < max; i++)
     {
@@ -603,5 +822,5 @@ ConstStringPtr Library_GenreName(short genre)       { return PoolString(gGenres.
 ConstStringPtr Library_ArtistName(short artist)     { return PoolString(gArtists.names[artist]); }
 ConstStringPtr Library_AlbumName(short album)       { return PoolString(gAlbums.names[album]); }
 ConstStringPtr Library_ComposerName(short composer) { return PoolString(gComposers.names[composer]); }
-ConstStringPtr Library_PlaylistName(short playlist) { return PoolString(gPlaylistNames[playlist]); }
+ConstStringPtr Library_PlaylistName(short playlist) { return gPlaylistNames[playlist]; }
 ConstStringPtr Library_SongTitle(short song)        { return PoolString(Songs()[song].title); }

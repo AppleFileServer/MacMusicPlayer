@@ -12,6 +12,7 @@
 #include "ipod_lcd.h"
 #include "libsetup.h"
 #include "import.h"
+#include "playlists.h"
 #include "lcd_draw.h"
 #include "ui_nav.h"
 #include "input.h"
@@ -38,6 +39,8 @@ enum
     kItemQuit = 4,
 
     kMenuEdit = 130,
+
+    kMenuPlaylists = 131,
 
     kAboutAlert = 128
 };
@@ -67,6 +70,7 @@ static void SetUpMenus(void)
 
 static void ChooseLibrary(void);
 static void ImportSong(void);
+static void PlaylistsChanged(void);
 
 static void ShowAboutBox(void)
 {
@@ -104,6 +108,12 @@ static void HandleMenuChoice(long choice)
 
         case kMenuEdit:
             SystemEdit(menuItem - 1);
+            break;
+
+        case kMenuPlaylists:
+            HiliteMenu(0);
+            if (Playlists_HandleMenu(menuItem))
+                PlaylistsChanged();
             break;
     }
 
@@ -149,6 +159,25 @@ static void RedrawWindowNow(void)
     SetPort(gMainWindow);
     DrawMainWindow(gMainWindow);
     ValidRect(&gMainWindow->portRect);
+}
+
+/* Brings menus up to date with the library and the iPod's highlighted
+   row; called just before a menu is pulled down or a key equivalent is
+   looked up. */
+static void AdjustMenus(void)
+{
+    Playlists_AdjustMenu(GetMenuHandle(kMenuPlaylists),
+                         LibSetup_HasLibrary());
+}
+
+/* A playlist was created or added to: rebuild the iPod's screens (the
+   current one may be the Playlists list or that playlist) and redraw.
+   Not an iPod restart, so no logo (P11). */
+static void PlaylistsChanged(void)
+{
+    UI_Refresh();
+    UI_Render();
+    PresentLCD();
 }
 
 static void UpdateFileMenu(void)
@@ -238,6 +267,7 @@ static void HandleKey(EventRecord *event)
 
     if (event->modifiers & cmdKey)
     {
+        AdjustMenus();
         HandleMenuChoice(MenuKey(key));
         return;
     }
@@ -264,6 +294,7 @@ static void HandleMouseDown(EventRecord *event)
     switch (part)
     {
         case inMenuBar:
+            AdjustMenus();
             HandleMenuChoice(MenuSelect(event->where));
             break;
 
