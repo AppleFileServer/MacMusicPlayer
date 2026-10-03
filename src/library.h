@@ -36,6 +36,10 @@ Boolean Library_Scan(const LibraryFolder *folder);
 short Library_SkippedCount(void);   /* files skipped by the last scan */
 long Library_NextSongID(void);      /* one more than the largest ID */
 
+/* A song whose audio has this length and checksum (D31), or kNone.
+   Songs saved without a checksum never match. */
+short Library_FindAudioMatch(long audioLength, unsigned long checksum);
+
 /* Each List function writes item indexes, in display order, to out
    (at most max) and returns how many it wrote. */
 short Library_ListGenres(short *out, short max);

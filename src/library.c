@@ -16,6 +16,7 @@ typedef struct
     long seconds;
     long audioOffset;           /* = header length */
     long audioLength;
+    unsigned long checksum;     /* valid if flags has kSongFlagHasChecksum */
     long title, artistName, albumName, genreName, composerName, fileName;
     short track;
     short flags;
@@ -248,6 +249,15 @@ static Boolean ParseHeader(long fileLength, long bytesRead,
         stringAt[i] = at;
         at += 1 + gHeader[at];
     }
+
+    /* Optional audio checksum straight after the strings (D31). */
+    song->checksum = 0;
+    if (song->flags & kSongFlagHasChecksum)
+    {
+        if (at + 4 > headerLength)
+            return false;
+        song->checksum = Get32(gHeader + at);
+    }
     return true;
 }
 
@@ -467,9 +477,27 @@ short Library_SkippedCount(void)
     return gSkipped;
 }
 
+/* Song IDs are never reused: the next one is above the highest valid ID
+   found by the last scan, whatever songs are missing below it. */
 long Library_NextSongID(void)
 {
     return gMaxSongID + 1;
+}
+
+short Library_FindAudioMatch(long audioLength, unsigned long checksum)
+{
+    short i;
+
+    for (i = 0; i < gSongCount; i++)
+    {
+        const SongRec *song = &Songs()[i];
+
+        if ((song->flags & kSongFlagHasChecksum)
+            && song->audioLength == audioLength
+            && song->checksum == checksum)
+            return i;
+    }
+    return kNone;
 }
 
 /* ---- Queries ---------------------------------------------------------- */

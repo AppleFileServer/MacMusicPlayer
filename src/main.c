@@ -11,12 +11,19 @@
 #include "ipod_shell.h"
 #include "ipod_lcd.h"
 #include "libsetup.h"
+#include "import.h"
+#include "lcd_draw.h"
 #include "ui_nav.h"
 #include "input.h"
 
 /* Top of the window's content area: below the 20-pixel menu bar
    and the rDocProc title bar. */
 #define kWindowContentTop   39
+
+/* DECISION (D32): the Apple logo stays up at least 1 second (60 ticks)
+   whenever the iPod starts or restarts, however quickly the library
+   loads. */
+#define kLogoTicks          60
 
 enum
 {
@@ -26,7 +33,7 @@ enum
     kItemAbout = 1,
 
     kMenuFile = 129,
-    kItemImport = 1,            /* Stage 3b; disabled in the MENU resource */
+    kItemImport = 1,            /* enabled only when a library is set */
     kItemChooseLibrary = 2,
     kItemQuit = 4,
 
@@ -37,6 +44,7 @@ enum
 
 static WindowPtr gMainWindow;
 static Boolean gQuit = false;
+static unsigned long gLogoShownAt;
 
 static void InitToolbox(void)
 {
@@ -58,6 +66,7 @@ static void SetUpMenus(void)
 }
 
 static void ChooseLibrary(void);
+static void ImportSong(void);
 
 static void ShowAboutBox(void)
 {
@@ -85,7 +94,9 @@ static void HandleMenuChoice(long choice)
             break;
 
         case kMenuFile:
-            if (menuItem == kItemChooseLibrary)
+            if (menuItem == kItemImport)
+                ImportSong();
+            else if (menuItem == kItemChooseLibrary)
                 ChooseLibrary();
             else if (menuItem == kItemQuit)
                 gQuit = true;
@@ -131,16 +142,74 @@ static void HandleUIEvent(UIEvent uiEvent)
     PresentLCD();
 }
 
-/* File > Choose Library...: list positions refer to the old library, so
-   the iPod returns to its main menu. */
-static void ChooseLibrary(void)
+/* Draws the whole window now (shell and LCD) instead of waiting for an
+   update event: used while no events are being handled. */
+static void RedrawWindowNow(void)
 {
-    if (!LibSetup_ChooseLibrary())
-        return;
+    SetPort(gMainWindow);
+    DrawMainWindow(gMainWindow);
+    ValidRect(&gMainWindow->portRect);
+}
+
+static void UpdateFileMenu(void)
+{
+    MenuHandle fileMenu = GetMenuHandle(kMenuFile);
+
+    if (LibSetup_HasLibrary())
+        EnableItem(fileMenu, kItemImport);
+    else
+        DisableItem(fileMenu, kItemImport);
+}
+
+/* An iPod start or restart: BeginRestart shows the Apple logo; the caller
+   then (re)loads the library, during which alerts may appear; EndRestart
+   keeps the logo up for at least kLogoTicks, discards clicks and keys
+   made meanwhile, and shows the main menu. Rescanning invalidates list
+   positions, so every restart returns to the main menu (D26). */
+static void BeginRestart(void)
+{
+    LCD_BeginDraw();
+    LCDDraw_Logo();
+    LCD_EndDraw();
+    RedrawWindowNow();
+    gLogoShownAt = TickCount();
+}
+
+static void EndRestart(void)
+{
+    RedrawWindowNow();          /* alerts may have covered the window */
+    while (TickCount() - gLogoShownAt < kLogoTicks)
+        ;
+    FlushEvents(mDownMask | mUpMask | keyDownMask | keyUpMask | autoKeyMask, 0);
 
     UI_Init();
     UI_Render();
     PresentLCD();
+    UpdateFileMenu();
+}
+
+/* File > Choose Library... */
+static void ChooseLibrary(void)
+{
+    HiliteMenu(0);
+    if (!LibSetup_ChooseLibrary())
+        return;
+
+    BeginRestart();
+    LibSetup_Rescan();
+    EndRestart();
+}
+
+/* File > Import Song... */
+static void ImportSong(void)
+{
+    HiliteMenu(0);
+    if (!LibSetup_HasLibrary() || !Import_Run(LibSetup_Folder()))
+        return;
+
+    BeginRestart();
+    LibSetup_Rescan();
+    EndRestart();
 }
 
 static void HandleContentClick(WindowPtr window, Point where)
@@ -236,11 +305,6 @@ int main(void)
         return 0;
     }
 
-    LibSetup_Startup();
-
-    UI_Init();
-    UI_Render();
-
     windowRect.left = (qd.screenBits.bounds.right - kShellWidth) / 2;
     windowRect.top = kWindowContentTop;
     windowRect.right = windowRect.left + kShellWidth;
@@ -256,6 +320,12 @@ int main(void)
         true,
         0
     );
+
+    /* Start-up is an iPod start: the logo is shown while the library is
+       found (asking for one if needed) and scanned. */
+    BeginRestart();
+    LibSetup_Startup();
+    EndRestart();
 
     while (!gQuit)
     {

@@ -15,6 +15,9 @@ void LCDDraw_Header(ConstStringPtr title);
 void LCDDraw_Row(short position, ConstStringPtr text, Boolean selected,
                  Boolean hasArrow, Boolean hasScrollBar);
 
+/* The start-up screen: the Apple logo centred on a blank LCD. */
+void LCDDraw_Logo(void);
+
 /* Scroll bar for a list of total items whose first visible item is top. */
 void LCDDraw_ScrollBar(short total, short top);
 

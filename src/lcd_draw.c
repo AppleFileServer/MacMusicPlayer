@@ -24,6 +24,24 @@ static const unsigned short kBatteryBits[kBatteryHeight * 2] = {
     0xFFFF, 0xE000
 };
 
+/* Apple logo shown while the iPod starts (manual pp. 15, 49: "until the
+   Apple logo appears"). PROVISIONAL (D32): its size and exact shape on the
+   4G LCD are not in any screenshot; this 30x34 silhouette is centred. */
+#define kLogoWidth      30
+#define kLogoHeight     34
+
+static const unsigned short kLogoBits[kLogoHeight * 2] = {
+    0x0000, 0x3000,  0x0000, 0x7000,  0x0000, 0xF000,  0x0001, 0xF000,
+    0x0003, 0xE000,  0x0003, 0xC000,  0x0003, 0x0000,  0x0000, 0x0000,
+    0x0040, 0x0800,  0x03F8, 0x7F00,  0x0FFC, 0xFFC0,  0x1FFF, 0xFFE0,
+    0x1FFF, 0xFFC0,  0x3FFF, 0xFF80,  0x7FFF, 0xFF80,  0x7FFF, 0xFF00,
+    0x7FFF, 0xFF00,  0xFFFF, 0xFF00,  0xFFFF, 0xFF00,  0xFFFF, 0xFF80,
+    0xFFFF, 0xFF80,  0xFFFF, 0xFFC0,  0xFFFF, 0xFFE0,  0xFFFF, 0xFFFC,
+    0xFFFF, 0xFFFC,  0x7FFF, 0xFFF8,  0x7FFF, 0xFFF8,  0x7FFF, 0xFFF8,
+    0x3FFF, 0xFFF0,  0x1FFF, 0xFFE0,  0x1FFF, 0xFFE0,  0x0FFF, 0xFFC0,
+    0x03F8, 0x7F00,  0x0040, 0x0800
+};
+
 /* Copies an icon into the current (LCD) port: srcOr draws it black,
    srcBic draws it white. */
 static void DrawIcon(const unsigned short *bits, short rowBytes,
@@ -141,4 +159,12 @@ void LCDDraw_ScrollBar(short total, short top)
 
     SetRect(&thumb, kThumbLeft, thumbTop, kThumbRight, thumbTop + thumbHeight);
     PaintRect(&thumb);
+}
+
+void LCDDraw_Logo(void)
+{
+    LCDDraw_Clear();
+    DrawIcon(kLogoBits, 4, kLogoWidth, kLogoHeight,
+             (kLCDWidth - kLogoWidth) / 2, (kLCDHeight - kLogoHeight) / 2,
+             srcOr);
 }

@@ -26,14 +26,16 @@ if pgrep -x minivmac >/dev/null; then
 fi
 
 "$TOOLS/hmount" "$DISK" >/dev/null
+# Always unmount: hfsutils only writes changes back to the image then.
+trap '"$TOOLS/humount" >/dev/null 2>&1 || true' EXIT
 
 # hmount leaves the current folder at the volume root, e.g. "MusicTest:".
 ROOT=$("$TOOLS/hpwd")
 LIB="${ROOT}iPod Library"
 
-if ! "$TOOLS/hls" "$LIB" >/dev/null 2>&1 \
-   || ! "$TOOLS/hls" "$LIB:Playlists" >/dev/null 2>&1; then
-    "$TOOLS/humount" >/dev/null
+# hls exits 0 even for a missing path, so look for the names instead.
+if ! "$TOOLS/hls" "$ROOT" | grep -qx "iPod Library" \
+   || ! "$TOOLS/hls" "$LIB" | grep -qx "Playlists"; then
     echo "No \"iPod Library\" folder (with Playlists) at the top of the test disk." >&2
     echo "Create it with the app first (File > Choose Library...)." >&2
     exit 1
@@ -61,6 +63,5 @@ for f in "$SRC"/Playlists/*; do
 done
 
 "$TOOLS/hls" -l "$LIB"
-"$TOOLS/humount" >/dev/null
 
 echo "Installed $songs files into iPod Library and $playlists into Playlists."

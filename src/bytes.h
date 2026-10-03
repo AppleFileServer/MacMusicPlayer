@@ -17,6 +17,18 @@ static inline unsigned long Get32(const unsigned char *p)
          | ((unsigned long)p[2] << 8) | p[3];
 }
 
+/* Little-endian (WAV files). */
+static inline unsigned short GetLE16(const unsigned char *p)
+{
+    return (unsigned short)(p[0] | (p[1] << 8));
+}
+
+static inline unsigned long GetLE32(const unsigned char *p)
+{
+    return p[0] | ((unsigned long)p[1] << 8)
+         | ((unsigned long)p[2] << 16) | ((unsigned long)p[3] << 24);
+}
+
 static inline void Put16(unsigned char *p, unsigned short v)
 {
     p[0] = (unsigned char)(v >> 8);

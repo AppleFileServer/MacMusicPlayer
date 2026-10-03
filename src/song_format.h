@@ -20,8 +20,13 @@
     34     4   audio length in bytes
     38     -   title, artist, album, genre, composer: each a length byte
                (0-63) followed by that many Mac Roman characters
-     ...       (header length may exceed the strings: room for later fields)
+     s     4   audio checksum, present only if flags bit 1 is set
+               (s = first byte after the strings; see SongChecksum)
+     ...       (header length may exceed these: room for later fields)
    header length: audio samples
+
+   Files without the checksum flag remain valid; they just cannot be
+   matched as duplicates (DECISION D31).
 
    The data fork holds everything; the resource fork is unused. */
 
@@ -48,6 +53,41 @@
 #define kSongMaxHeaderSize      1024
 
 #define kSongFlagAudiobook      0x0001
+#define kSongFlagHasChecksum    0x0002
+
+/* Audio checksum: two running 32-bit sums over the audio bytes,
+       a += byte; b += a;   checksum = (b << 16) ^ a
+   computed incrementally over the copy, starting from a = b = 0. */
+typedef struct
+{
+    unsigned long a;
+    unsigned long b;
+} SongChecksum;
+
+static inline void SongChecksum_Init(SongChecksum *c)
+{
+    c->a = 0;
+    c->b = 0;
+}
+
+static inline void SongChecksum_Add(SongChecksum *c,
+                                    const unsigned char *bytes, long count)
+{
+    unsigned long a = c->a, b = c->b;
+
+    while (count-- > 0)
+    {
+        a += *bytes++;
+        b += a;
+    }
+    c->a = a;
+    c->b = b;
+}
+
+static inline unsigned long SongChecksum_Value(const SongChecksum *c)
+{
+    return (c->b << 16) ^ c->a;
+}
 
 /* The only audio format accepted. */
 #define kSongEncodingPCMu       'PCMu'
