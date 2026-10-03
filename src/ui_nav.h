@@ -10,7 +10,10 @@ typedef enum
     kEvtWheelUp,        /* counter-clockwise: highlight moves up */
     kEvtWheelDown,      /* clockwise: highlight moves down */
     kEvtSelect,
-    kEvtMenu
+    kEvtMenu,
+    kEvtPlayPause,
+    kEvtNext,
+    kEvtPrevious
 } UIEvent;
 
 void UI_Init(void);
@@ -29,5 +32,9 @@ short UI_SelectedSong(void);
    playlist change), keeping each highlight on the same item where it
    still exists. Does not draw. */
 void UI_Refresh(void);
+
+/* Advances playback; returns true if the LCD needs redrawing (time or
+   song changed on Now Playing, or playback stopped). Call often. */
+Boolean UI_Tick(void);
 
 #endif

@@ -53,4 +53,24 @@
 #define kBatteryWidth           20
 #define kBatteryHeight          10
 
+/* Now Playing (measured from Apple's Now Playing screenshot) */
+#define kPlayIconLeft           9       /* 9x9 play/pause icon, x 9-17 */
+#define kPlayIconTop            3       /* y 3-11 */
+#define kPlayIconSize           9
+#define kCounterLeft            10      /* "3 of 12", small font */
+#define kCounterTop             24      /* y 24-30 */
+#define kNowLineBaseline0       48      /* title; ink from y 39 */
+#define kNowLineSpacing         18      /* artist 65, album 83 */
+#define kNowLineMaxWidth        (kLCDWidth - 2 * kTextLeft)
+#define kProgressLeft           8       /* bar x 8-150, y 99-107 */
+#define kProgressRight          151     /* exclusive */
+#define kProgressTop            99
+#define kProgressBottom         108     /* exclusive */
+#define kTimeTop                114     /* y 114-120 */
+#define kElapsedLeft            10      /* "1:28" (its 1 sits at x 11) */
+#define kRemainingRight         152     /* exclusive: "-0:56" ends at x 151 */
+
+/* Small font (counter, times): 7 px tall glyphs. */
+#define kSmallFontHeight        7
+
 #endif

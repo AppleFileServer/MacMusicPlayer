@@ -824,3 +824,8 @@ ConstStringPtr Library_AlbumName(short album)       { return PoolString(gAlbums.
 ConstStringPtr Library_ComposerName(short composer) { return PoolString(gComposers.names[composer]); }
 ConstStringPtr Library_PlaylistName(short playlist) { return gPlaylistNames[playlist]; }
 ConstStringPtr Library_SongTitle(short song)        { return PoolString(Songs()[song].title); }
+long Library_SongID(short song)                     { return Songs()[song].id; }
+ConstStringPtr Library_SongArtistName(short song)   { return PoolString(Songs()[song].artistName); }
+ConstStringPtr Library_SongAlbumName(short song)    { return PoolString(Songs()[song].albumName); }
+long Library_SongSeconds(short song)                { return Songs()[song].seconds; }
+long Library_SongAudioLength(short song)            { return Songs()[song].audioLength; }

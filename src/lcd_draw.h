@@ -18,6 +18,18 @@ void LCDDraw_Row(short position, ConstStringPtr text, Boolean selected,
 /* The start-up screen: the Apple logo centred on a blank LCD. */
 void LCDDraw_Logo(void);
 
+/* Small font (counter and times on Now Playing). C strings. */
+short LCDDraw_SmallTextWidth(const char *text);
+void LCDDraw_SmallText(short left, short top, const char *text);
+
+void LCDDraw_PlayStateIcon(Boolean paused);
+void LCDDraw_ProgressBar(long done, long total);
+
+/* The whole Now Playing screen; position is 0-based. */
+void LCDDraw_NowPlaying(ConstStringPtr title, ConstStringPtr artist,
+                        ConstStringPtr album, short position, short count,
+                        long elapsedTicks, long lengthTicks, Boolean paused);
+
 /* Scroll bar for a list of total items whose first visible item is top. */
 void LCDDraw_ScrollBar(short total, short top);
 

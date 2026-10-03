@@ -2,13 +2,15 @@
 #include "ui_lists.h"
 
 /* Main Menu: items and order Documented/Observed (manual p. 13 and its
-   LCD screenshot). The conditional "Now Playing" item is not included. */
+   LCD screenshot). The last item, Now Playing, is listed only while a
+   song is playing or paused (PROVISIONAL N1; see UIList_Build). */
 static const MenuItemDef kMainItems[] = {
     { "\pMusic",            kActMenu, kMenuMusic },
     { "\pExtras",           kActStub, 0 },  /* PROVISIONAL (D3): contents unknown */
     { "\pSettings",         kActStub, 0 },  /* PROVISIONAL (D3): order unknown */
-    { "\pShuffle Songs",    kActNone, 0 },  /* playback: later stage */
-    { "\pBacklight",        kActNone, 0 }   /* backlight: later stage */
+    { "\pShuffle Songs",    kActShuffle, 0 },  /* manual p. 32 */
+    { "\pBacklight",        kActNone, 0 },  /* backlight: later stage */
+    { "\pNow Playing",      kActNowPlaying, 0 }
 };
 
 /* Music: first six items Observed in Apple's Music screenshot.

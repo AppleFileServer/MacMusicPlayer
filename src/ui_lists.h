@@ -16,7 +16,8 @@ typedef enum
     kScreenAlbums,
     kScreenSongs,
     kScreenComposers,
-    kScreenAudiobooks
+    kScreenAudiobooks,
+    kScreenNowPlaying       /* not a list: drawn by LCDDraw_NowPlaying */
 } ScreenKind;
 
 /* Item value standing for the "All" row (D9). */
@@ -46,6 +47,13 @@ Boolean UIList_ItemHasArrow(const Screen *screen, short index);
 /* The song shown in row index, for Songs and Audiobooks lists; kNone for
    every other kind of row. */
 short UIList_ItemSong(const Screen *screen, short index);
+
+/* The songs that playing row index would play, in order, written to out
+   (at most max); *start is the song to begin with. 0 if the row plays
+   nothing. Song rows play their list from that song (N2); list rows play
+   every song that row leads to, from the first (N3). */
+short UIList_RowSongs(const Screen *screen, short index,
+                      short *out, short max, short *start);
 
 /* Sets kind, menuID, filter and title of the screen that Select on item
    index opens. Returns false if the item opens nothing (yet). */

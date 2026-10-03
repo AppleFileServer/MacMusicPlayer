@@ -110,6 +110,9 @@ void Input_TrackWheel(ShellZone startZone, UIEventSink emit)
 #define kKeyReturn      0x0D
 #define kKeyEnter       0x03
 #define kKeyDelete      0x08
+#define kKeyLeftArrow   0x1C
+#define kKeyRightArrow  0x1D
+#define kKeySpace       ' '
 
 UIEvent Input_FromKey(char key, Boolean autoRepeat)
 {
@@ -128,6 +131,10 @@ UIEvent Input_FromKey(char key, Boolean autoRepeat)
         case kKeyReturn:
         case kKeyEnter:     return kEvtSelect;
         case kKeyDelete:    return kEvtMenu;
+        /* Stage 4 additions to the D8 emulator mapping. */
+        case kKeyLeftArrow: return kEvtPrevious;
+        case kKeyRightArrow:return kEvtNext;
+        case kKeySpace:     return kEvtPlayPause;
     }
 
     return kEvtNone;
@@ -135,12 +142,15 @@ UIEvent Input_FromKey(char key, Boolean autoRepeat)
 
 UIEvent Input_FromShellZone(ShellZone zone)
 {
-    /* Previous, Next and Play/Pause zones are recognised but have no
-       action until a later stage. */
+    /* A press (not a drag) on a wheel zone. Held presses (fast-forward,
+       rewind, power off) are a later stage. */
     switch (zone)
     {
         case kZoneSelect:   return kEvtSelect;
         case kZoneMenu:     return kEvtMenu;
+        case kZonePrevious: return kEvtPrevious;
+        case kZoneNext:     return kEvtNext;
+        case kZonePlayPause:return kEvtPlayPause;
         default:            return kEvtNone;
     }
 }

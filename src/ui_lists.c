@@ -1,5 +1,6 @@
 #include "ui_lists.h"
 #include "ui_menus.h"
+#include "playback.h"
 
 /* Music hierarchy screens. Levels below each Music item are Inferred
    (see "iPod 4G UI Specification", Music hierarchy).
@@ -33,6 +34,10 @@ void UIList_Build(Screen *s)
     {
         case kScreenMenu:
             s->count = UIMenus_Get(s->menuID)->count;
+            /* PROVISIONAL (N1): the main menu's last item, Now Playing,
+               only while a song is playing or paused. */
+            if (s->menuID == kMenuMain && !Playback_IsActive())
+                s->count--;
             for (i = 0; i < s->count; i++)
                 s->items[i] = i;
             break;
@@ -96,8 +101,10 @@ Boolean UIList_ItemHasArrow(const Screen *s, short index)
     switch (s->kind)
     {
         case kScreenMenu:
-            return UIMenus_Get(s->menuID)->items[s->items[index]].action
-                   != kActNone;
+        {
+            short action = UIMenus_Get(s->menuID)->items[s->items[index]].action;
+            return action != kActNone && action != kActShuffle;
+        }
 
         case kScreenSongs:
         case kScreenAudiobooks:
@@ -115,6 +122,46 @@ short UIList_ItemSong(const Screen *s, short index)
     if (s->kind == kScreenSongs || s->kind == kScreenAudiobooks)
         return s->items[index];
     return kNone;
+}
+
+short UIList_RowSongs(const Screen *s, short index,
+                      short *out, short max, short *start)
+{
+    Screen next;
+    short i, n;
+
+    *start = 0;
+    if (index < 0 || index >= s->count)
+        return 0;
+
+    if (s->kind == kScreenSongs || s->kind == kScreenAudiobooks)
+    {
+        n = s->count < max ? s->count : max;
+        for (i = 0; i < n; i++)
+            out[i] = s->items[i];
+        *start = index < n ? index : 0;
+        return n;
+    }
+
+    /* A list row: what it opens decides the songs. Menus, Now Playing
+       and the Playlists list itself play nothing. */
+    if (!UIList_ItemTarget(s, index, &next))
+        return 0;
+    switch (next.kind)
+    {
+        case kScreenAudiobooks:
+            return Library_ListAudiobooks(out, max);
+        case kScreenSongs:
+        case kScreenArtists:
+        case kScreenAlbums:
+        case kScreenGenres:
+        case kScreenComposers:
+            /* DECISION N3: the songs the row leads to, in the order the
+               screens show them (album: track order; otherwise D14). */
+            return Library_ListSongs(&next.filter, out, max);
+        default:
+            return 0;
+    }
 }
 
 Boolean UIList_ItemTarget(const Screen *s, short index, Screen *next)
@@ -143,7 +190,12 @@ Boolean UIList_ItemTarget(const Screen *s, short index, Screen *next)
                 LibFilter_Clear(&next->filter);
                 return true;
             }
-            return false;       /* kActNone, kActStub: not yet */
+            if (def->action == kActNowPlaying)
+            {
+                next->kind = kScreenNowPlaying;
+                return true;
+            }
+            return false;       /* kActNone, kActStub, kActShuffle */
 
         case kScreenPlaylists:
             next->kind = kScreenSongs;

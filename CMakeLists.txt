@@ -16,6 +16,7 @@ add_application(MacMusicPlayer
     src/wav.c
     src/import.c
     src/playlists.c
+    src/playback.c
     src/ui_lists.c
     src/ui_menus.c
     src/ui_nav.c

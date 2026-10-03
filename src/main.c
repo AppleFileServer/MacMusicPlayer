@@ -13,6 +13,7 @@
 #include "libsetup.h"
 #include "import.h"
 #include "playlists.h"
+#include "playback.h"
 #include "lcd_draw.h"
 #include "ui_nav.h"
 #include "input.h"
@@ -224,6 +225,8 @@ static void ChooseLibrary(void)
     if (!LibSetup_ChooseLibrary())
         return;
 
+    /* A different library: whatever was playing belongs to the old one. */
+    Playback_Stop();
     BeginRestart();
     LibSetup_Rescan();
     EndRestart();
@@ -236,8 +239,10 @@ static void ImportSong(void)
     if (!LibSetup_HasLibrary() || !Import_Run(LibSetup_Folder()))
         return;
 
+    /* Same library, rescanned: the queue (song IDs) carries on. */
     BeginRestart();
     LibSetup_Rescan();
+    Playback_LibraryChanged();
     EndRestart();
 }
 
@@ -329,6 +334,7 @@ int main(void)
 
     InitToolbox();
     SetUpMenus();
+    qd.randSeed = TickCount();      /* for Shuffle Songs */
 
     if (!LCD_Init())
     {
@@ -360,7 +366,9 @@ int main(void)
 
     while (!gQuit)
     {
-        if (WaitNextEvent(everyEvent, &event, 30, nil))
+        /* While a song plays, come back often enough to update the time. */
+        if (WaitNextEvent(everyEvent, &event,
+                          Playback_State() == kPlayPlaying ? 10 : 30, nil))
         {
             switch (event.what)
             {
@@ -377,6 +385,14 @@ int main(void)
                     HandleUpdate(&event);
                     break;
             }
+        }
+
+        /* Playback clock: redraw when Now Playing's time or song changes,
+           or when playback stops. */
+        if (UI_Tick())
+        {
+            UI_Render();
+            PresentLCD();
         }
     }
 

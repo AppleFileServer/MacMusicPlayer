@@ -16,7 +16,9 @@ enum
     kActNone = 0,       /* no arrow; nothing yet (playback etc.) */
     kActStub,           /* arrow shown, screen not implemented yet */
     kActMenu,           /* open static menu `arg` */
-    kActScreen          /* open library list screen kind `arg` */
+    kActScreen,         /* open library list screen kind `arg` */
+    kActShuffle,        /* Shuffle Songs: play everything, random order */
+    kActNowPlaying      /* open Now Playing */
 };
 
 typedef struct

@@ -77,4 +77,12 @@ ConstStringPtr Library_ComposerName(short composer);
 ConstStringPtr Library_PlaylistName(short playlist);
 ConstStringPtr Library_SongTitle(short song);
 
+/* Per-song details for Now Playing and playback (song = library index,
+   valid until the next scan; use the ID to keep a song across scans). */
+long Library_SongID(short song);
+ConstStringPtr Library_SongArtistName(short song);   /* may be empty */
+ConstStringPtr Library_SongAlbumName(short song);    /* may be empty */
+long Library_SongSeconds(short song);
+long Library_SongAudioLength(short song);           /* bytes */
+
 #endif
