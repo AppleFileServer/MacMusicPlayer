@@ -43,4 +43,12 @@ static inline void Put32(unsigned char *p, unsigned long v)
     p[3] = (unsigned char)v;
 }
 
+static inline void PutLE32(unsigned char *p, unsigned long v)
+{
+    p[0] = (unsigned char)v;
+    p[1] = (unsigned char)(v >> 8);
+    p[2] = (unsigned char)(v >> 16);
+    p[3] = (unsigned char)(v >> 24);
+}
+
 #endif

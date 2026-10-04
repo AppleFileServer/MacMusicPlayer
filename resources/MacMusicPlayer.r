@@ -12,14 +12,16 @@ resource 'MENU' (128) {
     }
 };
 
-/* Items 1 (Import Song...) and 3 (divider) start disabled: mask 0x7FFFFFFA
-   clears their bits. Import is enabled at run time once a library is set. */
+/* Items 1 (Import Song...), 2 (Export Song...) and 4 (divider) start
+   disabled: mask 0x7FFFFFF4 clears their bits. Import is enabled at run
+   time once a library is set; Export while the highlight is on a song. */
 resource 'MENU' (129) {
     129, textMenuProc;
-    0x7FFFFFFA, enabled;
+    0x7FFFFFF4, enabled;
     "File";
     {
         "Import Song\0xC9", noIcon, noKey, noMark, plain;
+        "Export Song\0xC9", noIcon, noKey, noMark, plain;
         "Choose Library\0xC9", noIcon, noKey, noMark, plain;
         "-", noIcon, noKey, noMark, plain;
         "Quit", noIcon, "Q", noMark, plain;
@@ -288,5 +290,109 @@ resource 'DITL' (134) {
         { 12, 16, 68, 306 },
         StaticText { disabled, "\0xD2^0\0xD3 is already in the playlist "
                                "\0xD2^1\0xD3. Add it again?" };
+    }
+};
+
+/* Stage 5b-2 import. The chosen file is on a different disk from the
+   iPod Library, so it must be copied. Import is the default. */
+resource 'ALRT' (135) {
+    { 110, 86, 216, 426 },
+    135,
+    {
+        OK, visible, sound1;
+        OK, visible, sound1;
+        OK, visible, sound1;
+        OK, visible, sound1;
+    },
+    noAutoCenter
+};
+
+resource 'DITL' (135) {
+    {
+        { 74, 236, 94, 326 },
+        Button { enabled, "Import" };
+
+        { 74, 136, 94, 226 },
+        Button { enabled, "Cancel" };
+
+        { 12, 16, 64, 326 },
+        StaticText { disabled, "Importing from another disk will take "
+                               "some time. Do you still want to import?" };
+    }
+};
+
+/* Move (OK, the default) or copy the chosen file into the library. */
+resource 'ALRT' (136) {
+    { 104, 86, 226, 426 },
+    136,
+    {
+        OK, visible, silent;
+        OK, visible, silent;
+        OK, visible, silent;
+        OK, visible, silent;
+    },
+    noAutoCenter
+};
+
+resource 'DITL' (136) {
+    {
+        { 90, 236, 110, 326 },
+        Button { enabled, "OK" };
+
+        { 90, 136, 110, 226 },
+        Button { enabled, "Just Copy" };
+
+        { 12, 16, 80, 326 },
+        StaticText { disabled, "The file will be moved into the iPod "
+                               "Library. Choose Just Copy to leave the "
+                               "original where it is (copying takes "
+                               "longer)." };
+    }
+};
+
+/* "Importing..." / "Exporting...": shown, without buttons, while the
+   work is done. ^0 is the text. */
+resource 'DLOG' (137) {
+    { 146, 156, 196, 356 },
+    dBoxProc,
+    invisible,
+    noGoAway,
+    0,
+    137,
+    "",
+    noAutoCenter
+};
+
+resource 'DITL' (137) {
+    {
+        { 16, 16, 34, 184 },
+        StaticText { disabled, "^0" };
+    }
+};
+
+/* E4: the file could not be moved (^0 says why). Copy is the default. */
+resource 'ALRT' (138) {
+    { 106, 86, 226, 426 },
+    138,
+    {
+        OK, visible, sound1;
+        OK, visible, sound1;
+        OK, visible, sound1;
+        OK, visible, sound1;
+    },
+    noAutoCenter
+};
+
+resource 'DITL' (138) {
+    {
+        { 88, 236, 108, 326 },
+        Button { enabled, "Copy" };
+
+        { 88, 136, 108, 226 },
+        Button { enabled, "Cancel" };
+
+        { 12, 16, 78, 326 },
+        StaticText { disabled, "^0 Copy it into the iPod Library "
+                               "instead?" };
     }
 };

@@ -14,10 +14,13 @@ typedef struct
     Str63 album;                /* IPRD */
     Str63 genre;                /* IGNR */
     short track;                /* ITRK; 0 if absent */
+    long ipodChunkAt;           /* offset of an "iPod" chunk (song_format.h)
+                                   left by an earlier import; 0 if none */
 } WavInfo;
 
 /* Checks a WAV file. Returns true if it is PCM, mono, 22050 Hz, 8-bit
    unsigned; otherwise false with a sentence explaining why in problem.
+   An "iPod" chunk is skipped, and only accepted as the last chunk.
    The file (vRefNum may be a working directory) is opened read-only. */
 Boolean Wav_Read(short vRefNum, long dirID, ConstStringPtr name,
                  WavInfo *info, Str255 problem);

@@ -4,8 +4,7 @@
 
 #include "library.h"
 #include "fileopen.h"
-#include "song_format.h"
-#include "bytes.h"
+#include "songfile.h"
 
 #define kDirectoryAttribute     0x10    /* ioFlAttrib bit 4 */
 
@@ -14,9 +13,9 @@ typedef struct
 {
     long id;
     long seconds;
-    long audioOffset;           /* = header length */
+    long audioOffset;
     long audioLength;
-    unsigned long checksum;     /* valid if flags has kSongFlagHasChecksum */
+    unsigned long fingerprint;  /* D31 */
     long title, artistName, albumName, genreName, composerName, fileName;
     short track;
     short flags;
@@ -58,8 +57,8 @@ static long gPlaylistIDs[kMaxPlaylistEntries];
 static long gMaxSongID;
 static short gSkipped;
 
-/* Header read buffer; static to keep it off the small stack. */
-static unsigned char gHeader[kSongMaxHeaderSize];
+/* One song file as read; static to keep it off the small stack. */
+static SongInfo gInfo;
 
 #define Songs()             ((SongRec *)*gSongsH)
 #define PoolString(offset)  ((ConstStringPtr)(*gPoolH + (offset)))
@@ -213,100 +212,34 @@ static long PoolAdd(ConstStringPtr s)
     return offset;
 }
 
-/* Checks one file's header. On success fills song (except its string
-   offsets) and the positions of its five strings within gHeader. */
-static Boolean ParseHeader(long fileLength, long bytesRead,
-                           SongRec *song, short stringAt[kSongStringCount])
-{
-    long headerLength, expectedSeconds;
-    short i, at;
-
-    if (bytesRead < kSongMinHeaderSize
-        || Get32(gHeader + kSongOffsetMagic) != kSongMagic
-        || Get16(gHeader + kSongOffsetVersion) != kSongFormatVersion)
-        return false;
-
-    headerLength = (long)Get32(gHeader + kSongOffsetHeaderLength);
-    if (headerLength < kSongMinHeaderSize || headerLength > kSongMaxHeaderSize
-        || headerLength > bytesRead)
-        return false;
-
-    if (Get32(gHeader + kSongOffsetEncoding) != kSongEncodingPCMu
-        || Get32(gHeader + kSongOffsetSampleRate) != kSongSampleRate
-        || Get16(gHeader + kSongOffsetBits) != kSongBitsPerSample
-        || Get16(gHeader + kSongOffsetChannels) != kSongChannels)
-        return false;
-
-    song->id = (long)Get32(gHeader + kSongOffsetID);
-    song->flags = Get16(gHeader + kSongOffsetFlags);
-    song->track = Get16(gHeader + kSongOffsetTrack);
-    song->seconds = (long)Get32(gHeader + kSongOffsetDuration);
-    song->audioOffset = headerLength;
-    song->audioLength = (long)Get32(gHeader + kSongOffsetAudioLength);
-
-    if (song->id <= 0 || song->track < 0 || song->audioLength < 0
-        || song->audioLength > fileLength - headerLength)
-        return false;
-
-    expectedSeconds = (song->audioLength + kSongSampleRate / 2) / kSongSampleRate;
-    if (song->seconds != expectedSeconds)
-        return false;
-
-    at = kSongOffsetStrings;
-    for (i = 0; i < kSongStringCount; i++)
-    {
-        if (at >= headerLength || gHeader[at] > kSongMaxString
-            || at + 1 + gHeader[at] > headerLength)
-            return false;
-        stringAt[i] = at;
-        at += 1 + gHeader[at];
-    }
-
-    /* Optional audio checksum straight after the strings (D31). */
-    song->checksum = 0;
-    if (song->flags & kSongFlagHasChecksum)
-    {
-        if (at + 4 > headerLength)
-            return false;
-        song->checksum = Get32(gHeader + at);
-    }
-    return true;
-}
-
 /* Reads and checks one file. Returns false if it is not a valid song
    (the caller counts it as skipped); sets *outOfMemory on a memory error. */
 static Boolean AddSongFile(const LibraryFolder *folder, ConstStringPtr fileName,
                            Boolean *outOfMemory)
 {
     SongRec song;
-    short stringAt[kSongStringCount];
-    long fileLength, bytesRead;
-    long offsets[kSongStringCount + 1];
-    short refNum, i;
-    OSErr err;
+    long offsets[kSongTagCount + 1];
+    short i;
 
-    if (OpenDataFork(folder->vRefNum, folder->folderID, fileName, fsRdPerm, &refNum)
-        != noErr)
-        return false;
-
-    err = GetEOF(refNum, &fileLength);
-    bytesRead = fileLength < kSongMaxHeaderSize ? fileLength : kSongMaxHeaderSize;
-    if (err == noErr)
-        err = FSRead(refNum, &bytesRead, gHeader);
-    FSClose(refNum);
-
-    if ((err != noErr && err != eofErr)
-        || !ParseHeader(fileLength, bytesRead, &song, stringAt))
+    if (!SongFile_Read(folder->vRefNum, folder->folderID, fileName, &gInfo))
         return false;
 
     for (i = 0; i < gSongCount; i++)
-        if (Songs()[i].id == song.id)
+        if (Songs()[i].id == gInfo.id)
             return false;               /* duplicate ID: keep the first */
 
-    for (i = 0; i < kSongStringCount; i++)
-        offsets[i] = PoolAdd(gHeader + stringAt[i]);
-    offsets[kSongStringCount] = PoolAdd(fileName);
-    for (i = 0; i <= kSongStringCount; i++)
+    song.id = gInfo.id;
+    song.seconds = gInfo.seconds;
+    song.audioOffset = gInfo.audioOffset;
+    song.audioLength = gInfo.audioLength;
+    song.fingerprint = gInfo.fingerprint;
+    song.track = gInfo.track;
+    song.flags = gInfo.flags;
+
+    for (i = 0; i < kSongTagCount; i++)
+        offsets[i] = PoolAdd(gInfo.text[i]);
+    offsets[kSongTagCount] = PoolAdd(fileName);
+    for (i = 0; i <= kSongTagCount; i++)
         if (offsets[i] < 0)
         {
             *outOfMemory = true;
@@ -497,7 +430,7 @@ long Library_NextSongID(void)
     return gMaxSongID + 1;
 }
 
-short Library_FindAudioMatch(long audioLength, unsigned long checksum)
+short Library_FindAudioMatch(long audioLength, unsigned long fingerprint)
 {
     short i;
 
@@ -505,9 +438,7 @@ short Library_FindAudioMatch(long audioLength, unsigned long checksum)
     {
         const SongRec *song = &Songs()[i];
 
-        if ((song->flags & kSongFlagHasChecksum)
-            && song->audioLength == audioLength
-            && song->checksum == checksum)
+        if (song->audioLength == audioLength && song->fingerprint == fingerprint)
             return i;
     }
     return kNone;
@@ -707,6 +638,98 @@ OSErr Library_AppendToPlaylist(short playlist, short song)
     if (err == noErr)
         err = FlushVol(nil, gFolder.vRefNum);
     return err;
+}
+
+/* The leading song ID of the line starting at text[at], or 0 if the line
+   does not start with a digit (as ReadPlaylistIDs reads it). */
+static long LineID(const unsigned char *text, long at, long length)
+{
+    long id = 0;
+
+    while (at < length && text[at] >= '0' && text[at] <= '9')
+    {
+        if (id < 100000000L)
+            id = id * 10 + (text[at] - '0');
+        at++;
+    }
+    return id;
+}
+
+/* Rewrites one playlist file without the lines for id. */
+static OSErr RemoveFromPlaylist(short playlist, long id)
+{
+    Ptr text;
+    long length, count, at, end, kept = 0;
+    short refNum;
+    Boolean changed = false;
+    OSErr err;
+
+    err = OpenDataFork(gFolder.vRefNum, gFolder.playlistsID,
+                       gPlaylistNames[playlist], fsRdWrPerm, &refNum);
+    if (err != noErr)
+        return err;
+
+    err = GetEOF(refNum, &length);
+    text = err == noErr ? NewPtr(length > 0 ? length : 1) : nil;
+    if (err == noErr && text == nil)
+        err = memFullErr;
+    count = length;
+    if (err == noErr && length > 0)
+        err = FSRead(refNum, &count, text);
+    if (err == noErr && count != length)
+        err = ioErr;
+
+    /* Compact in place: each line (with its CR, LF or CRLF ending) is
+       kept unless it starts with this ID. */
+    for (at = 0; err == noErr && at < length; at = end)
+    {
+        end = at;
+        while (end < length && text[end] != '\r' && text[end] != '\n')
+            end++;
+        if (end < length && text[end] == '\r')
+            end++;
+        if (end < length && text[end] == '\n')
+            end++;
+
+        if (LineID((unsigned char *)text, at, length) == id)
+            changed = true;
+        else
+        {
+            BlockMove(text + at, text + kept, end - at);
+            kept += end - at;
+        }
+    }
+
+    if (err == noErr && changed)
+    {
+        count = kept;
+        err = SetFPos(refNum, fsFromStart, 0);
+        if (err == noErr)
+            err = FSWrite(refNum, &count, text);
+        if (err == noErr)
+            err = SetEOF(refNum, kept);
+    }
+    if (text != nil)
+        DisposePtr(text);
+    FSClose(refNum);
+    return err;
+}
+
+OSErr Library_RemoveFromPlaylists(long id)
+{
+    short i;
+    OSErr err, first = noErr;
+
+    if (!gHaveFolder || id <= 0)
+        return noErr;
+    for (i = 0; i < gPlaylistCount; i++)
+    {
+        err = RemoveFromPlaylist(i, id);
+        if (first == noErr)
+            first = err;
+    }
+    FlushVol(nil, gFolder.vRefNum);
+    return first;
 }
 
 /* ---- Queries ---------------------------------------------------------- */

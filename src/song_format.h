@@ -1,67 +1,101 @@
 #ifndef SONG_FORMAT_H
 #define SONG_FORMAT_H
 
-/* iPod song file format, version 1 (project-specific).
+#include <MacTypes.h>
 
-   All integers big-endian, read and written field by field (bytes.h).
+/* iPod song file format, version 2 (project-specific, Stage 5b-2).
+
+   A song file is the imported WAV file itself, unchanged except that an
+   "iPod" chunk is added at the very end and the RIFF size field (bytes
+   4-7) is updated to cover it. The audio is never moved or rewritten,
+   so import can move the file into the library instead of copying it,
+   and export restores the original file byte for byte by cutting the
+   chunk off and putting back the RIFF size.
+
+   File layout:
+     0               "RIFF" <size, LE> "WAVE"   size = file length - 8
+     12              the original WAV's chunks, untouched
+     originalLength  one zero pad byte, only if originalLength is odd
+                     (RIFF chunks start on even offsets)
+     chunkStart      "iPod" <payload length, LE>
+     chunkStart + 8  payload; its length is even, so the chunk ends the
+                     file with no RIFF pad byte
+
+   Payload, integers big-endian (bytes.h):
 
    Offset Size Field
-     0     4   magic 'IPOD'
-     4     2   format version (1)
-     6     4   header length: offset of the first audio byte
-    10     4   song ID (> 0, unique in the library)
-    14     2   flags (bit 0: audiobook)
-    16     2   track number (0 = none)
-    18     4   duration in seconds, = round(audio length / sample rate)
-    22     4   encoding 'PCMu': linear PCM, unsigned samples
-    26     4   sample rate in Hz (22050)
-    30     2   bits per sample (8)
-    32     2   channels (1)
-    34     4   audio length in bytes
-    38     -   title, artist, album, genre, composer: each a length byte
-               (0-63) followed by that many Mac Roman characters
-     s     4   audio checksum, present only if flags bit 1 is set
-               (s = first byte after the strings; see SongChecksum)
-     ...       (header length may exceed these: room for later fields)
-   header length: audio samples
-
-   Files without the checksum flag remain valid; they just cannot be
-   matched as duplicates (DECISION D31).
+     0     2   chunk version (1)
+     2     4   song ID (> 0, unique in the library)
+     6     2   flags (bit 0: audiobook)
+     8     2   track number (0 = none)
+    10     4   duration in seconds, = round(audio length / sample rate)
+    14     4   encoding 'PCMu': linear PCM, unsigned samples
+    18     4   sample rate in Hz (22050)
+    22     2   bits per sample (8)
+    24     2   channels (1)
+    26     4   audio offset: first byte of the WAV's "data" chunk body
+    30     4   audio length in bytes (= the "data" chunk size)
+    34     4   audio fingerprint (SongFingerprint, DECISION D31)
+    38     4   original file length, before import
+    42     4   original RIFF size field, before import
+    46     4   original Finder type
+    50     4   original Finder creator
+    54     -   title, artist, album, genre, composer, original file name:
+               each a length byte (0-63) then that many Mac Roman
+               characters
+     -     -   zero padding to an even length
+     -     4   chunkStart (the offset of "iPod"), so a reader can find
+               the chunk from the end of the file
+     -     4   end mark 'iPod'
 
    The data fork holds everything; the resource fork is unused. */
 
-#define kSongMagic              'IPOD'
-#define kSongFormatVersion      1
+#define kSongChunkID            'iPod'
+#define kSongChunkVersion       1
 
-#define kSongOffsetMagic        0
-#define kSongOffsetVersion      4
-#define kSongOffsetHeaderLength 6
-#define kSongOffsetID           10
-#define kSongOffsetFlags        14
-#define kSongOffsetTrack        16
-#define kSongOffsetDuration     18
-#define kSongOffsetEncoding     22
-#define kSongOffsetSampleRate   26
-#define kSongOffsetBits         30
-#define kSongOffsetChannels     32
-#define kSongOffsetAudioLength  34
-#define kSongOffsetStrings      38
+#define kSongOffsetVersion      0
+#define kSongOffsetID           2
+#define kSongOffsetFlags        6
+#define kSongOffsetTrack        8
+#define kSongOffsetDuration     10
+#define kSongOffsetEncoding     14
+#define kSongOffsetSampleRate   18
+#define kSongOffsetBits         22
+#define kSongOffsetChannels     24
+#define kSongOffsetAudioOffset  26
+#define kSongOffsetAudioLength  30
+#define kSongOffsetFingerprint  34
+#define kSongOffsetOrigLength   38
+#define kSongOffsetOrigRIFFSize 42
+#define kSongOffsetOrigType     46
+#define kSongOffsetOrigCreator  50
+#define kSongOffsetStrings      54
 
-#define kSongStringCount        5
+#define kSongStringCount        6       /* the five tags + original name */
+#define kSongTagCount           5       /* title ... composer */
+#define kSongStringFileName     5
 #define kSongMaxString          63
-#define kSongMinHeaderSize      (kSongOffsetStrings + kSongStringCount)
-#define kSongMaxHeaderSize      1024
+#define kSongTrailerSize        8       /* chunkStart + end mark */
+#define kSongMinPayload         (kSongOffsetStrings + kSongStringCount \
+                                 + kSongTrailerSize)
+#define kSongMaxChunk           1024    /* whole chunk, header included */
 
 #define kSongFlagAudiobook      0x0001
-#define kSongFlagHasChecksum    0x0002
 
-/* Audio checksum: two running 32-bit sums over the audio bytes,
-       a += byte; b += a;   checksum = (b << 16) ^ a
-   computed incrementally over the copy, starting from a = b = 0. */
+/* DECISION D31 (revised in 5b-2): duplicates are found by audio length
+   plus a fingerprint: two running 32-bit sums,
+       a += byte; b += a;   fingerprint = (b << 16) ^ a
+   over up to three kSongFingerprintSample-byte samples of the audio: the
+   start, the middle and the end (the whole audio if it is shorter than
+   three samples). Reading 24 KB instead of the whole file keeps import
+   fast; audio that differs only elsewhere is not detected as a
+   duplicate, which is accepted. */
+#define kSongFingerprintSample  8192L
+
 typedef struct
 {
-    unsigned long a;
-    unsigned long b;
+    UInt32 a;
+    UInt32 b;
 } SongChecksum;
 
 static inline void SongChecksum_Init(SongChecksum *c)
@@ -73,7 +107,7 @@ static inline void SongChecksum_Init(SongChecksum *c)
 static inline void SongChecksum_Add(SongChecksum *c,
                                     const unsigned char *bytes, long count)
 {
-    unsigned long a = c->a, b = c->b;
+    UInt32 a = c->a, b = c->b;
 
     while (count-- > 0)
     {
@@ -84,7 +118,7 @@ static inline void SongChecksum_Add(SongChecksum *c,
     c->b = b;
 }
 
-static inline unsigned long SongChecksum_Value(const SongChecksum *c)
+static inline UInt32 SongChecksum_Value(const SongChecksum *c)
 {
     return (c->b << 16) ^ c->a;
 }

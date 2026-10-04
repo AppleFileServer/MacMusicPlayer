@@ -147,6 +147,7 @@ Boolean Wav_Read(short vRefNum, long dirID, ConstStringPtr name,
     info->dataLength = 0;
     info->title[0] = info->artist[0] = info->album[0] = info->genre[0] = 0;
     info->track = 0;
+    info->ipodChunkAt = 0;
 
     err = OpenDataFork(vRefNum, dirID, name, fsRdPerm, &refNum);
     if (err != noErr)
@@ -199,6 +200,18 @@ Boolean Wav_Read(short vRefNum, long dirID, ConstStringPtr name,
             info->dataOffset = at;
             info->dataLength = size;
             haveData = true;
+        }
+        else if (id == 'iPod')
+        {
+            /* E5: an earlier import's chunk; it must end the file. */
+            if (at + size + (size & 1) != fileLength)
+            {
+                FSClose(refNum);
+                return Fail(problem, P("This WAV file is damaged: it has "
+                                       "iPod information that is not at "
+                                       "the end of the file."));
+            }
+            info->ipodChunkAt = at - 8;
         }
         else if (id == 'LIST' && size >= 4)
         {

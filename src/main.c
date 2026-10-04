@@ -12,6 +12,8 @@
 #include "ipod_lcd.h"
 #include "libsetup.h"
 #include "import.h"
+#include "export.h"
+#include "library.h"
 #include "playlists.h"
 #include "playback.h"
 #include "audio.h"
@@ -39,8 +41,9 @@ enum
 
     kMenuFile = 129,
     kItemImport = 1,            /* enabled only when a library is set */
-    kItemChooseLibrary = 2,
-    kItemQuit = 4,
+    kItemExport = 2,            /* ... and the highlight is on a song */
+    kItemChooseLibrary = 3,
+    kItemQuit = 5,
 
     kMenuEdit = 130,
 
@@ -75,6 +78,8 @@ static void SetUpMenus(void)
 static void ChooseLibrary(void);
 static void ImportSong(void);
 static void ImportSongPausingAudio(void);
+static void ExportSongPausingAudio(void);
+static void UpdateFileMenu(void);
 static void PlaylistsChanged(void);
 
 static void ShowAboutBox(void)
@@ -105,6 +110,8 @@ static void HandleMenuChoice(long choice)
         case kMenuFile:
             if (menuItem == kItemImport)
                 ImportSongPausingAudio();
+            else if (menuItem == kItemExport)
+                ExportSongPausingAudio();
             else if (menuItem == kItemChooseLibrary)
                 ChooseLibrary();
             else if (menuItem == kItemQuit)
@@ -189,6 +196,7 @@ static void ReportPlaybackProblems(void)
    looked up. */
 static void AdjustMenus(void)
 {
+    UpdateFileMenu();
     Playlists_AdjustMenu(GetMenuHandle(kMenuPlaylists),
                          LibSetup_HasLibrary());
 }
@@ -211,6 +219,12 @@ static void UpdateFileMenu(void)
         EnableItem(fileMenu, kItemImport);
     else
         DisableItem(fileMenu, kItemImport);
+
+    /* Plan item 3: Export acts only on a highlighted song. */
+    if (LibSetup_HasLibrary() && UI_SelectedSong() != kNone)
+        EnableItem(fileMenu, kItemExport);
+    else
+        DisableItem(fileMenu, kItemExport);
 }
 
 /* An iPod start or restart: BeginRestart shows the Apple logo; the caller
@@ -278,6 +292,35 @@ static void ImportSongPausingAudio(void)
     if (wasPlaying)
         Playback_TogglePause();
     ImportSong();
+    if (wasPlaying && Playback_State() == kPlayPaused)
+        Playback_TogglePause();
+}
+
+/* File > Export Song... */
+static void ExportSong(void)
+{
+    HiliteMenu(0);
+    if (!LibSetup_HasLibrary()
+        || !Export_Run(LibSetup_Folder(), UI_SelectedSong()))
+        return;
+
+    /* The song has left the library. If it was the current song,
+       playback moves on to the next (E7), as for any song that goes. */
+    BeginRestart();
+    LibSetup_Rescan();
+    Playback_LibraryChanged();
+    EndRestart();
+}
+
+/* File > Export Song...: audio pauses, as for import (A5), which also
+   closes the current song's file before export changes it. */
+static void ExportSongPausingAudio(void)
+{
+    Boolean wasPlaying = Playback_State() == kPlayPlaying;
+
+    if (wasPlaying)
+        Playback_TogglePause();
+    ExportSong();
     if (wasPlaying && Playback_State() == kPlayPaused)
         Playback_TogglePause();
 }

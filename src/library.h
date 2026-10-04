@@ -37,9 +37,8 @@ Boolean Library_Scan(const LibraryFolder *folder);
 short Library_SkippedCount(void);   /* files skipped by the last scan */
 long Library_NextSongID(void);      /* one more than the largest ID */
 
-/* A song whose audio has this length and checksum (D31), or kNone.
-   Songs saved without a checksum never match. */
-short Library_FindAudioMatch(long audioLength, unsigned long checksum);
+/* A song whose audio has this length and fingerprint (D31), or kNone. */
+short Library_FindAudioMatch(long audioLength, unsigned long fingerprint);
 
 /* ---- Playlists (DECISION P1: membership by song ID only) ---- */
 
@@ -59,6 +58,11 @@ OSErr Library_AddPlaylist(ConstStringPtr name, short *playlist);
 
 /* Appends "<id><tab><title><CR>" to the playlist file. */
 OSErr Library_AppendToPlaylist(short playlist, short song);
+
+/* Removes every line for song ID id from every playlist file (Stage 5b-2
+   export: the song leaves the library). Other lines are kept exactly;
+   files without the ID are not rewritten. Returns the first error. */
+OSErr Library_RemoveFromPlaylists(long id);
 
 /* Each List function writes item indexes, in display order, to out
    (at most max) and returns how many it wrote. */

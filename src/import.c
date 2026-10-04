@@ -12,7 +12,8 @@
 #include "library.h"
 #include "message.h"
 #include "pstr.h"
-#include "song_format.h"
+#include "fileops.h"
+#include "songfile.h"
 #include "wav.h"
 
 /* Import Song window (DLOG/DITL 131). */
@@ -34,29 +35,37 @@ enum
     kItemImportAnyway = 2
 };
 
-#define kCopyBufferSize     8192L
+/* Stage 5b-2 alerts: from another disk (135), move or copy (136), and a
+   file that can't be moved (138). Item 1 is the default in each. */
+enum
+{
+    kOtherDiskAlert = 135,
+    kItemOtherDiskImport = 1,
+    kMoveAlert = 136,
+    kItemMove = 1,
+    kItemJustCopy = 2,
+    kCantMoveAlert = 138,
+    kItemCopyInstead = 1
+};
+
+/* Copy buffer: larger transfers are much faster than 8 KB ones; at least
+   kSongFingerprintSample, which the fingerprint reads with it. */
+#define kCopyBufferSize     32768L
+
 
 typedef struct
 {
-    Str63 text[kSongStringCount];   /* title, artist, album, genre, composer */
+    Str63 text[kSongTagCount];      /* title, artist, album, genre, composer */
     short track;
     Boolean audiobook;
 } SongDetails;
 
-static ConstStringPtr const kFieldNames[kSongStringCount] = {
+static ConstStringPtr const kFieldNames[kSongTagCount] = {
     P("The title"), P("The artist"), P("The album"), P("The genre"),
     P("The composer")
 };
 
 /* ---- Small helpers ---------------------------------------------------- */
-
-static void SetWatchCursor(void)
-{
-    CursHandle watch = GetCursor(watchCursor);
-
-    if (watch != nil)
-        SetCursor(*watch);
-}
 
 /* "IPOD" + the ID, at least four digits. */
 static void MakeSongFileName(long id, Str63 name)
@@ -102,43 +111,6 @@ static void TitleFromFileName(ConstStringPtr fileName, Str63 title)
     BlockMove(fileName + 1, title + 1, length);
 }
 
-/* Reads the source audio once to compute its checksum (D31). */
-static OSErr ChecksumAudio(short vRefNum, ConstStringPtr name,
-                           const WavInfo *wav, Ptr buffer,
-                           unsigned long *checksum)
-{
-    SongChecksum sum;
-    long remaining = wav->dataLength;
-    long count;
-    short refNum;
-    OSErr err;
-
-    err = OpenDataFork(vRefNum, 0, name, fsRdPerm, &refNum);
-    if (err != noErr)
-        return err;
-
-    SongChecksum_Init(&sum);
-    err = SetFPos(refNum, fsFromStart, wav->dataOffset);
-    while (err == noErr && remaining > 0)
-    {
-        count = remaining < kCopyBufferSize ? remaining : kCopyBufferSize;
-        err = FSRead(refNum, &count, buffer);
-        if (err == eofErr && count > 0)
-            err = noErr;
-        if (err == noErr && count == 0)
-            err = eofErr;
-        if (err == noErr)
-        {
-            SongChecksum_Add(&sum, (unsigned char *)buffer, count);
-            remaining -= count;
-        }
-    }
-    FSClose(refNum);
-
-    *checksum = SongChecksum_Value(&sum);
-    return err;
-}
-
 /* ---- Import Song window ----------------------------------------------- */
 
 /* Draws the thick outline round the default (Import) button. */
@@ -174,7 +146,7 @@ static Boolean ReadDetails(DialogPtr dialog, SongDetails *details)
     short i;
     long track;
 
-    for (i = 0; i < kSongStringCount; i++)
+    for (i = 0; i < kSongTagCount; i++)
     {
         GetDialogItemText(ItemHandle(dialog, kItemTitle + i), text);
         if (text[0] > kSongMaxString)
@@ -291,209 +263,231 @@ static Boolean AskForDetails(ConstStringPtr fileName, const WavInfo *wav,
     return ok;
 }
 
-/* ---- Writing the song file -------------------------------------------- */
+/* ---- The source file ---------------------------------------------------- */
 
-/* Free bytes on a volume. */
-static long FreeBytes(short vRefNum)
+typedef struct
+{
+    short vRefNum;
+    long dirID;
+    Str63 name;
+    Boolean locked;
+    OSType type, creator;
+    long length;                /* the file without any old iPod chunk */
+    long riffSize;              /* its RIFF size field */
+} Source;
+
+/* Fills in the source's Finder information and lengths. */
+static OSErr ReadSource(Source *src, const WavInfo *wav)
 {
     HParamBlockRec pb;
-
-    memset(&pb, 0, sizeof(pb));
-    pb.volumeParam.ioVRefNum = vRefNum;
-    if (PBHGetVInfoSync(&pb) != noErr)
-        return 0;
-    return (long)pb.volumeParam.ioVFrBlk * pb.volumeParam.ioVAlBlkSiz;
-}
-
-/* Builds the version-1 header (song_format.h); returns its length. */
-static long BuildHeader(unsigned char *h, long id, const SongDetails *d,
-                        long audioLength, unsigned long checksum)
-{
-    long at = kSongOffsetStrings;
-    short i;
-
-    for (i = 0; i < kSongStringCount; i++)
-    {
-        BlockMove(d->text[i], h + at, d->text[i][0] + 1);
-        at += 1 + d->text[i][0];
-    }
-    Put32(h + at, checksum);
-    at += 4;
-
-    Put32(h + kSongOffsetMagic, kSongMagic);
-    Put16(h + kSongOffsetVersion, kSongFormatVersion);
-    Put32(h + kSongOffsetHeaderLength, at);
-    Put32(h + kSongOffsetID, id);
-    Put16(h + kSongOffsetFlags, kSongFlagHasChecksum
-                                | (d->audiobook ? kSongFlagAudiobook : 0));
-    Put16(h + kSongOffsetTrack, d->track);
-    Put32(h + kSongOffsetDuration,
-          (audioLength + kSongSampleRate / 2) / kSongSampleRate);
-    Put32(h + kSongOffsetEncoding, kSongEncodingPCMu);
-    Put32(h + kSongOffsetSampleRate, kSongSampleRate);
-    Put16(h + kSongOffsetBits, kSongBitsPerSample);
-    Put16(h + kSongOffsetChannels, kSongChannels);
-    Put32(h + kSongOffsetAudioLength, audioLength);
-    return at;
-}
-
-/* Creates IPODnnnn with a fresh ID: Library_NextSongID() (above every
-   existing valid ID), then upwards while the file name is taken. */
-static OSErr CreateSongFile(const LibraryFolder *folder, long *id, Str63 name)
-{
+    unsigned char head[8];
+    long count = 8;
+    short refNum;
     OSErr err;
+
+    err = GetFileInfo(src->vRefNum, src->dirID, src->name, &pb);
+    if (err != noErr)
+        return err;
+    src->locked = (pb.fileParam.ioFlAttrib & kLockedAttribute) != 0;
+    src->type = pb.fileParam.ioFlFndrInfo.fdType;
+    src->creator = pb.fileParam.ioFlFndrInfo.fdCreator;
+
+    /* E5: a chunk left by an earlier import is replaced, so the file's
+       "original" form is everything before it. */
+    if (wav->ipodChunkAt != 0)
+    {
+        src->length = wav->ipodChunkAt;
+        src->riffSize = wav->ipodChunkAt - 8;
+        return noErr;
+    }
+
+    err = OpenDataFork(src->vRefNum, src->dirID, src->name, fsRdPerm, &refNum);
+    if (err != noErr)
+        return err;
+    err = GetEOF(refNum, &src->length);
+    if (err == noErr)
+        err = FSRead(refNum, &count, head);
+    FSClose(refNum);
+    src->riffSize = (long)GetLE32(head + 4);
+    return err;
+}
+
+static OSErr FingerprintSource(const Source *src, const WavInfo *wav,
+                               Ptr buffer, unsigned long *fingerprint)
+{
+    short refNum;
+    OSErr err;
+
+    err = OpenDataFork(src->vRefNum, src->dirID, src->name, fsRdPerm, &refNum);
+    if (err != noErr)
+        return err;
+    err = SongFile_Fingerprint(refNum, wav->dataOffset, wav->dataLength,
+                               buffer, fingerprint);
+    FSClose(refNum);
+    return err;
+}
+
+/* ---- Writing the song ------------------------------------------------- */
+
+/* A free song ID whose file name is unused in the library (and, when
+   moving, in the source's folder, where the file is renamed first):
+   Library_NextSongID() (above every existing valid ID), then upwards. */
+static OSErr ChooseSongName(const LibraryFolder *folder, const Source *src,
+                            Boolean alsoInSource, long *id, Str63 name)
+{
     short attempts;
 
     *id = Library_NextSongID();
     for (attempts = 0; attempts < 1000; attempts++, (*id)++)
     {
         MakeSongFileName(*id, name);
-        err = HCreate(folder->vRefNum, folder->folderID, name,
-                      kAppCreator, kSongFileType);
-        if (err != dupFNErr)
-            return err;
+        if (!FileExists(folder->vRefNum, folder->folderID, name)
+            && !(alsoInSource && FileExists(src->vRefNum, src->dirID, name)))
+            return noErr;
     }
     return dupFNErr;
 }
 
-/* Copies the audio after the header, checking it matches the checksum
-   taken earlier (the source must not have changed). */
-static OSErr CopyAudio(short sourceVRefNum, ConstStringPtr sourceName,
-                       const WavInfo *wav, short destRefNum, Ptr buffer,
-                       unsigned long expected)
+static void FillSongInfo(SongInfo *info, long id, const SongDetails *d,
+                         const WavInfo *wav, unsigned long fingerprint,
+                         const Source *src)
 {
-    SongChecksum sum;
-    long remaining = wav->dataLength;
-    long count, written;
-    short sourceRefNum;
+    short i;
+
+    memset(info, 0, sizeof(*info));
+    info->id = id;
+    info->flags = d->audiobook ? kSongFlagAudiobook : 0;
+    info->track = d->track;
+    info->audioOffset = wav->dataOffset;
+    info->audioLength = wav->dataLength;
+    info->fingerprint = fingerprint;
+    info->originalLength = src->length;
+    info->originalRIFFSize = src->riffSize;
+    info->originalType = src->type;
+    info->originalCreator = src->creator;
+    for (i = 0; i < kSongTagCount; i++)
+        BlockMove(d->text[i], info->text[i], d->text[i][0] + 1);
+    BlockMove(src->name, info->text[kSongStringFileName], src->name[0] + 1);
+}
+
+/* Same disk: adds the chunk to the file where it is, renames it and
+   moves it into the library; the audio is never copied. On any failure
+   every step done so far is undone, leaving the file as it was. */
+static OSErr MoveIntoLibrary(const LibraryFolder *folder, const Source *src,
+                             const SongInfo *info, ConstStringPtr songName)
+{
     OSErr err;
 
-    err = OpenDataFork(sourceVRefNum, 0, sourceName, fsRdPerm, &sourceRefNum);
+    err = ChangeChunk(src->vRefNum, src->dirID, src->name, info, true);
+    if (err != noErr)
+    {
+        ChangeChunk(src->vRefNum, src->dirID, src->name, info, false);
+        return err;
+    }
+
+    err = RenameFile(src->vRefNum, src->dirID, src->name, songName);
+    if (err == noErr)
+    {
+        err = MoveFile(src->vRefNum, src->dirID, songName, folder->folderID);
+        if (err != noErr)
+            RenameFile(src->vRefNum, src->dirID, songName, src->name);
+    }
+    if (err != noErr)
+    {
+        ChangeChunk(src->vRefNum, src->dirID, src->name, info, false);
+        return err;
+    }
+
+    /* The Finder codes only label the file; a song plays without them. */
+    SetFileType(folder->vRefNum, folder->folderID, songName,
+                kSongFileType, kAppCreator);
+    FlushVol(nil, folder->vRefNum);
+    return noErr;
+}
+
+/* Copies the source (without any old chunk) into a new library file and
+   adds the chunk; the source is not changed. The new file is checked by
+   reading it back as the library will; on any failure it is deleted. */
+static OSErr CopyIntoLibrary(const LibraryFolder *folder, const Source *src,
+                             const SongInfo *info, ConstStringPtr songName,
+                             Ptr buffer, long bufferSize)
+{
+    SongInfo check;
+    long remaining = src->length, count, written;
+    short srcRef = 0, destRef = 0;
+    OSErr err;
+
+    if (src->length + kSongMaxChunk > FreeBytes(folder->vRefNum))
+        return dskFulErr;
+
+    err = HCreate(folder->vRefNum, folder->folderID, songName,
+                  kAppCreator, kSongFileType);
     if (err != noErr)
         return err;
 
-    SongChecksum_Init(&sum);
-    err = SetFPos(sourceRefNum, fsFromStart, wav->dataOffset);
+    err = OpenDataFork(src->vRefNum, src->dirID, src->name, fsRdPerm, &srcRef);
+    if (err == noErr)
+        err = OpenDataFork(folder->vRefNum, folder->folderID, songName,
+                           fsRdWrPerm, &destRef);
     while (err == noErr && remaining > 0)
     {
-        count = remaining < kCopyBufferSize ? remaining : kCopyBufferSize;
-        err = FSRead(sourceRefNum, &count, buffer);
+        count = remaining < bufferSize ? remaining : bufferSize;
+        err = FSRead(srcRef, &count, buffer);
         if (err == eofErr && count > 0)
             err = noErr;
         if (err == noErr && count == 0)
             err = eofErr;
         if (err != noErr)
             break;
-
-        SongChecksum_Add(&sum, (unsigned char *)buffer, count);
         written = count;
-        err = FSWrite(destRefNum, &written, buffer);
+        err = FSWrite(destRef, &written, buffer);
         remaining -= count;
     }
-    FSClose(sourceRefNum);
-
-    if (err == noErr && SongChecksum_Value(&sum) != expected)
-        err = ioErr;
-    return err;
-}
-
-/* Reopens the new file and checks its length and header. */
-static Boolean VerifySongFile(const LibraryFolder *folder, ConstStringPtr name,
-                              const unsigned char *header, long headerLength,
-                              long audioLength)
-{
-    unsigned char check[400];
-    long length, count = headerLength;
-    short refNum;
-    Boolean ok;
-
-    if (OpenDataFork(folder->vRefNum, folder->folderID, name, fsRdPerm, &refNum)
-        != noErr)
-        return false;
-
-    ok = GetEOF(refNum, &length) == noErr
-      && length == headerLength + audioLength
-      && FSRead(refNum, &count, check) == noErr
-      && count == headerLength
-      && memcmp(check, header, headerLength) == 0;
-    FSClose(refNum);
-    return ok;
-}
-
-static Boolean WriteSong(const LibraryFolder *folder, short sourceVRefNum,
-                         ConstStringPtr sourceName, const WavInfo *wav,
-                         const SongDetails *details, unsigned long checksum,
-                         Ptr buffer)
-{
-    unsigned char header[400];
-    Str63 name;
-    long id, headerLength, count;
-    short refNum = 0;
-    Boolean created = false;
-    OSErr err;
-
-    /* D30: the only size limit is free space on the library's disk. */
-    headerLength = BuildHeader(header, 0, details, wav->dataLength, checksum);
-    if (headerLength + wav->dataLength > FreeBytes(folder->vRefNum))
-    {
-        Message_Show(P("There is not enough space on the iPod Library\xD5s "
-                       "disk for this song."), noErr);
-        return false;
-    }
-
-    err = CreateSongFile(folder, &id, name);
     if (err == noErr)
-    {
-        created = true;
-        headerLength = BuildHeader(header, id, details, wav->dataLength, checksum);
-        err = OpenDataFork(folder->vRefNum, folder->folderID, name,
-                           fsRdWrPerm, &refNum);
-    }
-    if (err == noErr)
-    {
-        count = headerLength;
-        err = FSWrite(refNum, &count, header);
-    }
-    if (err == noErr)
-    {
-        SetWatchCursor();
-        err = CopyAudio(sourceVRefNum, sourceName, wav, refNum, buffer, checksum);
-        InitCursor();
-    }
-    if (err == noErr)
-        err = SetEOF(refNum, headerLength + wav->dataLength);
-    if (refNum != 0)
-        FSClose(refNum);
+        err = SongFile_AddChunk(destRef, info);
+    if (srcRef != 0)
+        FSClose(srcRef);
+    if (destRef != 0)
+        FSClose(destRef);
     if (err == noErr)
         err = FlushVol(nil, folder->vRefNum);
+
     if (err == noErr
-        && !VerifySongFile(folder, name, header, headerLength, wav->dataLength))
+        && (!SongFile_Read(folder->vRefNum, folder->folderID, songName, &check)
+            || check.id != info->id || check.audioLength != info->audioLength
+            || check.fingerprint != info->fingerprint))
         err = ioErr;
 
     if (err != noErr)
-    {
-        /* Never leave a half-written song in the library. */
-        if (created)
-            HDelete(folder->vRefNum, folder->folderID, name);
-        Message_Show(P("The song could not be imported."), err);
-        return false;
-    }
-    return true;
+        HDelete(folder->vRefNum, folder->folderID, songName);
+    return err;
 }
 
 /* ---- Import Song... --------------------------------------------------- */
 
+/* E4: the file can't be moved; offers to copy it instead. */
+static Boolean AskToCopyInstead(ConstStringPtr reason)
+{
+    ParamText(reason, P(""), P(""), P(""));
+    return Alert(kCantMoveAlert, nil) == kItemCopyInstead;
+}
+
 Boolean Import_Run(const LibraryFolder *folder)
 {
     SFReply reply;
+    Source src;
     WavInfo wav;
     SongDetails details;
+    SongInfo info;
     Str255 problem;
+    Str63 songName;
     Point where;
     Ptr buffer;
-    unsigned long checksum;
+    long bufferSize = kCopyBufferSize, id;
+    unsigned long fingerprint;
     short match;
-    Boolean imported;
+    Boolean sameDisk, move, imported = false;
+    DialogPtr working;
     OSErr err;
 
     /* Any file can be chosen: WAVs are recognised by their contents. */
@@ -503,13 +497,33 @@ Boolean Import_Run(const LibraryFolder *folder)
     if (!reply.good)
         return false;
 
-    if (!Wav_Read(reply.vRefNum, 0, reply.fName, &wav, problem))
+    if (ResolveWD(reply.vRefNum, &src.vRefNum, &src.dirID) != noErr)
+    {
+        Message_Show(P("The file could not be found."), noErr);
+        return false;
+    }
+    BlockMove(reply.fName, src.name, reply.fName[0] + 1);
+
+    if (src.vRefNum == folder->vRefNum
+        && (src.dirID == folder->folderID || src.dirID == folder->playlistsID))
+    {
+        Message_Show(P("This file is already inside the iPod Library folder."),
+                     noErr);
+        return false;
+    }
+
+    if (!Wav_Read(src.vRefNum, src.dirID, src.name, &wav, problem))
     {
         Message_Show(problem, noErr);
         return false;
     }
 
-    buffer = NewPtr(kCopyBufferSize);
+    buffer = NewPtr(bufferSize);
+    if (buffer == nil)
+    {
+        bufferSize = kSongFingerprintSample;
+        buffer = NewPtr(bufferSize);
+    }
     if (buffer == nil)
     {
         Message_Show(P("There is not enough memory to import a song."), noErr);
@@ -517,9 +531,9 @@ Boolean Import_Run(const LibraryFolder *folder)
     }
 
     /* DECISION D31: warn if the same audio is already in the library. */
-    SetWatchCursor();
-    err = ChecksumAudio(reply.vRefNum, reply.fName, &wav, buffer, &checksum);
-    InitCursor();
+    err = ReadSource(&src, &wav);
+    if (err == noErr)
+        err = FingerprintSource(&src, &wav, buffer, &fingerprint);
     if (err != noErr)
     {
         DisposePtr(buffer);
@@ -527,7 +541,7 @@ Boolean Import_Run(const LibraryFolder *folder)
         return false;
     }
 
-    match = Library_FindAudioMatch(wav.dataLength, checksum);
+    match = Library_FindAudioMatch(wav.dataLength, fingerprint);
     if (match != kNone)
     {
         ParamText(Library_SongTitle(match), P(""), P(""), P(""));
@@ -538,10 +552,85 @@ Boolean Import_Run(const LibraryFolder *folder)
         }
     }
 
-    imported = AskForDetails(reply.fName, &wav, &details)
-            && WriteSong(folder, reply.vRefNum, reply.fName, &wav, &details,
-                         checksum, buffer);
+    /* Stage 5b-2: from another disk the file has to be copied, which is
+       slow, so ask first. Either way the file is moved unless the user
+       chooses Just Copy. */
+    sameDisk = src.vRefNum == folder->vRefNum;
+    if (!sameDisk && Alert(kOtherDiskAlert, nil) != kItemOtherDiskImport)
+    {
+        DisposePtr(buffer);
+        return false;
+    }
+    move = Alert(kMoveAlert, nil) == kItemMove;
+
+    if (move && sameDisk && src.locked)
+    {
+        if (!AskToCopyInstead(P("This file is locked, so it can\xD5t be moved.")))
+        {
+            DisposePtr(buffer);
+            return false;
+        }
+        move = false;
+    }
+
+    if (!AskForDetails(src.name, &wav, &details))
+    {
+        DisposePtr(buffer);
+        return false;
+    }
+
+    working = Message_BeginWorking(P("Importing\xC9"));
+    err = ChooseSongName(folder, &src, move && sameDisk, &id, songName);
+    if (err == noErr)
+    {
+        FillSongInfo(&info, id, &details, &wav, fingerprint, &src);
+        if (move && sameDisk)
+            err = MoveIntoLibrary(folder, &src, &info, songName);
+        else
+            err = CopyIntoLibrary(folder, &src, &info, songName,
+                                  buffer, bufferSize);
+    }
+    Message_EndWorking(working);
+
+    /* E4: open elsewhere, or on a locked disk: nothing was changed. */
+    if (move && sameDisk && IsCantChangeError(err)
+        && AskToCopyInstead(P("This file is in use or its disk is locked, "
+                              "so it can\xD5t be moved.")))
+    {
+        working = Message_BeginWorking(P("Importing\xC9"));
+        err = CopyIntoLibrary(folder, &src, &info, songName, buffer, bufferSize);
+        Message_EndWorking(working);
+        move = false;
+    }
+    else if (move && sameDisk && IsCantChangeError(err))
+    {
+        DisposePtr(buffer);
+        return false;
+    }
 
     DisposePtr(buffer);
+    if (err == dskFulErr)
+    {
+        Message_Show(P("There is not enough space on the iPod Library\xD5s "
+                       "disk for this song."), noErr);
+        return false;
+    }
+    if (err != noErr)
+    {
+        Message_Show(P("The song could not be imported."), err);
+        return false;
+    }
+    imported = true;
+
+    /* From another disk, "move" = copy, then delete the original (E4: if
+       that fails, the original is left where it was). */
+    if (move && !sameDisk
+        && HDelete(src.vRefNum, src.dirID, src.name) != noErr)
+        Message_Show(P("The song was imported, but the original file "
+                       "couldn\xD5t be removed from its disk, so it was "
+                       "left in place."), noErr);
+    else if (move && !sameDisk)
+        FlushVol(nil, src.vRefNum);
+
     return imported;
 }
