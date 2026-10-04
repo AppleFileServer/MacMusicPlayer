@@ -38,7 +38,7 @@ enum { kQuietCmd = 3, kFreqCmd = 42, kSoundCmd = 80 };
 #define kRingBytes          (400L * kSamplesPerTick)   /* 148000, ~6.65 s (R2) */
 #define kGuard              (8L * kSamplesPerTick)     /* write margin */
 #define kLag                (3L * kSamplesPerTick)     /* silence this far behind */
-#define kReadChunk          8192L                       /* R4: fewer, larger reads */
+#define kMinRefill          8192L                       /* R4: no tiny reads */
 #define kSilence            0x80
 
 static Boolean gAvailable;
@@ -161,8 +161,9 @@ static void Quiet(void)
 }
 
 /* Writes samples [gWritten, upTo) into the ring: file data, then silence
-   after the end. At most maxReads file reads. */
-static OSErr Fill(long upTo, short maxReads)
+   after the end. Each read takes all it can up to the end of the ring,
+   so a fill is at most two reads (before and after the wrap). */
+static OSErr Fill(long upTo)
 {
     long slot, n, count;
     OSErr err = noErr;
@@ -176,10 +177,6 @@ static OSErr Fill(long upTo, short maxReads)
 
         if (gWritten < gLength)
         {
-            if (maxReads-- <= 0)
-                break;
-            if (n > kReadChunk)
-                n = kReadChunk;
             if (n > gLength - gWritten)
                 n = gLength - gWritten;
             count = n;
@@ -234,7 +231,7 @@ OSErr Audio_Play(const AudioSource *source, long startSample)
     /* A full ring before starting. */
     gOrigin = startSample;
     gWritten = startSample;
-    err = Fill(startSample + kRingBytes, 1000);
+    err = Fill(startSample + kRingBytes);
     if (err != noErr)
     {
         Audio_Stop();
@@ -292,10 +289,14 @@ void Audio_Service(void)
         gWritten = played + kSamplesPerTick;
     }
 
-    /* Top up once at least one read's worth of the ring is free. */
-    if (played + kRingBytes - kGuard - gWritten >= kReadChunk
+    /* Fix 1 (after 5b): top up all the free space, however long since
+       the last pass. The main loop may come round only about once a
+       second while playing, and a capped refill (two 8 KB reads, 16 KB)
+       fell behind the 22 KB a second played, so the ring ran dry after
+       20-25 s. Small amounts wait until kMinRefill is free. */
+    if (played + kRingBytes - kGuard - gWritten >= kMinRefill
         || gWritten >= gLength)
-        Fill(played + kRingBytes - kGuard, 2);
+        Fill(played + kRingBytes - kGuard);
 }
 
 long Audio_Position(void)
