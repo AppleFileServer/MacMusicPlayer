@@ -24,9 +24,23 @@ typedef struct
 Boolean Audio_Init(void);
 Boolean Audio_IsAvailable(void);
 
-/* Starts playing source from sample startSample. Stops anything playing
-   first. Returns an error if the file can't be opened or read. */
-OSErr Audio_Play(const AudioSource *source, long startSample);
+/* Starts playing source from sample startSample, as a new stream: stops
+   anything playing first. tag identifies the song to the caller (its
+   place in the play queue). Returns an error if the file can't be opened
+   or read. Sound starts after about 4 s of audio is buffered (G2). */
+OSErr Audio_Play(const AudioSource *source, long startSample, short tag);
+
+/* Stage 5c, gapless playback (DECISION G1): adds the next song to the
+   stream. Its audio follows the previous song's last sample in the
+   ring, with no gap. Call whenever Audio_WantsNext() is true (G3: as
+   soon as a song starts). A song whose file can't be opened is dropped,
+   reported once by Audio_TakeFileError (R8). */
+void Audio_Queue(const AudioSource *source, short tag);
+Boolean Audio_WantsNext(void);
+Boolean Audio_TakeFileError(void);
+
+/* The tag of the song being heard now. */
+short Audio_CurrentTag(void);
 
 /* Stops playback and closes the file. */
 void Audio_Stop(void);
@@ -34,10 +48,11 @@ void Audio_Stop(void);
 /* Keeps the ring filled. Call often from the main loop while playing. */
 void Audio_Service(void);
 
-/* Samples played so far (0 to length): what the hardware has consumed. */
+/* Samples of the current song played so far (0 to its length): what the
+   hardware has consumed. */
 long Audio_Position(void);
 
-/* True once the whole song has played. */
+/* True once every song in the stream has played. */
 Boolean Audio_Ended(void);
 
 /* Times the main loop fell behind (heard as silence, R6). */

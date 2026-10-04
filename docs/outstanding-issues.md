@@ -3,7 +3,7 @@
 Known problems and deferred work, newest stage last. Update this file when
 an issue is fixed (move it to "Resolved" with the commit) or found.
 
-Status as of commit `b1bf831` (Stage 5b-3).
+Status as of Stage 5c (gapless playback).
 
 ## Open
 
@@ -28,7 +28,8 @@ Status as of commit `b1bf831` (Stage 5b-3).
 - **Cause:** unknown. Suspects: `WaitNextEvent` giving the Finder long
   turns under MultiFinder; the ring reads; the once-a-second redraw.
 - **Impact now:** no longer starves the audio since `6e6fcde` (whole-ring
-  refill); remains a responsiveness issue.
+  refill); remains a responsiveness issue, and with gapless playback
+  (5c) Now Playing may show the new song up to a second after it starts.
 - **Next step:** a timing build that measures each part of a pass.
 
 ### I3. Silence after about 6 s of a held menu or open dialog
@@ -44,19 +45,14 @@ Status as of commit `b1bf831` (Stage 5b-3).
 - **Fix (if wanted):** repeat one sample in every 108 while filling the
   ring. Accepted as-is for now.
 
-### I5. Gap between songs (R5) — next stage
-- Each natural song change stops the sound, refills the whole ring
-  (up to 148,000 bytes) and restarts it.
-- See the Stage 5c plan.
-
 ### I6. Open a library from the Finder (L4, deferred from 5b-3)
 - Double-clicking "iPod Library Info" could launch the app with that
   library selected (System 6 passes the document at launch).
 
 ### I7. Hardware test image is out of date
 - `HD50_512 Scratch 30 MB.hda` on the BlueSCSI card has the app as of
-  `6e6fcde` and a version-1 library; this version (version-2 songs) won't
-  read it. Rebuild the image (plan first) before the next Mac Plus test.
+  `6e6fcde` and a version-1 library; versions from Stage 5b-2 on
+  (version-2 songs) won't read it. Rebuild the image (plan first) before the next Mac Plus test.
 
 ### I8. Unexplained 600-tick stall, seen once (5b diagnostic)
 - One AudioTest run lost about 10 s at a song change; three later runs,
@@ -70,6 +66,8 @@ Status as of commit `b1bf831` (Stage 5b-3).
 
 ## Resolved
 - Ring ran dry after 20–25 s (stutter): `6e6fcde`.
+- Gap between songs (I5, R5): Stage 5c, gapless stream; sound also
+  starts after about 4 s of buffering instead of the whole ring.
 - Slow import / duplicate copies on disk: `eaaff53` (Stage 5b-2).
 - No way to use an existing library: `b1bf831` (Stage 5b-3).
 - `run-persistent.sh` could not launch Mini vMac (-10825): `8eccbce`.

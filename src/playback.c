@@ -25,6 +25,7 @@ static unsigned long gResumedAt;
 static long gLastSecond;
 static long gPausedSample;
 static Boolean gFileError;              /* a song could not be played (R8) */
+static short gQueuedUpTo;               /* last position handed to audio */
 
 /* Audio position in song time: samples at the song's 22050 Hz, so the
    times and progress bar reach the song's length exactly at its end even
@@ -48,6 +49,9 @@ short Playback_CurrentSong(void)
 
 long Playback_ElapsedTicks(void)
 {
+    if (Audio_IsAvailable() && gState == kPlayPlaying
+        && Audio_CurrentTag() != gPosition)
+        return Playback_LengthTicks();  /* moved on; Tick catches up */
     if (Audio_IsAvailable())
         return SamplesToTicks(gState == kPlayPlaying ? Audio_Position()
                                                      : gPausedSample);
@@ -64,18 +68,67 @@ Boolean Playback_TakeFileError(void)
     return error;
 }
 
-/* Starts the current song's audio at sample. */
+/* Where the song at queue position is, for the audio stream. */
+static Boolean SourceAt(short position, AudioSource *source)
+{
+    short song = Library_SongForID(gQueue[position]);
+
+    if (song == kNone
+        || !Library_SongFile(song, &source->vRefNum, &source->dirID,
+                             &source->name, &source->offset))
+        return false;
+    source->length = Library_SongAudioLength(song);
+    return true;
+}
+
+/* Stage 5c, DECISION G3: the song after the last one handed to the audio
+   stream is queued as soon as the stream can take it, so its audio
+   follows without a gap however slowly the main loop runs. The last song
+   in the queue has nothing after it, so its natural end stops (N4). */
+static void QueueAhead(void)
+{
+    AudioSource source;
+
+    while (gState == kPlayPlaying && Audio_WantsNext()
+           && gQueuedUpTo + 1 < gQueueLength)
+    {
+        gQueuedUpTo++;
+        if (SourceAt(gQueuedUpTo, &source))
+            Audio_Queue(&source, gQueuedUpTo);
+    }
+}
+
+/* Starts the current song's audio at sample, as a new stream. */
 static OSErr PlayCurrentFrom(long sample)
 {
     AudioSource source;
-    short song = Playback_CurrentSong();
+    OSErr err;
 
-    if (song == kNone
-        || !Library_SongFile(song, &source.vRefNum, &source.dirID,
-                             &source.name, &source.offset))
+    if (!SourceAt(gPosition, &source))
         return fnfErr;
-    source.length = Library_SongAudioLength(song);
-    return Audio_Play(&source, sample);
+    err = Audio_Play(&source, sample, gPosition);
+    if (err == noErr)
+    {
+        gQueuedUpTo = gPosition;
+        QueueAhead();
+    }
+    return err;
+}
+
+/* Gapless songs change without a restart: when the audio has moved on to
+   a later song, the current position follows it. True if it moved. */
+static Boolean FollowAudio(void)
+{
+    short tag;
+
+    if (gState != kPlayPlaying || !Audio_IsAvailable())
+        return false;
+    tag = Audio_CurrentTag();
+    if (tag <= gPosition || tag >= gQueueLength)
+        return false;
+    gPosition = tag;
+    gLastSecond = -1;
+    return true;
 }
 
 long Playback_LengthTicks(void)
@@ -150,6 +203,7 @@ void Playback_TogglePause(void)
 {
     if (gState == kPlayPlaying)
     {
+        FollowAudio();
         if (Audio_IsAvailable())
         {
             gPausedSample = Audio_Position();
@@ -179,6 +233,7 @@ void Playback_Next(void)
 {
     if (gState == kPlayStopped)
         return;
+    FollowAudio();
     gPosition = (gPosition + 1) % gQueueLength;
     RestartSong();
 }
@@ -191,6 +246,7 @@ void Playback_Previous(void)
 {
     if (gState == kPlayStopped)
         return;
+    FollowAudio();
     if (Playback_ElapsedTicks() <= kRestartThresholdTicks && gPosition > 0)
         gPosition--;
     RestartSong();
@@ -198,7 +254,7 @@ void Playback_Previous(void)
 
 short Playback_Tick(void)
 {
-    short result = 0;
+    short result = 0, next;
     long elapsed, second;
 
     if (gState == kPlayStopped)
@@ -214,20 +270,30 @@ short Playback_Tick(void)
     }
 
     if (gState == kPlayPlaying && Audio_IsAvailable())
+    {
         Audio_Service();
+        QueueAhead();
+        if (Audio_TakeFileError())
+            gFileError = true;          /* a queued song was skipped (R8) */
+        if (FollowAudio())
+            result |= kTickSongChanged | kTickTimeChanged;
+    }
 
     elapsed = Playback_ElapsedTicks();
     if (gState == kPlayPlaying
         && (Audio_IsAvailable() ? Audio_Ended()
                                 : elapsed >= Playback_LengthTicks()))
     {
-        /* DECISION N4: at the natural end of the last song, stop. */
-        if (gPosition + 1 >= gQueueLength)
+        /* DECISION N4: at the natural end of the last song, stop. With
+           sound, the stream ran out early only if the songs after it
+           could not be queued (gone from the library): try the next. */
+        next = Audio_IsAvailable() ? gQueuedUpTo + 1 : gPosition + 1;
+        if (next >= gQueueLength)
         {
             Playback_Stop();
             return result | kTickStopped;
         }
-        gPosition++;
+        gPosition = next;
         RestartSong();
         if (gState == kPlayStopped)     /* R8: nothing left that plays */
             return result | kTickStopped;
@@ -245,12 +311,17 @@ short Playback_Tick(void)
 
 void Playback_LibraryChanged(void)
 {
-    long currentID;
-    short i, n = 0, newPosition = 0;
+    long currentID, sample = 0;
+    short i, n = 0, newPosition = 0, oldLength = gQueueLength;
     Boolean currentKept = false;
 
     if (gState == kPlayStopped)
         return;
+
+    /* The audio stream knows songs by queue position, which may shift. */
+    FollowAudio();
+    if (gState == kPlayPlaying && Audio_IsAvailable())
+        sample = Audio_Position();
 
     currentID = gQueue[gPosition];
     for (i = 0; i < gQueueLength; i++)
@@ -278,4 +349,10 @@ void Playback_LibraryChanged(void)
     gPosition = newPosition;
     if (!currentKept || gQueue[gPosition] != currentID)
         RestartSong();
+    else if (n != oldLength && gState == kPlayPlaying && Audio_IsAvailable()
+             && PlayCurrentFrom(sample) != noErr)
+    {
+        gFileError = true;
+        RestartSong();                  /* R8 */
+    }
 }
