@@ -829,3 +829,15 @@ ConstStringPtr Library_SongArtistName(short song)   { return PoolString(Songs()[
 ConstStringPtr Library_SongAlbumName(short song)    { return PoolString(Songs()[song].albumName); }
 long Library_SongSeconds(short song)                { return Songs()[song].seconds; }
 long Library_SongAudioLength(short song)            { return Songs()[song].audioLength; }
+
+Boolean Library_SongFile(short song, short *vRefNum, long *dirID,
+                         ConstStringPtr *fileName, long *audioOffset)
+{
+    if (!gHaveFolder)
+        return false;
+    *vRefNum = gFolder.vRefNum;
+    *dirID = gFolder.folderID;
+    *fileName = PoolString(Songs()[song].fileName);
+    *audioOffset = Songs()[song].audioOffset;
+    return true;
+}

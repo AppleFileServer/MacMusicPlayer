@@ -85,4 +85,9 @@ ConstStringPtr Library_SongAlbumName(short song);    /* may be empty */
 long Library_SongSeconds(short song);
 long Library_SongAudioLength(short song);           /* bytes */
 
+/* Where a song's audio is on disk, for playback. False if there is no
+   scanned library. */
+Boolean Library_SongFile(short song, short *vRefNum, long *dirID,
+                         ConstStringPtr *fileName, long *audioOffset);
+
 #endif

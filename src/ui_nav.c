@@ -175,7 +175,8 @@ static Boolean PlayAndShow(const short *songs, short count, short start)
         return false;
     Playback_Start(songs, count, start);
     RefreshMainMenus();
-    PushNowPlaying();
+    if (Playback_IsActive())            /* R8: nothing playable -> stay */
+        PushNowPlaying();
     return true;
 }
 

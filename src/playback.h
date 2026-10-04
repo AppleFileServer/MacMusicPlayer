@@ -35,6 +35,9 @@ short Playback_Tick(void);
    are dropped; stops if none remain. */
 void Playback_LibraryChanged(void);
 
+/* True once after a song file could not be played and was skipped (R8). */
+Boolean Playback_TakeFileError(void);
+
 PlayState Playback_State(void);
 Boolean Playback_IsActive(void);        /* playing or paused */
 short Playback_CurrentSong(void);       /* library song index, or kNone */

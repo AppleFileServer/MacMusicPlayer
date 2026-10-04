@@ -14,6 +14,9 @@
 #include "import.h"
 #include "playlists.h"
 #include "playback.h"
+#include "audio.h"
+#include "message.h"
+#include "pstr.h"
 #include "lcd_draw.h"
 #include "ui_nav.h"
 #include "input.h"
@@ -71,6 +74,7 @@ static void SetUpMenus(void)
 
 static void ChooseLibrary(void);
 static void ImportSong(void);
+static void ImportSongPausingAudio(void);
 static void PlaylistsChanged(void);
 
 static void ShowAboutBox(void)
@@ -100,7 +104,7 @@ static void HandleMenuChoice(long choice)
 
         case kMenuFile:
             if (menuItem == kItemImport)
-                ImportSong();
+                ImportSongPausingAudio();
             else if (menuItem == kItemChooseLibrary)
                 ChooseLibrary();
             else if (menuItem == kItemQuit)
@@ -160,6 +164,24 @@ static void RedrawWindowNow(void)
     SetPort(gMainWindow);
     DrawMainWindow(gMainWindow);
     ValidRect(&gMainWindow->portRect);
+}
+
+/* DECISION A8: without sound, one alert per session, then silent
+   playback on the clock. DECISION R8: a song whose file can't be read is
+   skipped, with a message. */
+static void ReportPlaybackProblems(void)
+{
+    static Boolean toldNoSound = false;
+
+    if (!toldNoSound && Playback_IsActive() && !Audio_IsAvailable())
+    {
+        toldNoSound = true;
+        Message_Show(P("Sound playback isn\xD5t available; songs will play "
+                       "silently."), noErr);
+    }
+    if (Playback_TakeFileError())
+        Message_Show(P("A song\xD5s file couldn\xD5t be read, so it was "
+                       "skipped."), noErr);
 }
 
 /* Brings menus up to date with the library and the iPod's highlighted
@@ -244,6 +266,20 @@ static void ImportSong(void)
     LibSetup_Rescan();
     Playback_LibraryChanged();
     EndRestart();
+}
+
+/* File > Import Song...: DECISION A5, audio pauses for the import (its
+   dialogs and disk copy would starve the ring) and resumes at the same
+   song and sample afterwards, found again by its ID. */
+static void ImportSongPausingAudio(void)
+{
+    Boolean wasPlaying = Playback_State() == kPlayPlaying;
+
+    if (wasPlaying)
+        Playback_TogglePause();
+    ImportSong();
+    if (wasPlaying && Playback_State() == kPlayPaused)
+        Playback_TogglePause();
 }
 
 static void HandleContentClick(WindowPtr window, Point where)
@@ -335,6 +371,7 @@ int main(void)
     InitToolbox();
     SetUpMenus();
     qd.randSeed = TickCount();      /* for Shuffle Songs */
+    Audio_Init();                   /* if it fails, playback is silent (A8) */
 
     if (!LCD_Init())
     {
@@ -366,9 +403,10 @@ int main(void)
 
     while (!gQuit)
     {
-        /* While a song plays, come back often enough to update the time. */
+        /* While a song plays, come back every tick to keep the audio ring
+           filled (R7) and the time updated. */
         if (WaitNextEvent(everyEvent, &event,
-                          Playback_State() == kPlayPlaying ? 10 : 30, nil))
+                          Playback_State() == kPlayPlaying ? 1 : 30, nil))
         {
             switch (event.what)
             {
@@ -394,8 +432,11 @@ int main(void)
             UI_Render();
             PresentLCD();
         }
+
+        ReportPlaybackProblems();
     }
 
+    Audio_Shutdown();
     DisposeWindow(gMainWindow);
     LCD_Dispose();
     return 0;
