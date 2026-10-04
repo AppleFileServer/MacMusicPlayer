@@ -285,6 +285,8 @@ static Boolean ScanSongs(const LibraryFolder *folder)
 
         if (pb.hFileInfo.ioFlAttrib & kDirectoryAttribute)
             continue;                   /* Playlists and other folders */
+        if (pb.hFileInfo.ioFlFndrInfo.fdType == kLibraryMarkerType)
+            continue;                   /* "iPod Library Info" (5b-3) */
 
         if (gSongCount >= kMaxSongs
             || !AddSongFile(folder, name, &outOfMemory))

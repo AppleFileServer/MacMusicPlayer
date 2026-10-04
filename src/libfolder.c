@@ -1,13 +1,23 @@
 #include <Files.h>
 #include <StandardFile.h>
 #include <TextUtils.h>
+#include <string.h>
 
 #include "libfolder.h"
 #include "pstr.h"
+#include "song_format.h"
 
 #define kDirectoryAttribute     0x10    /* ioFlAttrib bit 4 */
 
 static const unsigned char kPlaylistsName[] = "\pPlaylists";
+static const unsigned char kMarkerName[] = "\piPod Library Info";
+
+/* "Use it?" when Create New is used inside a library (ALRT 140). */
+enum
+{
+    kUseLibraryHereAlert = 140,
+    kItemUseIt = 1
+};
 
 /* Looks up name inside parentID. Returns noErr and the item's directory
    ID if it is a folder; fnfErr if absent; dupFNErr if it is a file. */
@@ -98,6 +108,94 @@ static Boolean FindVolume(ConstStringPtr volumeName, unsigned long created,
     }
 }
 
+/* ---- The library marker (Stage 5b-3) ---------------------------------- */
+
+/* Looks up a file (not a folder) inside dirID; its Finder type if found. */
+static Boolean FindFile(short vRefNum, long dirID, ConstStringPtr name,
+                        OSType *type)
+{
+    CInfoPBRec pb;
+    Str63 nameCopy;
+
+    BlockMove(name, nameCopy, name[0] + 1);
+    pb.hFileInfo.ioNamePtr = nameCopy;
+    pb.hFileInfo.ioVRefNum = vRefNum;
+    pb.hFileInfo.ioFDirIndex = 0;
+    pb.hFileInfo.ioDirID = dirID;
+    if (PBGetCatInfoSync(&pb) != noErr
+        || (pb.hFileInfo.ioFlAttrib & kDirectoryAttribute))
+        return false;
+    *type = pb.hFileInfo.ioFlFndrInfo.fdType;
+    return true;
+}
+
+/* True if the folder holds a song file. */
+static Boolean HasSongFile(short vRefNum, long dirID)
+{
+    CInfoPBRec pb;
+    Str63 name;
+    short index;
+
+    for (index = 1; ; index++)
+    {
+        pb.hFileInfo.ioNamePtr = name;
+        pb.hFileInfo.ioVRefNum = vRefNum;
+        pb.hFileInfo.ioFDirIndex = index;
+        pb.hFileInfo.ioDirID = dirID;
+        if (PBGetCatInfoSync(&pb) != noErr)
+            return false;
+        if (!(pb.hFileInfo.ioFlAttrib & kDirectoryAttribute)
+            && pb.hFileInfo.ioFlFndrInfo.fdType == kSongFileType)
+            return true;
+    }
+}
+
+/* A folder is an iPod Library if it holds the marker, or song files and
+   a Playlists folder (a library made before 5b-3). */
+static Boolean IsLibraryFolder(short vRefNum, long dirID)
+{
+    OSType type;
+    long playlistsID;
+
+    if (FindFile(vRefNum, dirID, kMarkerName, &type)
+        && type == kLibraryMarkerType)
+        return true;
+    return LookUpFolder(vRefNum, dirID, kPlaylistsName, &playlistsID) == noErr
+        && HasSongFile(vRefNum, dirID);
+}
+
+/* Adds the marker if it is missing. Failure (a locked disk) is harmless:
+   the library still works, it just can't be picked by its marker. */
+static void EnsureMarker(short vRefNum, long dirID)
+{
+    static const char text[] =
+        "This folder is an iPod Library for MacMusicPlayer. To use it, "
+        "choose File > Choose Library..., then Use Existing Library, and "
+        "open this file.\r";
+    HParamBlockRec pb;
+    Str63 name;
+    long count = sizeof(text) - 1;
+    short refNum;
+
+    if (HCreate(vRefNum, dirID, kMarkerName, kAppCreator, kLibraryMarkerType)
+        != noErr)
+        return;
+
+    BlockMove(kMarkerName, name, kMarkerName[0] + 1);
+    memset(&pb, 0, sizeof(pb));
+    pb.ioParam.ioNamePtr = name;
+    pb.ioParam.ioVRefNum = vRefNum;
+    pb.ioParam.ioPermssn = fsRdWrPerm;
+    pb.fileParam.ioDirID = dirID;
+    if (PBHOpenSync(&pb) == noErr)
+    {
+        refNum = pb.ioParam.ioRefNum;
+        FSWrite(refNum, &count, text);
+        FSClose(refNum);
+    }
+    FlushVol(nil, vRefNum);
+}
+
 Boolean Folder_Resolve(const LibraryLocation *location, LibraryFolder *folder)
 {
     if (!FindVolume(location->volumeName, location->volumeCreated,
@@ -107,12 +205,51 @@ Boolean Folder_Resolve(const LibraryLocation *location, LibraryFolder *folder)
         return false;
 
     folder->folderID = location->folderID;
-    return MakeFolder(folder->vRefNum, folder->folderID, kPlaylistsName,
-                      &folder->playlistsID) == noErr;
+    if (MakeFolder(folder->vRefNum, folder->folderID, kPlaylistsName,
+                   &folder->playlistsID) != noErr)
+        return false;
+    EnsureMarker(folder->vRefNum, folder->folderID);
+    return true;
 }
 
-/* An existing folder picked in the Save dialog (see ExistingFolderHook). */
+/* Uses folderID on vRefNum as the library: makes sure it has Playlists
+   and the marker, and fills in location (the volume is remembered by
+   name and creation date). */
+static short UseFolder(short vRefNum, long folderID,
+                       LibraryLocation *location, LibraryFolder *folder,
+                       short *error)
+{
+    HParamBlockRec vol;
+    OSErr err;
+
+    folder->vRefNum = vRefNum;
+    folder->folderID = folderID;
+    err = MakeFolder(vRefNum, folderID, kPlaylistsName, &folder->playlistsID);
+    if (err == dupFNErr)
+        return kFolderNameIsFile;
+    if (err == noErr)
+    {
+        vol.volumeParam.ioNamePtr = location->volumeName;
+        vol.volumeParam.ioVRefNum = vRefNum;
+        vol.volumeParam.ioVolIndex = 0;
+        err = PBHGetVInfoSync(&vol);
+    }
+    if (err != noErr)
+    {
+        *error = err;
+        return kFolderError;
+    }
+    EnsureMarker(vRefNum, folderID);
+
+    location->volumeCreated = vol.volumeParam.ioVCrDate;
+    location->folderID = folderID;
+    return kFolderChosen;
+}
+
+/* An existing folder picked in the Save dialog (see ExistingFolderHook),
+   or the folder shown being a library itself (gInLibrary). */
 static Boolean gPickedExisting;
+static Boolean gInLibrary;
 static short gPickedVRefNum;
 static long gPickedParentID;
 static Str63 gPickedName;
@@ -122,7 +259,10 @@ static Str63 gPickedName;
    turn that off. When Save is clicked and the name is an existing folder
    in the directory being shown, this hook records it and closes the
    dialog itself (as if Cancel), so the folder is simply reused. Any other
-   name, including an existing file, is left to Standard File. */
+   name, including an existing file, is left to Standard File.
+   DECISION L3 (5b-3): Save while showing the inside of a library would
+   create a library within it, so the hook closes the dialog and the
+   caller asks whether to use the library shown instead. */
 static pascal short ExistingFolderHook(short item, DialogPtr dialog)
 {
     short itemType;
@@ -144,6 +284,14 @@ static pascal short ExistingFolderHook(short item, DialogPtr dialog)
     vRefNum = -LMGetSFSaveDisk();
     parentID = LMGetCurDirStore();
 
+    if (IsLibraryFolder(vRefNum, parentID))
+    {
+        gInLibrary = true;
+        gPickedVRefNum = vRefNum;
+        gPickedParentID = parentID;
+        return putCancel;
+    }
+
     if (LookUpFolder(vRefNum, parentID, name, &folderID) != noErr)
         return item;
 
@@ -159,10 +307,10 @@ short Folder_Choose(LibraryLocation *location, LibraryFolder *folder,
 {
     SFReply reply;
     WDPBRec wd;
-    HParamBlockRec vol;
     Point where;
     ConstStringPtr name;
-    long parentID;
+    short vRefNum;
+    long parentID, folderID;
     OSErr err;
 
     *error = noErr;
@@ -174,12 +322,21 @@ short Folder_Choose(LibraryLocation *location, LibraryFolder *folder,
     where.h = 104;
     where.v = 60;
     gPickedExisting = false;
-    SFPutFile(where, P("Create iPod Library in:"), P("iPod Library"),
+    gInLibrary = false;
+    SFPutFile(where, P("Create new iPod Library in:"), P("iPod Library"),
               ExistingFolderHook, &reply);
+
+    if (gInLibrary)
+    {
+        if (Alert(kUseLibraryHereAlert, nil) != kItemUseIt)
+            return kFolderCancelled;
+        return UseFolder(gPickedVRefNum, gPickedParentID, location, folder,
+                         error);
+    }
 
     if (gPickedExisting)
     {
-        folder->vRefNum = gPickedVRefNum;
+        vRefNum = gPickedVRefNum;
         parentID = gPickedParentID;
         name = gPickedName;
     }
@@ -201,35 +358,95 @@ short Folder_Choose(LibraryLocation *location, LibraryFolder *folder,
             return kFolderError;
         }
 
-        folder->vRefNum = wd.ioWDVRefNum;
+        vRefNum = wd.ioWDVRefNum;
         parentID = wd.ioWDDirID;
         name = reply.fName;
     }
 
-    err = MakeFolder(folder->vRefNum, parentID, name, &folder->folderID);
+    err = MakeFolder(vRefNum, parentID, name, &folderID);
     if (err == dupFNErr)
         return kFolderNameIsFile;
-    if (err == noErr)
-        err = MakeFolder(folder->vRefNum, folder->folderID, kPlaylistsName,
-                         &folder->playlistsID);
+    if (err != noErr)
+    {
+        *error = err;
+        return kFolderError;
+    }
+    return UseFolder(vRefNum, folderID, location, folder, error);
+}
+
+/* Lists only files that identify a library: the marker, song files and
+   playlists (all with this app's creator). Returns true to hide. */
+static pascal Boolean LibraryFileFilter(CInfoPBPtr pb)
+{
+    OSType type = pb->hFileInfo.ioFlFndrInfo.fdType;
+
+    if (pb->hFileInfo.ioFlAttrib & kDirectoryAttribute)
+        return false;
+    if (pb->hFileInfo.ioFlFndrInfo.fdCreator != kAppCreator)
+        return true;
+    return type != kLibraryMarkerType && type != kSongFileType
+        && type != kPlaylistFileType;
+}
+
+/* The parent folder of dirID. */
+static OSErr ParentFolder(short vRefNum, long dirID, long *parentID)
+{
+    CInfoPBRec pb;
+    Str63 name;
+    OSErr err;
+
+    pb.dirInfo.ioNamePtr = name;
+    pb.dirInfo.ioVRefNum = vRefNum;
+    pb.dirInfo.ioFDirIndex = -1;            /* look up by directory ID */
+    pb.dirInfo.ioDrDirID = dirID;
+    err = PBGetCatInfoSync(&pb);
+    *parentID = pb.dirInfo.ioDrParID;
+    return err;
+}
+
+short Folder_FindExisting(LibraryLocation *location, LibraryFolder *folder,
+                          short *error)
+{
+    SFReply reply;
+    WDPBRec wd;
+    Point where;
+    long dirID;
+    OSErr err;
+
+    *error = noErr;
+
+    /* DECISION (5b-3): System 6 can't pick a folder in the Open dialog,
+       so a file in the library is picked instead: its marker, any song,
+       or a playlist (whose folder, Playlists, is inside the library). */
+    where.h = 82;
+    where.v = 50;
+    SFGetFile(where, P(""), LibraryFileFilter, -1, nil, nil, &reply);
+    if (!reply.good)
+        return kFolderCancelled;
+
+    wd.ioNamePtr = nil;
+    wd.ioVRefNum = reply.vRefNum;
+    wd.ioWDIndex = 0;
+    wd.ioWDProcID = 0;
+    err = PBGetWDInfoSync(&wd);
     if (err != noErr)
     {
         *error = err;
         return kFolderError;
     }
 
-    /* Remember the volume by name and creation date. */
-    vol.volumeParam.ioNamePtr = location->volumeName;
-    vol.volumeParam.ioVRefNum = folder->vRefNum;
-    vol.volumeParam.ioVolIndex = 0;
-    err = PBHGetVInfoSync(&vol);
-    if (err != noErr)
+    dirID = wd.ioWDDirID;
+    if (reply.fType == kPlaylistFileType)
     {
-        *error = err;
-        return kFolderError;
+        err = ParentFolder(wd.ioWDVRefNum, dirID, &dirID);
+        if (err != noErr)
+        {
+            *error = err;
+            return kFolderError;
+        }
     }
 
-    location->volumeCreated = vol.volumeParam.ioVCrDate;
-    location->folderID = folder->folderID;
-    return kFolderChosen;
+    if (!IsLibraryFolder(wd.ioWDVRefNum, dirID))
+        return kFolderNotLibrary;
+    return UseFolder(wd.ioWDVRefNum, dirID, location, folder, error);
 }

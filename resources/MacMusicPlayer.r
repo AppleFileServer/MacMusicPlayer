@@ -101,12 +101,16 @@ resource 'ALRT' (129) {
     noAutoCenter
 };
 
+/* 5b-3 (L1): Find Existing... is the default. */
 resource 'DITL' (129) {
     {
-        { 98, 250, 118, 350 },
-        Button { enabled, "Choose\0xC9" };
+        { 98, 230, 118, 350 },
+        Button { enabled, "Find Existing\0xC9" };
 
-        { 98, 136, 118, 236 },
+        { 98, 116, 118, 220 },
+        Button { enabled, "Create New\0xC9" };
+
+        { 98, 16, 118, 106 },
         Button { enabled, "Not Now" };
 
         { 12, 16, 86, 350 },
@@ -394,5 +398,67 @@ resource 'DITL' (138) {
         { 12, 16, 78, 326 },
         StaticText { disabled, "^0 Copy it into the iPod Library "
                                "instead?" };
+    }
+};
+
+/* Stage 5b-3 (L1). File > Choose Library...: use an existing library or
+   create a new one. Use Existing is the default. */
+resource 'ALRT' (139) {
+    { 104, 41, 222, 471 },
+    139,
+    {
+        OK, visible, silent;
+        OK, visible, silent;
+        OK, visible, silent;
+        OK, visible, silent;
+    },
+    noAutoCenter
+};
+
+resource 'DITL' (139) {
+    {
+        { 86, 254, 106, 414 },
+        Button { enabled, "Use Existing Library\0xC9" };
+
+        { 86, 100, 106, 244 },
+        Button { enabled, "Create New Library\0xC9" };
+
+        { 86, 16, 106, 90 },
+        Button { enabled, "Cancel" };
+
+        { 12, 16, 76, 414 },
+        StaticText { disabled, "Use an existing iPod Library, or create a "
+                               "new one? To use an existing library, open "
+                               "its \0xD2iPod Library Info\0xD3 file or one "
+                               "of its songs." };
+    }
+};
+
+/* 5b-3 (L3): Save in Create New while inside a library. Use It is the
+   default. */
+resource 'ALRT' (140) {
+    { 110, 96, 216, 416 },
+    140,
+    {
+        OK, visible, sound1;
+        OK, visible, sound1;
+        OK, visible, sound1;
+        OK, visible, sound1;
+    },
+    noAutoCenter
+};
+
+resource 'DITL' (140) {
+    {
+        { 74, 230, 94, 310 },
+        Button { enabled, "Use It" };
+
+        { 74, 136, 94, 216 },
+        Button { enabled, "Cancel" };
+
+        { 12, 16, 64, 310 },
+        StaticText { disabled, "This folder is already an iPod Library. "
+                               "Use it, instead of creating a new library "
+                               "inside it?" };
     }
 };

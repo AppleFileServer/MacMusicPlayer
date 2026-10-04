@@ -31,12 +31,26 @@ enum
     kFolderChosen,
     kFolderCancelled,
     kFolderNameIsFile,  /* a file, not a folder, has that name */
+    kFolderNotLibrary,  /* the folder found is not an iPod Library */
     kFolderError        /* see *error */
 };
 
-/* Asks where to create (or which existing) iPod Library folder to use,
-   with SFPutFile, then creates it and its Playlists folder. */
+/* Stage 5b-3: every library holds a marker file, "iPod Library Info"
+   (type kLibraryMarkerType), so that even an empty library can be
+   picked in the Open dialog. Created with a new library and added to
+   any library found without one. */
+
+/* Create New: asks where to create a new iPod Library folder, with
+   SFPutFile, then creates it and its Playlists folder. A typed name that
+   is an existing folder is reused; Save inside a folder that is already
+   a library asks whether to use that one (DECISION L3). */
 short Folder_Choose(LibraryLocation *location, LibraryFolder *folder,
                     short *error);
+
+/* Use Existing: asks for a file inside an existing library with
+   SFGetFile (only the marker, song files and playlists are listed) and
+   uses the library it is in. */
+short Folder_FindExisting(LibraryLocation *location, LibraryFolder *folder,
+                          short *error);
 
 #endif

@@ -8,10 +8,15 @@
 #include "library.h"
 #include "prefs.h"
 
+/* DECISION L1 (5b-3): finding an existing library and creating a new
+   one are separate choices, at startup (ALRT 129, with Not Now) and in
+   File > Choose Library... (ALRT 139, with Cancel). */
 enum
 {
-    kLibraryAlert = 129,        /* Choose... / Not Now */
-    kItemChoose = 1
+    kLibraryAlert = 129,        /* Find Existing... / Create New... / Not Now */
+    kChooseAlert = 139,         /* Use Existing... / Create New... / Cancel */
+    kItemFindExisting = 1,
+    kItemCreateNew = 2
 };
 
 static LibraryFolder gFolder;
@@ -51,8 +56,9 @@ void LibSetup_Rescan(void)
         ReportSkipped();
 }
 
-/* Asks for a folder until one is chosen or the user cancels; remembers it. */
-static Boolean ChooseAndRemember(void)
+/* Asks for a library (an existing one if findExisting, else where to
+   create one) until one is chosen or the user cancels; remembers it. */
+static Boolean ChooseAndRemember(Boolean findExisting)
 {
     LibraryLocation location;
     LibraryFolder folder;
@@ -61,7 +67,8 @@ static Boolean ChooseAndRemember(void)
 
     for (;;)
     {
-        result = Folder_Choose(&location, &folder, &err);
+        result = findExisting ? Folder_FindExisting(&location, &folder, &err)
+                              : Folder_Choose(&location, &folder, &err);
 
         if (result == kFolderChosen)
             break;
@@ -73,8 +80,17 @@ static Boolean ChooseAndRemember(void)
                            "Choose another name or place."), noErr);
             continue;
         }
+        if (result == kFolderNotLibrary)
+        {
+            Message_Show(P("That file isn\xD5t inside an iPod Library. Open "
+                           "the \xD2iPod Library Info\xD3 file, or a song, "
+                           "in the library\xD5s folder."), noErr);
+            continue;
+        }
 
-        Message_Show(P("The iPod Library folder could not be created."), err);
+        Message_Show(findExisting
+                     ? P("The iPod Library could not be opened.")
+                     : P("The iPod Library folder could not be created."), err);
         return false;
     }
 
@@ -99,17 +115,24 @@ void LibSetup_Startup(void)
     {
         if (remembered)
             ParamText(P("The iPod Library folder could not be found. Its disk "
-                        "may not be inserted. Choose where it is, or create a "
-                        "new one."), P(""), P(""), P(""));
+                        "may not be inserted, or it may have moved. Find it, "
+                        "or create a new one."), P(""), P(""), P(""));
         else
             ParamText(P("MacMusicPlayer keeps its songs in a folder called "
-                        "\xD2iPod Library.\xD3 Choose where to create it, or "
-                        "select an existing one."), P(""), P(""), P(""));
+                        "\xD2iPod Library.\xD3 Find an existing one, or "
+                        "create a new one."), P(""), P(""), P(""));
 
         /* DECISION (D22): Not Now continues with an empty library;
            File > Choose Library... is always available. */
-        if (Alert(kLibraryAlert, nil) == kItemChoose)
-            ChooseAndRemember();
+        switch (Alert(kLibraryAlert, nil))
+        {
+            case kItemFindExisting:
+                ChooseAndRemember(true);
+                break;
+            case kItemCreateNew:
+                ChooseAndRemember(false);
+                break;
+        }
     }
 
     LibSetup_Rescan();
@@ -117,7 +140,14 @@ void LibSetup_Startup(void)
 
 Boolean LibSetup_ChooseLibrary(void)
 {
-    return ChooseAndRemember();
+    switch (Alert(kChooseAlert, nil))
+    {
+        case kItemFindExisting:
+            return ChooseAndRemember(true);
+        case kItemCreateNew:
+            return ChooseAndRemember(false);
+    }
+    return false;
 }
 
 Boolean LibSetup_HasLibrary(void)
