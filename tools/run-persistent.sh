@@ -33,4 +33,6 @@ fi
 "$TOOLS/hls" -l
 "$TOOLS/humount" >/dev/null
 
-open "$MINIVMAC"
+# Run the executable directly: "open" on the bundle fails with
+# LaunchServices error -10825 on this Mac.
+nohup "$MINIVMAC/Contents/MacOS/minivmac" >/dev/null 2>&1 &
