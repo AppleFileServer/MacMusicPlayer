@@ -4,8 +4,8 @@ Status: proposed, not started. Revised after review (2026-10-05): order
 changed so measurement comes first, the background safeguard corrected,
 background playback layered across the stage, interrupt-time safety rules
 and success criteria added; then sub-stage 6b-2 added (pause instead of
-skipping when playback is starved, decision S5). Decisions S1-S5 at the
-end are still open.
+skipping when playback is starved, decision S5). Decisions S1-S5
+decided 2026-10-05 (see the end); Stage 6 started.
 
 Covers outstanding issues I2 (main loop runs about once a second while
 playing), I1 (audio repeats with another program's window in front) and
@@ -229,17 +229,20 @@ still easy to cause by holding a menu).
   - window active/inactive appearance, dialogs and desk accessories;
   - quitting while playing, in the foreground and from the background.
 
-## Decisions
+## Decisions (decided 2026-10-05)
 
-- **S1:** do Stage 6 before Stage 7 (recommended)?
-- **S2:** in the background, keep playing (recommended) or pause?
-- **S3:** rebuild the BlueSCSI Scratch image (I7) early in 6a-1 so timing
-  can be measured on the real Plus? (Plan presented before touching the
-  card.)
-- **S4 (revised):** include 6c in Stage 6 (recommended if background
-  playback must be reliable with busy programs in front), subject to the
-  Plus read-time measurement at its start?
-- **S5:** when playback is starved (main loop stalled longer than the
-  ring), keep time and skip the stalled seconds (R6, current), or pause
-  and continue from where the sound ran out (6b-2, recommended design: a
-  main-loop restart, no interrupt-time Sound Manager call)?
+- **S1:** Stage 6 is done before Stage 7.
+- **S2:** in the background the app keeps playing. If it is starved, the
+  silence behaves as a pause: feeding restarts from the last point of
+  audio played (as S5).
+- **S3:** no real hardware for now: develop and test in Mini vMac only.
+  Deferred until the BlueSCSI card is available: the Plus runs of 6a-1,
+  the Plus read-time measurement at the start of 6c, rebuilding the
+  Scratch image (I7), and the final tests on the Plus. Mini vMac's disk
+  is effectively instant, so it cannot show the Plus caveat on
+  interrupt-time reads: 6c uses small reads by design and must be
+  re-checked on the Plus before it is relied on there.
+- **S4:** interrupt-time refill (6c) is part of Stage 6.
+- **S5 (inferred from S2 and the discussion):** pause: continue from
+  where the sound ran out, using the 6b-2 recommended design (main-loop
+  restart, no interrupt-time Sound Manager call).

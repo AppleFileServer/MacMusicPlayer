@@ -30,7 +30,16 @@ Status as of Stage 5c (gapless playback).
 - **Impact now:** no longer starves the audio since `6e6fcde` (whole-ring
   refill); remains a responsiveness issue, and with gapless playback
   (5c) Now Playing may show the new song up to a second after it starts.
-- **Next step:** a timing build that measures each part of a pass.
+- **Stage 6a-1 measurement (2026-10-05), not reproduced:** a timing build
+  (logging only every 10 s) ran about 58 passes a second while playing, in
+  Mini vMac under the plain Finder, under MultiFinder with the MusicTest
+  folder window open, and with no Finder windows; refill time negligible;
+  the Now Playing redraw about 2 ticks once a second. The only long waits
+  (12-24 ticks) came when the log file was written into the folder the
+  Finder had open. Likely cause of the original reading: the 5b-1 logging
+  build wrote to that folder on every pass, and the Finder refreshed its
+  window each time it got time (during our `WaitNextEvent`). Keep open
+  until re-measured after the `SIZE` change (6a-2) and on the Plus.
 
 ### I3. Silence after about 6 s of a held menu or open dialog
 - **Seen/expected:** the ring (148,000 bytes, about 6.6 s) is refilled only
