@@ -1,8 +1,10 @@
 # Stage 6 plan: responsiveness and playing in the background
 
-Status: revised 2026-10-06 after Stage 6a-4. 6a-1 to 6a-4 are done; the
-remaining steps below replace the earlier 6b/6c plan, which assumed the
-tick-based play position and the VBL silencing task that 6a-4 removed.
+Status: **complete in Mini vMac (2026-10-07)**; only the real Mac Plus
+checks remain, deferred until the BlueSCSI card is available (S3). The
+6b steps below were revised on 2026-10-06 after Stage 6a-4, replacing an
+earlier 6b/6c plan that assumed the tick-based play position and the VBL
+silencing task that 6a-4 removed.
 All decisions (S1-S8) are made; see the end.
 
 ## Where Stage 6 stands
@@ -13,6 +15,10 @@ All decisions (S1-S8) are made; see the end.
 | 6a-2 `SIZE` | Runs in the background under MultiFinder; 512 KB / 384 KB partition | `82c7079` |
 | 6a-3 redraw | Now Playing redraw ~11x faster (was ~56 ticks a second at Plus speed) | `f34544c` |
 | 6a-4 position | Position from the Sound Manager's read pointer; tick model and VBL silencing removed; underrun = stop, restart from the end of the valid audio | `99601ce` |
+| 6b-1 switching | Verified (title bar, redraw, desk accessories, dialogs, quitting while playing); no code changes needed | (none) |
+| 6b-2 modal loops | Audio fed in menus, window drags, wheel holds, dialogs, alerts and Standard File; Return/Enter press the default button | `fa6ac35` |
+| 6b-3 stack | 24 KB stack (was 8 KB); deepest use ~6.3 KB | `206cffe` |
+| 6b-4 1x check | Main-loop pass 1-2 ticks while playing; redraw ~6 ticks a second; no underruns | (measurement only) |
 
 What 6a-4 changed for the rest of the plan:
 
@@ -129,11 +135,11 @@ File Manager calls are allowed.
 
 ## Order
 
-1. 6b-1 (verify switching, fix what's wrong).
-2. 6b-2 (modal-loop servicing, S6).
-3. 6b-3 (24 KB stack, S7).
-4. 6b-4 (1x responsiveness check).
-5. Hardware checks when the card is available.
+1. 6b-1 (verify switching, fix what's wrong): done.
+2. 6b-2 (modal-loop servicing, S6): done, `fa6ac35`.
+3. 6b-3 (24 KB stack, S7): done, `206cffe`.
+4. 6b-4 (1x responsiveness check): done.
+5. Hardware checks when the card is available: outstanding.
 
 Each step is built, tested (diagnostics plus manual Mini vMac at 1x) and
 committed separately after approval.

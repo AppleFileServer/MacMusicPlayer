@@ -3,36 +3,11 @@
 Known problems and deferred work, newest stage last. Update this file when
 an issue is fixed (move it to "Resolved" with the commit) or found.
 
-Status as of Stage 6a-4 (`99601ce`, playback position from the Sound
-Manager).
+Status as of the end of Stage 6 (`206cffe`): complete in Mini vMac;
+the real Mac Plus checks are deferred until the BlueSCSI card is available
+(I7, I9).
 
 ## Open
-
-### I1. Switching in and out of the background (rest of 5b-1 / Stage 6b-1)
-- **Now:** since `82c7079` (6a-2, `SIZE` resource) the app runs in the
-  background under MultiFinder, so playback continues with another
-  program in front; since `99601ce` (6a-4) heavy Finder disk work
-  (Duplicate, Empty Wastebasket) no longer breaks it (tested in Mini vMac
-  at 1x).
-- **Still to do (6b-1):** suspend/resume events are accepted but not
-  handled; the window's active/inactive appearance and redrawing on
-  switching are as before. Check Standard File, alerts and desk
-  accessories with background running enabled.
-- **Accepted limitation:** if the front program gives the app no time at
-  all for longer than the ring (about 6.6 s), the Sound Manager may
-  replay stale ring audio until the app runs again; it then detects the
-  underrun and restarts from the end of the valid audio (heard as a
-  pause).
-
-### I3. Long menu hold or open dialog: stale audio, then recovery
-- **Now (since 6a-4):** the ring is refilled only from the main loop, and
-  the VBL silencing task (R6) has been removed. A menu held or a dialog
-  open for longer than the ring (about 6.6 s) can replay stale ring audio
-  until it closes; then the underrun is detected and playback restarts
-  from where the valid audio ended. Before 6a-4 the same situation was
-  heard as silence (R6). Accepted with the 6a-4 design.
-- **Fix (if wanted):** interrupt-time refill (Stage 6c). Not part of
-  6a-4; decide separately.
 
 ### I4. Songs play about 0.9% fast (R3)
 - The Plus hardware plays 22,254.5 samples/s; songs are 22,050. Times and
@@ -70,14 +45,15 @@ Manager).
   other start of the looped sound does nothing; starts are therefore
   verified by the pointer moving, and retried.
 
-### I10. Small stack margin
-- Under MultiFinder the app gets an 8 KB stack (`ApplLimit` to
-  `CurStackBase`). Measured deepest use: about 6.4 KB during startup
-  with a newly created library, about 2.5 KB in normal use; playback
-  does not go deeper. Not a known cause of any failure, but a thin margin
-  since interrupt routines also use the app's stack.
-- **Fix (if wanted):** reserve a larger stack at startup
-  (`SetApplLimit` below the default before the heap grows).
+## Accepted limitations
+- **Starvation by other programs:** if another program gives the app no
+  time at all for longer than the ring (about 6.6 s, e.g. a very busy
+  front program), the Sound Manager may replay stale ring audio until the
+  app runs again; the underrun is then detected and playback restarts
+  from the end of the valid audio (heard as a pause). The app's own menus,
+  dialogs, window drags and wheel holds no longer cause this (6b-2).
+  Interrupt-time refill (former 6c) would remove it; dropped from Stage 6
+  (S4), possible later.
 
 ## Testing notes
 - Test timing-sensitive changes in Mini vMac at **1x** (Control-S): at
@@ -89,10 +65,9 @@ Manager).
   longest line (an overflow there caused crashes in Stage 6a-2 testing).
 
 ## Roadmap items (not defects)
-- Stage 6: 6b-1 (suspend/resume handling), 6b-2 and 6c are in
-  `docs/plans/stage-6-responsiveness-and-background.md`; their scope needs
-  revisiting after 6a-4 (the VBL task and tick model they assumed are
-  gone).
+- Stage 6 hardware checks (when the card is available): rebuild the
+  Scratch image (I7), then on the real Plus the read-pointer check (I9),
+  the Finder stress test, the modal-loop tests and responsiveness.
 - Stage 7: Now Playing volume, scrubber and rating screens.
 - Stage 8: On-The-Go playlist (D17).
 - Settings menu.
@@ -115,3 +90,13 @@ Manager).
   position, and the R6 silencing then blanked audio before it was played.
   `99601ce` (6a-4): position from the Sound Manager's read pointer; tick
   model and VBL silencing removed.
+- Switching in and out of the background (I1): verified in 6b-1 (title
+  bar, redrawing, desk accessories, dialogs, quitting while playing); no
+  code changes needed.
+- Playback starved inside the app's own modal loops (I3, menus, dialogs,
+  alerts, Standard File, window drags, wheel holds): `fa6ac35` (6b-2).
+- Small stack margin (I10): 24 KB stack, about 18 KB spare: `206cffe`
+  (6b-3).
+- Responsiveness at Plus speed (6b-4, Mini vMac 1x): a main-loop pass
+  takes 1-2 ticks while playing; the Now Playing redraw about 6 ticks a
+  second; no underruns.
