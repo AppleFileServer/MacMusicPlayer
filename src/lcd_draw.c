@@ -1,4 +1,5 @@
 #include <Memory.h>
+#include <string.h>
 
 #include "lcd_draw.h"
 #include "lcd_layout.h"
@@ -341,7 +342,8 @@ static void MeasureInk(ConstStringPtr text, short *inkLeft, short *inkWidth)
 {
     GrafPtr savedPort;
     BitMap bits;
-    short x, y, first = -1, last = -1;
+    unsigned short columns[kScratchWidth / 16], word;
+    short w, y, first = -1, last = -1;
     const unsigned short *row;
 
     GetPort(&savedPort);
@@ -365,37 +367,70 @@ static void MeasureInk(ConstStringPtr text, short *inkLeft, short *inkWidth)
     DrawString(text);
     SetPort(savedPort);
 
-    for (x = 0; x < kScratchWidth; x++)
-        for (y = 0; y < kScratchHeight; y++)
-        {
-            row = gScratchBits + y * (kScratchWidth / 16);
-            if (row[x >> 4] & (0x8000 >> (x & 15)))
+    /* Stage 6a-3: the columns with ink, a word at a time (all rows ORed
+       together), instead of testing 256 x 20 pixels one by one, which
+       cost the 68000 most of a second per Now Playing redraw at Mac Plus
+       speed. Same result: the first and last columns holding ink. */
+    for (w = 0; w < kScratchWidth / 16; w++)
+        columns[w] = 0;
+    row = gScratchBits;
+    for (y = 0; y < kScratchHeight; y++)
+        for (w = 0; w < kScratchWidth / 16; w++)
+            columns[w] |= *row++;
+
+    for (w = 0; w < kScratchWidth / 16 && first < 0; w++)
+        for (word = columns[w], y = 0; word != 0; word <<= 1, y++)
+            if (word & 0x8000)
             {
-                if (first < 0)
-                    first = x;
-                last = x;
+                first = w * 16 + y;
                 break;
             }
-        }
+    for (w = kScratchWidth / 16 - 1; w >= 0 && last < 0; w--)
+        for (word = columns[w], y = 15; word != 0; word >>= 1, y--)
+            if (word & 1)
+            {
+                last = w * 16 + y;
+                break;
+            }
 
     *inkLeft = first < 0 ? 0 : first - kScratchPenX;
     *inkWidth = first < 0 ? 0 : last - first + 1;
 }
 
+/* Stage 6a-3: each Now Playing line's fitted text and ink, kept until its
+   text changes. The screen is redrawn every second for the times, but the
+   lines only change with the song, so fitting and measuring them again
+   each time was wasted work (most of the redraw at Mac Plus speed). */
+typedef struct
+{
+    Boolean valid;
+    Str255 text;                /* as passed in */
+    Str255 fitted;              /* shortened with an ellipsis if needed */
+    short inkLeft, inkWidth;
+} NowLine;
+
+static NowLine gNowLines[3];
+
 /* Measured from Apple's Now Playing screenshot: each line's ink starts at
    (162 - ink width) / 2, rounded down. (The header uses the plain
    StringWidth centring of the list screens, which matched there.) */
-static void DrawCentredLine(short baseline, ConstStringPtr text)
+static void DrawCentredLine(short line, short baseline, ConstStringPtr text)
 {
-    Str255 fitted;
-    short inkLeft, inkWidth;
+    NowLine *n = &gNowLines[line];
 
-    FitText(text, kNowLineMaxWidth, fitted);
-    if (fitted[0] == 0)
+    if (!n->valid || memcmp(n->text, text, text[0] + 1) != 0)
+    {
+        BlockMove(text, n->text, text[0] + 1);
+        FitText(text, kNowLineMaxWidth, n->fitted);
+        n->inkLeft = n->inkWidth = 0;
+        if (n->fitted[0] != 0)
+            MeasureInk(n->fitted, &n->inkLeft, &n->inkWidth);
+        n->valid = true;
+    }
+    if (n->fitted[0] == 0)
         return;
-    MeasureInk(fitted, &inkLeft, &inkWidth);
-    MoveTo((162 - inkWidth) / 2 - inkLeft, baseline);
-    DrawString(fitted);
+    MoveTo((162 - n->inkWidth) / 2 - n->inkLeft, baseline);
+    DrawString(n->fitted);
 }
 
 void LCDDraw_NowPlaying(ConstStringPtr title, ConstStringPtr artist,
@@ -420,9 +455,9 @@ void LCDDraw_NowPlaying(ConstStringPtr title, ConstStringPtr artist,
     LCDDraw_SmallText(kCounterLeft, kCounterTop, text);
 
     /* DECISION N8: an empty artist or album leaves its line blank. */
-    DrawCentredLine(kNowLineBaseline0, title);
-    DrawCentredLine(kNowLineBaseline0 + kNowLineSpacing, artist);
-    DrawCentredLine(kNowLineBaseline0 + 2 * kNowLineSpacing, album);
+    DrawCentredLine(0, kNowLineBaseline0, title);
+    DrawCentredLine(1, kNowLineBaseline0 + kNowLineSpacing, artist);
+    DrawCentredLine(2, kNowLineBaseline0 + 2 * kNowLineSpacing, album);
 
     LCDDraw_ProgressBar(elapsedTicks, lengthTicks);
 
