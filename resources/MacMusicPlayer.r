@@ -1,5 +1,36 @@
 #include "Menus.r"
 #include "Dialogs.r"
+#include "Processes.r"
+
+/* Stage 6a-2: replaces Retro68's default SIZE resource (its build lists
+   our resources after Retro68APPL.r, so this one wins). Changes from the
+   default: the app can run in the background under MultiFinder, so the
+   audio ring keeps being refilled with another program in front (S2),
+   and it accepts suspend/resume events (handled from Stage 6b-1). Window
+   activation stays as before (needsActivateOnFGSwitch: MultiFinder sends
+   activate events). Partition: about 240 KB is in use while playing a
+   small library (measured); 512 KB preferred leaves room for a large
+   library, the import buffer and Standard File; 384 KB minimum. */
+resource 'SIZE' (-1) {
+    reserved,
+    acceptSuspendResumeEvents,
+    reserved,
+    canBackground,
+    needsActivateOnFGSwitch,
+    backgroundAndForeground,
+    dontGetFrontClicks,
+    ignoreChildDiedEvents,
+    is32BitCompatible,
+    notHighLevelEventAware,
+    onlyLocalHLEvents,
+    notStationeryAware,
+    dontUseTextEditServices,
+    reserved,
+    reserved,
+    reserved,
+    512 * 1024,
+    384 * 1024
+};
 
 /* Item 2 (the divider) is disabled: mask 0x7FFFFFFD clears its bit. */
 resource 'MENU' (128) {
