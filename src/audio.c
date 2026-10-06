@@ -11,46 +11,60 @@
 /* How it works (chosen by the Stage 5a tests, decisions R1-R9):
 
    The Sound Manager plays one sampled sound whose loop covers the whole
-   ring, started once per song, so there are no buffer boundaries (the
-   request-based paths left a gap at every buffer on the Plus). The Plus
-   plays exactly 370 samples per VBL whatever rate is requested, so the
-   play position is (ticks since start) * 370. The main loop reads the
-   file into the ring ahead of that position.
+   ring, started once per stream, so there are no buffer boundaries (the
+   request-based paths left a gap at every buffer on the Plus). The main
+   loop reads the files into the ring ahead of the play position.
 
-   Ring slot for absolute sample X = (X - gOrigin) mod kRingBytes.
-     - main loop writes samples up to played + kRingBytes - kGuard
-     - a VBL task silences samples up to played - kLag after they have
-       played (R6), so if the main loop is held up (a menu held down, a
-       dialog) the loop plays silence rather than repeating old audio.
-   kLag < kGuard keeps the two apart: a slot is silenced before the main
-   loop reuses it for the sample kRingBytes later.
+   Stage 6a-4 (simplified design): the play position is the Sound
+   Manager's own read pointer into the ring, never a time calculation.
+   The earlier "ticks since start x 370" was shown in Mini vMac at 1x to
+   drift: under heavy Finder disk work the Sound Manager falls whole ticks
+   behind the tick count, never to catch up. Sound Manager 2.0 has no call
+   that reports a looped sound's position (SndChannelStatus's times stay
+   0), but its sampled-sound player keeps a pointer to the next sample it
+   will read, in the channel's private data; measured against the samples
+   in the hardware sound buffer it stayed exactly in step, under load as
+   well. It is undocumented, so Audio_Init checks it before relying on it,
+   and sound is reported as unavailable if it doesn't behave.
+
+   Ring slot for stream sample X = (X - gOrigin) mod kRingBytes. gConsumed
+   counts the samples the Sound Manager has read, advanced by the
+   pointer's movement since the last look (with wrap-around). The main
+   loop writes up to gConsumed + kRingBytes - kGuard. If it finds the
+   Sound Manager has read past what was written (the app was held up
+   longer than the ring lasts), it stops the sound, counts an underrun
+   and restarts from the end of the valid audio: heard as a pause.
 
    Stage 5c (gapless, DECISION G1): the ring carries a stream, not one
    song. Sample positions count from the start of the stream; a short
    list of songs (gEntries) says where each starts in it. When the main
    loop finishes reading one song it opens the next and writes its first
    sample straight after the last one, so the sound never stops between
-   songs. Nothing is written after the stream's end: those slots have
-   already been silenced, a lap earlier, by the VBL task. */
+   songs. After the stream's last song the ring is filled with silence. */
 
 /* Constants missing from Retro68's headers (Inside Macintosh). */
 enum { kQuietCmd = 3, kFreqCmd = 42, kSoundCmd = 80 };
 #define kInitMono           0x0080
 #define kRate22254          0x56EE8BA3L     /* hardware rate, Fixed */
 #define kMiddleC            60
-#define kVBLType            1               /* vType */
 #define kSoundDispatchTrap  0xA800
 #define kUnimplementedTrap  0xA89F
 
 #define kSamplesPerTick     370L
 #define kRingBytes          (400L * kSamplesPerTick)   /* 148000, ~6.65 s (R2) */
 #define kGuard              (8L * kSamplesPerTick)     /* write margin */
-#define kLag                (3L * kSamplesPerTick)     /* silence this far behind */
 #define kMinRefill          8192L                       /* R4: no tiny reads */
 #define kStartFill          (240L * kSamplesPerTick)   /* G2: about 4 s */
 #define kMaxEntries         8           /* songs in the ring at once */
 #define kNotStarted         0x7FFFFFFFL /* streamStart before reading */
 #define kSilence            0x80
+
+/* The Sound Manager 2.0 sampled-sound player's read pointer: in the
+   private block that the channel's first modifier stub's userInfo points
+   to, at this byte offset (found by the 6a-4 probe). */
+#define kPrivateBlockWord   2           /* stub long holding the block */
+#define kReadPointerOffset  148
+#define kCheckTicks         12          /* Audio_Init's pointer check */
 
 static Boolean gAvailable;
 static SndChannelPtr gChan;
@@ -79,28 +93,24 @@ static short gReading;                  /* entry being read; gEntryCount
 static short gRefNum;                   /* its open file, 0 if none */
 static Boolean gFileFailed;             /* a queued song was dropped */
 
-/* Shared with the VBL task: plain longs, written by the main loop only
-   while gActive is false (or atomically). */
-static volatile Boolean gActive;
-static volatile long gOrigin;           /* absolute sample at ring[0] */
-static volatile long gStartSample;      /* sample playing at gStartTick */
-static volatile unsigned long gStartTick;
-static volatile long gSilenced;         /* samples silenced so far (absolute) */
-
+static Boolean gActive;                 /* a stream is playing */
+static long gOrigin;                    /* stream sample at ring[0] */
 static long gWritten;                   /* stream samples written */
+static long gPadded;                    /* ring silent up to here after the end */
 static long gUnderruns;
+static long gPausedPosition;            /* song sample, while paused */
+static Boolean gEndedEarly;             /* an underrun restart failed */
 
-static VBLTask gTask;
+/* The play position (6a-4). */
+static unsigned char * volatile *gReadPointer;  /* the Sound Manager's */
+static long gConsumed;                  /* stream samples read by it */
+static long gLastOffset;                /* its ring offset at the last look */
+static unsigned long gLastLook;         /* when (ticks) */
+static short gBadLooks;                 /* consecutive looks outside the ring */
 
 static unsigned long Ticks(void)
 {
     return *(volatile unsigned long *)0x016A;   /* low-memory Ticks */
-}
-
-/* Absolute samples played. Safe at interrupt time. */
-static long Played(void)
-{
-    return gStartSample + (long)(Ticks() - gStartTick) * kSamplesPerTick;
 }
 
 static long Slot(long sample)
@@ -108,28 +118,99 @@ static long Slot(long sample)
     return (sample - gOrigin) % kRingBytes;
 }
 
-/* VBL task (R6): runs every tick at interrupt time. Only memory writes:
-   no Toolbox, no File Manager, no allocation. Re-arms itself. */
-static void SilenceTask(void)
+/* The channel's read pointer field, or nil if the private block isn't
+   where Sound Manager 2.0 keeps it. */
+static unsigned char * volatile *FindReadPointer(void)
 {
-    long upTo, slot, n;
+    long *stub, block;
 
-    gTask.vblCount = 1;
-    if (!gActive)
-        return;
+    if (gChan == nil || (stub = (long *)gChan->firstMod) == nil)
+        return nil;
+    block = stub[kPrivateBlockWord];
+    if (block < 0x1000 || block > 0x00FFFFFFL || (block & 1))
+        return nil;
+    return (unsigned char * volatile *)(block + kReadPointerOffset);
+}
 
-    upTo = Played() - kLag;
-    if (upTo - gSilenced > kRingBytes)          /* far behind: one lap is enough */
-        gSilenced = upTo - kRingBytes;
-    while (gSilenced < upTo)
+/* The read pointer's offset into the ring, or -1 if it isn't in it. At
+   the loop's wrap it can read as the ring's end for a moment; that is
+   the start again. */
+static long ReadOffset(void)
+{
+    long offset;
+
+    if (gReadPointer == nil)
+        return -1;
+    offset = *gReadPointer - gRing;
+    if (offset == kRingBytes)
+        offset = 0;
+    return offset >= 0 && offset < kRingBytes ? offset : -1;
+}
+
+static OSErr StartLoop(void);
+static void Quiet(void);
+
+/* Starts the ring playing from ring[0] and confirms it really started:
+   the read pointer must move, from near the ring's start, within
+   kStartWait ticks. Measured in the 6a-4 tests: after quietCmd, every
+   other start does nothing (the Sound Manager apparently still treats
+   the note as on, so freqCmd only changes its pitch), and the pointer
+   stays where it was. Such a start is quieted and retried. Returns the
+   pointer's offset, or -1 if the sound could not be started. */
+#define kStartWait          4
+#define kStartTries         3
+#define kStartWindow        (4L * kSamplesPerTick)
+static long StartVerified(void)
+{
+    unsigned long until;
+    long first, offset;
+    short tries;
+
+    for (tries = 0; tries < kStartTries; tries++)
     {
-        slot = Slot(gSilenced);
-        n = upTo - gSilenced;
-        if (n > kRingBytes - slot)
-            n = kRingBytes - slot;
-        memset(gRing + slot, kSilence, n);
-        gSilenced += n;
+        if (tries > 0)
+            Quiet();
+        if (StartLoop() != noErr)
+            return -1;
+        gReadPointer = FindReadPointer();
+        first = ReadOffset();
+        until = Ticks() + kStartWait;
+        do
+        {
+            offset = ReadOffset();
+            if (offset >= 0 && offset < kStartWindow && offset != first)
+                return offset;
+        } while (Ticks() < until);
     }
+    Quiet();
+    return -1;
+}
+
+/* 6a-4: plays the (silent) ring for kCheckTicks and checks the read
+   pointer: inside the ring, and moved forward by about the samples the
+   hardware plays in that time (370 a tick, give or take a few ticks for
+   the start). The pointer is undocumented, so if it doesn't behave the
+   app plays without sound rather than guessing positions. */
+static Boolean CheckReadPointer(void)
+{
+    unsigned long until;
+    long before, after, moved;
+
+    memset(gRing, kSilence, kRingBytes);
+    before = StartVerified();
+    until = Ticks() + kCheckTicks;
+    while (Ticks() < until)
+        ;
+    after = ReadOffset();
+    Quiet();
+
+    if (before < 0 || after < 0)
+        return false;
+    moved = after - before;
+    if (moved < 0)
+        moved += kRingBytes;
+    return moved >= (kCheckTicks - 4) * kSamplesPerTick
+        && moved <= (kCheckTicks + 4) * kSamplesPerTick;
 }
 
 Boolean Audio_IsAvailable(void)
@@ -158,11 +239,7 @@ Boolean Audio_Init(void)
         return false;
     }
 
-    gTask.qType = kVBLType;
-    gTask.vblAddr = (ProcPtr)SilenceTask;
-    gTask.vblCount = 1;
-    gTask.vblPhase = 0;
-    if (VInstall(&gTask) != noErr)
+    if (!CheckReadPointer())
     {
         SndDisposeChannel(gChan, true);
         gChan = nil;
@@ -173,6 +250,34 @@ Boolean Audio_Init(void)
 
     gAvailable = true;
     return true;
+}
+
+/* Starts the ring playing from ring[0], looping, until Quiet. */
+static OSErr StartLoop(void)
+{
+    SndCommand c;
+    OSErr err;
+
+    gHeader->samplePtr = nil;
+    gHeader->length = kRingBytes;
+    gHeader->sampleRate = kRate22254;
+    gHeader->loopStart = 0;
+    gHeader->loopEnd = kRingBytes;
+    gHeader->encode = stdSH;
+    gHeader->baseFrequency = kMiddleC;
+
+    c.cmd = kSoundCmd;
+    c.param1 = 0;
+    c.param2 = (long)gHeader;
+    err = SndDoImmediate(gChan, &c);
+    if (err == noErr)
+    {
+        c.cmd = kFreqCmd;                       /* play, looping, until quiet */
+        c.param1 = 0;
+        c.param2 = kMiddleC;
+        err = SndDoImmediate(gChan, &c);
+    }
+    return err;
 }
 
 static void Quiet(void)
@@ -284,6 +389,8 @@ void Audio_Stop(void)
     CloseFile();
     gEntryCount = 0;
     gReading = 0;
+    gPausedPosition = 0;
+    gEndedEarly = false;
 }
 
 static void AddEntry(const AudioSource *source, long first, short tag)
@@ -300,9 +407,35 @@ static void AddEntry(const AudioSource *source, long first, short tag)
     e->tag = tag;
 }
 
+/* Starts the sound with the ring holding the stream from position at
+   onward: ring[0] is stream sample at, which is where the Sound Manager
+   starts reading. G2: about 4 s are read first (not the whole ring), so
+   playback starts sooner; the main loop fills the rest. The song being
+   read (gReading, its file open) must be the one containing at. */
+static OSErr BeginStream(long at)
+{
+    OSErr err;
+
+    memset(gRing, kSilence, kRingBytes);
+    gOrigin = at;
+    gWritten = at;
+    gPadded = at;
+    err = Fill(at + kStartFill);
+    if (err != noErr && gWritten == at)
+        return err;
+
+    gLastOffset = StartVerified();
+    if (gLastOffset < 0)
+        return notOpenErr;              /* no start, or the pointer has gone */
+    gConsumed = at + gLastOffset;
+    gLastLook = Ticks();
+    gBadLooks = 0;
+    gActive = true;
+    return noErr;
+}
+
 OSErr Audio_Play(const AudioSource *source, long startSample, short tag)
 {
-    SndCommand c;
     OSErr err;
 
     if (!gAvailable)
@@ -312,10 +445,6 @@ OSErr Audio_Play(const AudioSource *source, long startSample, short tag)
     if (startSample < 0 || startSample > source->length)
         startSample = 0;
 
-    /* A new stream: the ring may hold the last one's audio. */
-    memset(gRing, kSilence, kRingBytes);
-    gOrigin = 0;
-    gWritten = 0;
     gFileFailed = false;
 
     AddEntry(source, startSample, tag);
@@ -330,47 +459,12 @@ OSErr Audio_Play(const AudioSource *source, long startSample, short tag)
     }
     gEntries[0].streamStart = 0;
 
-    /* G2: about 4 s before starting, not the whole ring, so playback
-       starts sooner; the main loop fills the rest. */
-    err = Fill(kStartFill);
-    if (err != noErr && gWritten == 0)
-    {
-        Audio_Stop();
-        return err;
-    }
-
-    gHeader->samplePtr = nil;
-    gHeader->length = kRingBytes;
-    gHeader->sampleRate = kRate22254;
-    gHeader->loopStart = 0;
-    gHeader->loopEnd = kRingBytes;
-    gHeader->encode = stdSH;
-    gHeader->baseFrequency = kMiddleC;
-
-    c.cmd = kSoundCmd;
-    c.param1 = 0;
-    c.param2 = (long)gHeader;
-    err = SndDoImmediate(gChan, &c);
-    if (err == noErr)
-    {
-        c.cmd = kFreqCmd;                       /* play, looping, until quiet */
-        c.param1 = 0;
-        c.param2 = kMiddleC;
-        err = SndDoImmediate(gChan, &c);
-    }
+    err = BeginStream(0);
     if (err != noErr)
-    {
         Audio_Stop();
-        return err;
-    }
-
-    gStartSample = 0;
-    gSilenced = 0;
-    gStartTick = Ticks();
-    gActive = true;
     gFileFailed = false;                /* only the first song, reported
                                            through the return value */
-    return noErr;
+    return err;
 }
 
 void Audio_Queue(const AudioSource *source, short tag)
@@ -387,7 +481,7 @@ void Audio_Queue(const AudioSource *source, short tag)
     /* Everything before it has been read: start it now, straight after
        the last song, or just ahead of playback if that has gone past the
        end (it was queued late). */
-    played = Played();
+    played = gConsumed;
     at = gWritten;
     if (at < played + kSamplesPerTick)
         at = played + kSamplesPerTick;
@@ -419,60 +513,142 @@ static short CurrentEntry(long played)
     return i;
 }
 
+/* Advances gConsumed by the read pointer's movement since the last look,
+   allowing for the wrap from the ring's end to its start. False if the
+   position can't be trusted: the pointer has left the ring, or so long
+   has passed that it may have gone right round (the Sound Manager reads
+   at most 370 samples a tick, so less than a lap's worth of ticks means
+   less than a lap; the tick count is used only for this bound, never
+   for the position). */
+static Boolean Look(void)
+{
+    long offset = ReadOffset(), moved;
+    unsigned long now = Ticks();
+    Boolean trusted = (long)(now - gLastLook) * kSamplesPerTick
+                      < kRingBytes - kGuard;
+
+    if (offset < 0)
+        return false;
+    moved = offset - gLastOffset;
+    if (moved < 0)
+        moved += kRingBytes;
+    if (trusted)
+        gConsumed += moved;
+    gLastOffset = offset;
+    gLastLook = now;
+    return trusted;
+}
+
+/* The pointer is no longer where Sound Manager 2.0 keeps it: stop, and
+   play without sound from now on (the A8 path) rather than guess. */
+static void Fault(void)
+{
+    Audio_Stop();
+    gAvailable = false;
+}
+
+/* Fills the ring with silence from the end of the audio up to upTo, so
+   that after the stream's last song the Sound Manager reads silence, not
+   the previous lap's audio. */
+static void Pad(long upTo)
+{
+    long slot, n;
+
+    if (gPadded < gWritten)
+        gPadded = gWritten;
+    while (gPadded < upTo)
+    {
+        slot = Slot(gPadded);
+        n = upTo - gPadded;
+        if (n > kRingBytes - slot)
+            n = kRingBytes - slot;
+        memset(gRing + slot, kSilence, n);
+        gPadded += n;
+    }
+}
+
+/* Underrun: the Sound Manager has read past the audio written (the app
+   was held up longer than the ring lasts) and has been playing stale
+   ring contents. Stop, and restart from the end of the valid audio, with
+   the usual pre-fill: heard as a pause. The song being read continues
+   from exactly there, so the stream's songs and positions are kept. */
+static void Underrun(void)
+{
+    OSErr err;
+
+    gUnderruns++;
+    Quiet();
+    err = BeginStream(gWritten);
+    if (err == notOpenErr)
+        Fault();                        /* the read pointer has gone */
+    else if (err != noErr)
+        gEndedEarly = true;             /* the file couldn't be read */
+}
+
 void Audio_Service(void)
 {
-    long played;
+    Boolean trusted;
 
     if (!gActive || gEntryCount == 0)
         return;
 
-    played = Played();
+    trusted = Look();
+    if (ReadOffset() < 0)
+    {
+        if (++gBadLooks >= 2)
+            Fault();                    /* twice in a row: it has gone */
+        return;
+    }
+    gBadLooks = 0;
 
     /* Songs that have been heard in full are forgotten. */
     while (gEntryCount > 1 && gReading > 0
-           && gEntries[1].streamStart <= played)
+           && gEntries[1].streamStart <= gConsumed)
     {
         RemoveEntry(0);
         gReading--;
     }
 
     if (gReading >= gEntryCount)
-        return;                         /* all read: the stream runs out */
-
-    /* Fell behind: what was missed has been heard as silence (R6), so
-       carry on from where playback is now, keeping time. */
-    if (played > gWritten)
     {
-        gUnderruns++;
-        gWritten = played + kSamplesPerTick;
+        /* All read: the stream runs out into silence. Held up too long
+           here only means the end has been reached. */
+        if (!trusted && gConsumed < gWritten)
+            gConsumed = gWritten;
+        Pad(gConsumed + kRingBytes - kGuard);
+        return;
+    }
+
+    if (!trusted || gConsumed > gWritten)
+    {
+        Underrun();
+        return;
     }
 
     /* Fix 1 (after 5b): top up all the free space, however long since
-       the last pass. The main loop may come round only about once a
-       second while playing, and a capped refill (two 8 KB reads, 16 KB)
-       fell behind the 22 KB a second played, so the ring ran dry after
-       20-25 s. Small amounts wait until kMinRefill is free. */
-    if (played + kRingBytes - kGuard - gWritten >= kMinRefill)
-        Fill(played + kRingBytes - kGuard);
+       the last pass. Small amounts wait until kMinRefill is free. */
+    if (gConsumed + kRingBytes - kGuard - gWritten >= kMinRefill)
+        Fill(gConsumed + kRingBytes - kGuard);
 }
 
 short Audio_CurrentTag(void)
 {
     if (!gActive || gEntryCount == 0)
         return -1;
-    return gEntries[CurrentEntry(Played())].tag;
+    return gEntries[CurrentEntry(gConsumed)].tag;
 }
 
+/* The single source of the play position (6a-4): the samples of the
+   current song the Sound Manager has read, from its read pointer. */
 long Audio_Position(void)
 {
     const Entry *e;
-    long played, position;
+    long position;
 
     if (!gActive || gEntryCount == 0)
         return 0;
-    played = Played();
-    e = &gEntries[CurrentEntry(played)];
-    position = e->first + (played - e->streamStart);
+    e = &gEntries[CurrentEntry(gConsumed)];
+    position = e->first + (gConsumed - e->streamStart);
     if (position < e->first)
         position = e->first;
     return position < e->length ? position : e->length;
@@ -480,7 +656,30 @@ long Audio_Position(void)
 
 Boolean Audio_Ended(void)
 {
-    return gActive && gReading >= gEntryCount && Played() >= gWritten;
+    return gEndedEarly
+        || (gActive && gReading >= gEntryCount && gConsumed >= gWritten);
+}
+
+long Audio_Pause(void)
+{
+    long position;
+
+    if (gActive)
+        Look();
+    position = Audio_Position();
+    Audio_Stop();
+    gPausedPosition = position;
+    return position;
+}
+
+long Audio_PausedPosition(void)
+{
+    return gPausedPosition;
+}
+
+OSErr Audio_Resume(const AudioSource *source, short tag)
+{
+    return Audio_Play(source, gPausedPosition, tag);
 }
 
 long Audio_Underruns(void)
@@ -493,7 +692,6 @@ void Audio_Shutdown(void)
     if (!gAvailable)
         return;
     Audio_Stop();
-    VRemove(&gTask);
     SndDisposeChannel(gChan, true);
     gChan = nil;
     DisposePtr(gBlock);

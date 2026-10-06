@@ -18,12 +18,12 @@ static short gPosition;
 static PlayState gState = kPlayStopped;
 
 /* Without sound: elapsed time = gElapsedBase + (TickCount() - gResumedAt)
-   while playing. With sound (Stage 5b), the audio position is the clock
-   (A6); gPausedSample holds it while paused. */
+   while playing. With sound, the audio position is the clock (A6): from
+   the Sound Manager's read pointer (6a-4), and while paused the position
+   Audio_Pause recorded. */
 static long gElapsedBase;
 static unsigned long gResumedAt;
 static long gLastSecond;
-static long gPausedSample;
 static Boolean gFileError;              /* a song could not be played (R8) */
 static short gQueuedUpTo;               /* last position handed to audio */
 
@@ -54,7 +54,7 @@ long Playback_ElapsedTicks(void)
         return Playback_LengthTicks();  /* moved on; Tick catches up */
     if (Audio_IsAvailable())
         return SamplesToTicks(gState == kPlayPlaying ? Audio_Position()
-                                                     : gPausedSample);
+                                                     : Audio_PausedPosition());
     if (gState == kPlayPlaying)
         return gElapsedBase + (long)(TickCount() - gResumedAt);
     return gElapsedBase;
@@ -98,15 +98,17 @@ static void QueueAhead(void)
     }
 }
 
-/* Starts the current song's audio at sample, as a new stream. */
-static OSErr PlayCurrentFrom(long sample)
+/* Starts the current song's audio as a new stream: at sample, or (resume)
+   where Audio_Pause recorded. */
+static OSErr StartCurrent(long sample, Boolean resume)
 {
     AudioSource source;
     OSErr err;
 
     if (!SourceAt(gPosition, &source))
         return fnfErr;
-    err = Audio_Play(&source, sample, gPosition);
+    err = resume ? Audio_Resume(&source, gPosition)
+                 : Audio_Play(&source, sample, gPosition);
     if (err == noErr)
     {
         gQueuedUpTo = gPosition;
@@ -148,7 +150,6 @@ void Playback_Stop(void)
     gQueueLength = 0;
     gPosition = 0;
     gElapsedBase = 0;
-    gPausedSample = 0;
 }
 
 /* Starts the current position from 0:00, keeping play/pause state. With
@@ -159,16 +160,15 @@ static void RestartSong(void)
     gElapsedBase = 0;
     gResumedAt = TickCount();
     gLastSecond = 0;
-    gPausedSample = 0;
 
     if (!Audio_IsAvailable())
         return;
     if (gState != kPlayPlaying)
     {
-        Audio_Stop();                   /* paused: start when resumed */
+        Audio_Stop();                   /* paused: from 0:00 when resumed */
         return;
     }
-    while (PlayCurrentFrom(0) != noErr)
+    while (StartCurrent(0, false) != noErr)
     {
         gFileError = true;
         if (gPosition + 1 >= gQueueLength)
@@ -205,10 +205,7 @@ void Playback_TogglePause(void)
     {
         FollowAudio();
         if (Audio_IsAvailable())
-        {
-            gPausedSample = Audio_Position();
-            Audio_Stop();
-        }
+            Audio_Pause();              /* records the position */
         gElapsedBase = Playback_ElapsedTicks();
         gState = kPlayPaused;
     }
@@ -218,7 +215,7 @@ void Playback_TogglePause(void)
         gState = kPlayPlaying;
         /* Re-opened by the song's current index (found by ID), so this
            also works after a rescan (A5: import pauses and resumes). */
-        if (Audio_IsAvailable() && PlayCurrentFrom(gPausedSample) != noErr)
+        if (Audio_IsAvailable() && StartCurrent(0, true) != noErr)
         {
             gFileError = true;
             RestartSong();              /* R8: skip to a playable song */
@@ -350,7 +347,7 @@ void Playback_LibraryChanged(void)
     if (!currentKept || gQueue[gPosition] != currentID)
         RestartSong();
     else if (n != oldLength && gState == kPlayPlaying && Audio_IsAvailable()
-             && PlayCurrentFrom(sample) != noErr)
+             && StartCurrent(sample, false) != noErr)
     {
         gFileError = true;
         RestartSong();                  /* R8 */
