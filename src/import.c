@@ -6,6 +6,7 @@
 #include <ToolUtils.h>
 #include <string.h>
 
+#include "modal.h"
 #include "import.h"
 #include "bytes.h"
 #include "fileopen.h"
@@ -240,7 +241,7 @@ static Boolean AskForDetails(ConstStringPtr fileName, const WavInfo *wav,
 
     for (;;)
     {
-        ModalDialog(nil, &item);
+        ModalDialog(Modal_DialogFilter, &item);
 
         if (item == kItemImport)
         {
@@ -469,7 +470,7 @@ static OSErr CopyIntoLibrary(const LibraryFolder *folder, const Source *src,
 static Boolean AskToCopyInstead(ConstStringPtr reason)
 {
     ParamText(reason, P(""), P(""), P(""));
-    return Alert(kCantMoveAlert, nil) == kItemCopyInstead;
+    return Alert(kCantMoveAlert, Modal_DialogFilter) == kItemCopyInstead;
 }
 
 Boolean Import_Run(const LibraryFolder *folder)
@@ -493,7 +494,8 @@ Boolean Import_Run(const LibraryFolder *folder)
     /* Any file can be chosen: WAVs are recognised by their contents. */
     where.h = 82;
     where.v = 50;
-    SFGetFile(where, P(""), nil, -1, nil, nil, &reply);
+    SFPGetFile(where, P(""), nil, -1, nil, nil, &reply, getDlgID,
+               Modal_FileFilter);
     if (!reply.good)
         return false;
 
@@ -545,7 +547,7 @@ Boolean Import_Run(const LibraryFolder *folder)
     if (match != kNone)
     {
         ParamText(Library_SongTitle(match), P(""), P(""), P(""));
-        if (Alert(kDuplicateAlert, nil) != kItemImportAnyway)
+        if (Alert(kDuplicateAlert, Modal_DialogFilter) != kItemImportAnyway)
         {
             DisposePtr(buffer);
             return false;
@@ -556,12 +558,12 @@ Boolean Import_Run(const LibraryFolder *folder)
        slow, so ask first. Either way the file is moved unless the user
        chooses Just Copy. */
     sameDisk = src.vRefNum == folder->vRefNum;
-    if (!sameDisk && Alert(kOtherDiskAlert, nil) != kItemOtherDiskImport)
+    if (!sameDisk && Alert(kOtherDiskAlert, Modal_DialogFilter) != kItemOtherDiskImport)
     {
         DisposePtr(buffer);
         return false;
     }
-    move = Alert(kMoveAlert, nil) == kItemMove;
+    move = Alert(kMoveAlert, Modal_DialogFilter) == kItemMove;
 
     if (move && sameDisk && src.locked)
     {

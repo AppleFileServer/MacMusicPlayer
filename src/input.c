@@ -1,5 +1,6 @@
 #include <Events.h>
 
+#include "modal.h"
 #include "input.h"
 
 /* PROVISIONAL (E3, spec unknown #6): one list step per 15 degrees of
@@ -64,6 +65,7 @@ void Input_TrackWheel(ShellZone startZone, UIEventSink emit)
 
     while (StillDown())
     {
+        Modal_Service();                /* 6b-2: keep the audio fed */
         GetMouse(&where);
         if (!WheelAngle(where, &angle))
             continue;

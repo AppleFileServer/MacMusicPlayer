@@ -249,6 +249,14 @@ void Playback_Previous(void)
     RestartSong();
 }
 
+void Playback_ServiceAudio(void)
+{
+    if (gState != kPlayPlaying || !Audio_IsAvailable())
+        return;
+    Audio_Service();
+    QueueAhead();
+}
+
 short Playback_Tick(void)
 {
     short result = 0, next;

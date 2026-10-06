@@ -3,6 +3,7 @@
 #include <TextUtils.h>
 #include <ToolUtils.h>
 
+#include "modal.h"
 #include "message.h"
 #include "pstr.h"
 
@@ -34,7 +35,7 @@ void Message_Show(ConstStringPtr text, OSErr err)
     }
 
     ParamText(text, detail, P(""), P(""));
-    Alert(kMessageAlert, nil);
+    Alert(kMessageAlert, Modal_DialogFilter);
 }
 
 DialogPtr Message_BeginWorking(ConstStringPtr text)

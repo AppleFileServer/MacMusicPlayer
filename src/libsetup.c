@@ -2,6 +2,7 @@
 #include <Memory.h>
 #include <TextUtils.h>
 
+#include "modal.h"
 #include "libsetup.h"
 #include "pstr.h"
 #include "message.h"
@@ -124,7 +125,7 @@ void LibSetup_Startup(void)
 
         /* DECISION (D22): Not Now continues with an empty library;
            File > Choose Library... is always available. */
-        switch (Alert(kLibraryAlert, nil))
+        switch (Alert(kLibraryAlert, Modal_DialogFilter))
         {
             case kItemFindExisting:
                 ChooseAndRemember(true);
@@ -140,7 +141,7 @@ void LibSetup_Startup(void)
 
 Boolean LibSetup_ChooseLibrary(void)
 {
-    switch (Alert(kChooseAlert, nil))
+    switch (Alert(kChooseAlert, Modal_DialogFilter))
     {
         case kItemFindExisting:
             return ChooseAndRemember(true);

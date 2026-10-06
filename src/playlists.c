@@ -3,6 +3,7 @@
 #include <TextUtils.h>
 #include <ToolUtils.h>
 
+#include "modal.h"
 #include "playlists.h"
 #include "library.h"
 #include "message.h"
@@ -171,7 +172,7 @@ static Boolean NewPlaylist(void)
 
     for (;;)
     {
-        ModalDialog(nil, &item);
+        ModalDialog(Modal_DialogFilter, &item);
         if (item == kItemCancel)
         {
             DisposeDialog(dialog);
@@ -225,7 +226,7 @@ static Boolean AddToPlaylist(short playlist)
     {
         ParamText(Library_SongTitle(song), Library_PlaylistName(playlist),
                   P(""), P(""));
-        if (Alert(kAlreadyAlert, nil) != kItemAddAgain)
+        if (Alert(kAlreadyAlert, Modal_DialogFilter) != kItemAddAgain)
             return false;
     }
 

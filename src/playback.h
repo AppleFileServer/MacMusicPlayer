@@ -28,6 +28,11 @@ void Playback_TogglePause(void);
 void Playback_Next(void);       /* on the last song: wraps to the first (N6) */
 void Playback_Previous(void);
 
+/* Stage 6b-2: only keeps the audio fed (refill, underrun recovery, queueing
+   the next song); no other state changes and no drawing, so it can be
+   called from inside modal loops (menus, dialogs, window drags). */
+void Playback_ServiceAudio(void);
+
 /* Advances the clock; returns kTick... flags. Call often while playing. */
 short Playback_Tick(void);
 

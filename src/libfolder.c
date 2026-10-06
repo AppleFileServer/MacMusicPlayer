@@ -3,6 +3,7 @@
 #include <TextUtils.h>
 #include <string.h>
 
+#include "modal.h"
 #include "libfolder.h"
 #include "pstr.h"
 #include "song_format.h"
@@ -323,12 +324,12 @@ short Folder_Choose(LibraryLocation *location, LibraryFolder *folder,
     where.v = 60;
     gPickedExisting = false;
     gInLibrary = false;
-    SFPutFile(where, P("Create new iPod Library in:"), P("iPod Library"),
-              ExistingFolderHook, &reply);
+    SFPPutFile(where, P("Create new iPod Library in:"), P("iPod Library"),
+               ExistingFolderHook, &reply, putDlgID, Modal_FileFilter);
 
     if (gInLibrary)
     {
-        if (Alert(kUseLibraryHereAlert, nil) != kItemUseIt)
+        if (Alert(kUseLibraryHereAlert, Modal_DialogFilter) != kItemUseIt)
             return kFolderCancelled;
         return UseFolder(gPickedVRefNum, gPickedParentID, location, folder,
                          error);
@@ -420,7 +421,8 @@ short Folder_FindExisting(LibraryLocation *location, LibraryFolder *folder,
        or a playlist (whose folder, Playlists, is inside the library). */
     where.h = 82;
     where.v = 50;
-    SFGetFile(where, P(""), LibraryFileFilter, -1, nil, nil, &reply);
+    SFPGetFile(where, P(""), LibraryFileFilter, -1, nil, nil, &reply,
+               getDlgID, Modal_FileFilter);
     if (!reply.good)
         return kFolderCancelled;
 

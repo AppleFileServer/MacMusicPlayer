@@ -4,6 +4,7 @@
 #include <TextUtils.h>
 #include <string.h>
 
+#include "modal.h"
 #include "export.h"
 #include "bytes.h"
 #include "fileopen.h"
@@ -212,8 +213,8 @@ Boolean Export_Run(const LibraryFolder *folder, short song)
     /* Plan item 4: a Save dialog, starting with the original name. */
     where.h = 104;
     where.v = 60;
-    SFPutFile(where, P("Export song as:"), info.text[kSongStringFileName],
-              nil, &reply);
+    SFPPutFile(where, P("Export song as:"), info.text[kSongStringFileName],
+               nil, &reply, putDlgID, Modal_FileFilter);
     if (!reply.good)
         return false;
 

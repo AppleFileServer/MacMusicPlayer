@@ -8,6 +8,7 @@
 #include <Devices.h>
 #include <ToolUtils.h>
 
+#include "modal.h"
 #include "ipod_shell.h"
 #include "ipod_lcd.h"
 #include "libsetup.h"
@@ -84,7 +85,7 @@ static void PlaylistsChanged(void);
 
 static void ShowAboutBox(void)
 {
-    Alert(kAboutAlert, nil);
+    Alert(kAboutAlert, Modal_DialogFilter);
 }
 
 static void HandleMenuChoice(long choice)
@@ -379,7 +380,7 @@ static void HandleMouseDown(EventRecord *event)
     {
         case inMenuBar:
             AdjustMenus();
-            HandleMenuChoice(MenuSelect(event->where));
+            HandleMenuChoice(Modal_MenuSelect(event->where));
             break;
 
         case inSysWindow:
@@ -389,11 +390,11 @@ static void HandleMouseDown(EventRecord *event)
         case inDrag:
             dragBounds = qd.screenBits.bounds;
             InsetRect(&dragBounds, 4, 4);
-            DragWindow(window, event->where, &dragBounds);
+            Modal_DragWindow(window, event->where, &dragBounds);
             break;
 
         case inGoAway:
-            if (TrackGoAway(window, event->where))
+            if (Modal_TrackGoAway(window, event->where))
                 gQuit = true;
             break;
 
@@ -415,6 +416,7 @@ int main(void)
     SetUpMenus();
     qd.randSeed = TickCount();      /* for Shuffle Songs */
     Audio_Init();                   /* if it fails, playback is silent (A8) */
+    Modal_SetService(Playback_ServiceAudio);   /* 6b-2: fed in modal loops */
 
     if (!LCD_Init())
     {
