@@ -7,6 +7,7 @@
 #include <Dialogs.h>
 #include <Devices.h>
 #include <ToolUtils.h>
+#include <Memory.h>
 
 #include "modal.h"
 #include "ipod_shell.h"
@@ -56,6 +57,22 @@ enum
 static WindowPtr gMainWindow;
 static Boolean gQuit = false;
 static unsigned long gLogoShownAt;
+
+/* Stage 6b-3 (DECISION S7, issue I10): the stack MultiFinder gives a 68000
+   program is 8 KB (measured: ApplLimit to CurStackBase), and the app's
+   deepest use was about 6.4 KB, a thin margin since interrupt routines use
+   the same stack. Before anything is allocated, ApplLimit is lowered so
+   the stack has 24 KB; the heap can't grow into it. Only ever lowered,
+   and only if the heap hasn't already grown past the new limit. */
+#define kStackSize          (24L * 1024)
+
+static void ReserveStack(void)
+{
+    Ptr limit = LMGetCurStackBase() - kStackSize;
+
+    if (limit < LMGetApplLimit() && limit > (Ptr)ApplicationZone()->bkLim)
+        SetApplLimit(limit);
+}
 
 static void InitToolbox(void)
 {
@@ -412,6 +429,7 @@ int main(void)
     EventRecord event;
     Rect windowRect;
 
+    ReserveStack();                 /* first: before anything is allocated */
     InitToolbox();
     SetUpMenus();
     qd.randSeed = TickCount();      /* for Shuffle Songs */
