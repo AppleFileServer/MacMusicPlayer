@@ -50,7 +50,8 @@ enum
     kItemChooseLibrary = 4,
     kItemRescan = 5,            /* Stage 8d-2; with a library */
     kItemLibraryInfo = 6,       /* Stage 8d-2; with a library */
-    kItemQuit = 8,
+    kItemFirstRecent = 8,       /* Stage 8d-3: recent libraries, then a
+                                   divider, then Quit; with none, Quit */
 
     kMenuEdit = 130,
     kItemEditSong = 8,          /* Stage 8c; items 1-6 are for DAs */
@@ -107,6 +108,17 @@ static void UpdateFileMenu(void);
 static void PlaylistsChanged(void);
 static void EditSong(void);
 static void RescanLibrary(void);
+static void UseRecentLibrary(short index);
+
+/* Recent libraries listed in the File menu (Stage 8d-3). Quit follows
+   them (after a divider), so its item number changes with them. */
+static short gRecentShown;
+
+static short QuitItem(void)
+{
+    return gRecentShown > 0 ? kItemFirstRecent + gRecentShown + 1
+                            : kItemFirstRecent;
+}
 
 static void ShowAboutBox(void)
 {
@@ -147,8 +159,11 @@ static void HandleMenuChoice(long choice)
                 HiliteMenu(0);
                 LibSetup_ShowInfo();
             }
-            else if (menuItem == kItemQuit)
+            else if (menuItem == QuitItem())
                 gQuit = true;
+            else if (menuItem >= kItemFirstRecent
+                     && menuItem < kItemFirstRecent + gRecentShown)
+                UseRecentLibrary(menuItem - kItemFirstRecent);
             break;
 
         case kMenuEdit:
@@ -278,9 +293,38 @@ static void PlaylistsChanged(void)
     PresentLCD();
 }
 
+/* Lists the recent libraries between Library Info... and Quit: the
+   current one ticked, any whose disk isn't mounted dimmed. The items are
+   set with SetMenuItemText so that characters such as ";" or "(" in a
+   folder name are shown, not taken as menu commands. */
+static void UpdateRecentLibraries(MenuHandle fileMenu)
+{
+    Str255 text;
+    Boolean available, current;
+    short i, n = LibSetup_RecentCount();
+
+    while (CountMItems(fileMenu) >= kItemFirstRecent)
+        DeleteMenuItem(fileMenu, kItemFirstRecent);
+    for (i = 0; i < n; i++)
+    {
+        LibSetup_RecentItem(i, text, &available, &current);
+        AppendMenu(fileMenu, P(" "));
+        SetMenuItemText(fileMenu, kItemFirstRecent + i, text);
+        if (!available)
+            DisableItem(fileMenu, kItemFirstRecent + i);
+        CheckItem(fileMenu, kItemFirstRecent + i, current);
+    }
+    if (n > 0)
+        AppendMenu(fileMenu, P("(-"));
+    AppendMenu(fileMenu, P("Quit/Q"));
+    gRecentShown = n;
+}
+
 static void UpdateFileMenu(void)
 {
     MenuHandle fileMenu = GetMenuHandle(kMenuFile);
+
+    UpdateRecentLibraries(fileMenu);
 
     if (LibSetup_HasLibrary())
     {
@@ -337,6 +381,20 @@ static void ChooseLibrary(void)
         return;
 
     /* A different library: whatever was playing belongs to the old one. */
+    Playback_Stop();
+    BeginRestart();
+    LibSetup_Rescan();
+    EndRestart();
+}
+
+/* File > a recent library (Stage 8d-3): switches to it, as Choose
+   Library... does. */
+static void UseRecentLibrary(short index)
+{
+    HiliteMenu(0);
+    if (!LibSetup_UseRecent(index))
+        return;
+
     Playback_Stop();
     BeginRestart();
     LibSetup_Rescan();

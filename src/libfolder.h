@@ -53,6 +53,14 @@ short Folder_Choose(LibraryLocation *location, LibraryFolder *folder,
 short Folder_FindExisting(LibraryLocation *location, LibraryFolder *folder,
                           short *error);
 
+/* Stage 8d-3: whether a remembered library can be used now (its disk is
+   mounted and its folder there), and the folder's current name. Unlike
+   Folder_Resolve, changes nothing on the disk. */
+Boolean Folder_Find(const LibraryLocation *location, Str31 folderName);
+
+/* True if two locations are the same library. */
+Boolean Folder_SameLocation(const LibraryLocation *a, const LibraryLocation *b);
+
 /* Stage 8d (M4): song IDs are never reused. The library's "next song
    ID" is kept as a last line, "Next song ID: <n>", in its marker's text
    (the rest of the text is kept as it is). Read gives 0 if there is none

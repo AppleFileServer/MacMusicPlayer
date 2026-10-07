@@ -10,10 +10,13 @@
 
 #define kPrefsMagic         'MMPf'
 #define kPrefsVersion1      1
-#define kPrefsVersion       2
+#define kPrefsVersion2      2
+#define kPrefsVersion       3
 #define kMaxVolumeName      27
 #define kNoVolume           0xFF
-#define kPrefsMaxSize       (8 + 1 + kMaxVolumeName + 4 + 4)
+#define kLocationMax        (1 + kMaxVolumeName + 4 + 4)
+#define kPrefsMaxSize       (8 + kLocationMax + 1 \
+                             + kMaxRecent * (kLocationMax + 32))
 
 static const unsigned char kPrefsName[] = "\pMacMusic Prefs";
 static const unsigned char kOldPrefsName[] = "\pMacMusicPlayer Prefs";
@@ -26,6 +29,8 @@ typedef struct
     Boolean hasLibrary;
     LibraryLocation location;
     short volume;                       /* 0-7, or -1 */
+    short recentCount;
+    RecentLibrary recent[kMaxRecent];
 } Prefs;
 
 /* Working-directory reference for the System Folder. */
@@ -71,6 +76,52 @@ static Boolean ReadLocation(const unsigned char *buf, long count, short at,
     return true;
 }
 
+/* The bytes a location takes (after ReadLocation succeeded on it). */
+static short LocationSize(const LibraryLocation *location)
+{
+    return 1 + location->volumeName[0] + 8;
+}
+
+/* Writes a location at buf + at; returns the bytes written, or 0 if the
+   volume name doesn't fit. */
+static short WriteLocation(unsigned char *buf, short at,
+                           const LibraryLocation *location)
+{
+    short nameLength = location->volumeName[0];
+
+    if (nameLength < 1 || nameLength > kMaxVolumeName)
+        return 0;
+    BlockMove(location->volumeName, buf + at, nameLength + 1);
+    Put32(buf + at + 1 + nameLength, location->volumeCreated);
+    Put32(buf + at + 5 + nameLength, (unsigned long)location->folderID);
+    return 1 + nameLength + 8;
+}
+
+/* Version 3's recent list, from buf + at; stops at anything malformed. */
+static void ReadRecent(const unsigned char *buf, long count, short at,
+                       Prefs *prefs)
+{
+    short n, i, nameLength;
+    RecentLibrary *r;
+
+    if (at >= count)
+        return;
+    n = buf[at++];
+    for (i = 0; i < n && i < kMaxRecent; i++)
+    {
+        r = &prefs->recent[i];
+        if (!ReadLocation(buf, count, at, &r->location))
+            return;
+        at += LocationSize(&r->location);
+        if (at >= count || buf[at] > 31 || at + 1 + buf[at] > count)
+            return;
+        nameLength = buf[at];
+        BlockMove(buf + at, r->folderName, nameLength + 1);
+        at += 1 + nameLength;
+        prefs->recentCount = i + 1;
+    }
+}
+
 /* Reads the prefs file (either version); false if there is none or it is
    not recognised. */
 static Boolean ReadPrefs(Prefs *prefs)
@@ -83,6 +134,7 @@ static Boolean ReadPrefs(Prefs *prefs)
 
     prefs->hasLibrary = false;
     prefs->volume = -1;
+    prefs->recentCount = 0;
     if (OpenDataFork(sysFolder, 0, NameToRead(sysFolder), fsRdPerm, &refNum)
         != noErr)
         return false;
@@ -96,22 +148,28 @@ static Boolean ReadPrefs(Prefs *prefs)
         prefs->hasLibrary = ReadLocation(buf, count, 6, &prefs->location);
         return true;
     }
-    if (Get16(buf + 4) != kPrefsVersion || count < 8)
+    if ((Get16(buf + 4) != kPrefsVersion2 && Get16(buf + 4) != kPrefsVersion)
+        || count < 8)
         return false;
     if (buf[7] <= 7)
         prefs->volume = buf[7];
     if (buf[6])
         prefs->hasLibrary = ReadLocation(buf, count, 8, &prefs->location);
+    if (Get16(buf + 4) == kPrefsVersion
+        && (prefs->hasLibrary || !buf[6]))
+        ReadRecent(buf, count,
+                   8 + (prefs->hasLibrary ? LocationSize(&prefs->location) : 0),
+                   prefs);
     return true;
 }
 
 static OSErr WritePrefs(const Prefs *prefs)
 {
     unsigned char buf[kPrefsMaxSize];
-    short nameLength = 0;
     short sysFolder = SystemFolder();
     long count = 8;
-    short refNum;
+    short refNum, i, size, n = 0, countAt;
+    const RecentLibrary *r;
     OSErr err;
 
     Put32(buf, kPrefsMagic);
@@ -120,14 +178,26 @@ static OSErr WritePrefs(const Prefs *prefs)
     buf[7] = prefs->volume >= 0 && prefs->volume <= 7 ? prefs->volume : kNoVolume;
     if (prefs->hasLibrary)
     {
-        nameLength = prefs->location.volumeName[0];
-        if (nameLength < 1 || nameLength > kMaxVolumeName)
+        size = WriteLocation(buf, 8, &prefs->location);
+        if (size == 0)
             return paramErr;
-        BlockMove(prefs->location.volumeName, buf + 8, nameLength + 1);
-        Put32(buf + 9 + nameLength, prefs->location.volumeCreated);
-        Put32(buf + 13 + nameLength, (unsigned long)prefs->location.folderID);
-        count = 17 + nameLength;
+        count += size;
     }
+
+    /* The recent list; an entry that doesn't fit is left out. */
+    countAt = count++;
+    for (i = 0; i < prefs->recentCount && i < kMaxRecent; i++)
+    {
+        r = &prefs->recent[i];
+        size = WriteLocation(buf, count, &r->location);
+        if (size == 0 || r->folderName[0] > 31)
+            continue;
+        count += size;
+        BlockMove(r->folderName, buf + count, r->folderName[0] + 1);
+        count += 1 + r->folderName[0];
+        n++;
+    }
+    buf[countAt] = (unsigned char)n;
 
     err = HCreate(sysFolder, 0, kPrefsName, kAppCreator, kPrefsFileType);
     if (err != noErr && err != dupFNErr)
@@ -183,5 +253,30 @@ OSErr Prefs_SaveVolume(short level)
 
     ReadPrefs(&prefs);                  /* keep the library location */
     prefs.volume = level;
+    return WritePrefs(&prefs);
+}
+
+short Prefs_LoadRecent(RecentLibrary *recent)
+{
+    Prefs prefs;
+    short i;
+
+    ReadPrefs(&prefs);
+    for (i = 0; i < prefs.recentCount; i++)
+        recent[i] = prefs.recent[i];
+    return prefs.recentCount;
+}
+
+OSErr Prefs_SaveRecent(const RecentLibrary *recent, short count)
+{
+    Prefs prefs;
+    short i;
+
+    ReadPrefs(&prefs);                  /* keep the library and volume */
+    if (count > kMaxRecent)
+        count = kMaxRecent;
+    for (i = 0; i < count; i++)
+        prefs.recent[i] = recent[i];
+    prefs.recentCount = count;
     return WritePrefs(&prefs);
 }

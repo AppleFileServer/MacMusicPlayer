@@ -23,6 +23,18 @@ void LibSetup_Rescan(void);
    Limit if any song files were left out. */
 void LibSetup_ShowInfo(void);
 
+/* Stage 8d-3: the libraries used before, most recent first (the current
+   one included, up to kMaxRecent). Item gives the File menu text, "folder
+   (disk)", whether the library can be chosen now (its disk mounted), and
+   whether it is the current one. UseRecent switches to library i;
+   false if it is already the current one or can't be found (a message
+   then says so). The caller then rescans and restarts, as for Choose
+   Library.... */
+short LibSetup_RecentCount(void);
+void LibSetup_RecentItem(short i, Str255 text, Boolean *available,
+                         Boolean *current);
+Boolean LibSetup_UseRecent(short i);
+
 Boolean LibSetup_HasLibrary(void);
 const LibraryFolder *LibSetup_Folder(void);
 

@@ -4,7 +4,7 @@ Status: approved (2026-10-07), decisions L1-L11 made. 8a decided:
 Option A (`stage-8a-multiple-libraries.md`, M1-M4). 8b decided
 (`stage-8b-settings.md`). 8c done. 8d in progress, in four parts:
 8d-1 safeguards (done), 8d-2 Rescan and Library Info (done), 8d-3
-Recent Libraries, 8d-4 Remove from Playlist.
+Recent Libraries (done), 8d-4 Remove from Playlist.
 No code has been changed.
 
 Replaces the earlier Stage 8 (On-The-Go), now deferred
@@ -221,6 +221,13 @@ can't be chosen. Choosing one switches to it, as Choose Library… does
 (playback stops, the iPod restarts). The locations are kept in the prefs,
 which gain a list; version 2 prefs files are still read. How many to keep
 is decided in 8d.
+
+**Done in 8d-3:** up to 5 libraries (PROVISIONAL), listed directly in
+the File menu between Library Info… and Quit as "Folder (Disk)", rather
+than in a hierarchical submenu, which may not be reliable on the Plus's
+ROM. The current one is ticked; one whose disk isn't mounted is dimmed,
+under its last known name. The prefs file is now version 3 (versions 1
+and 2 are still read).
 
 **The 500-song limit (M3):**
 - Import checks the number of songs first. With 500 already, it stops

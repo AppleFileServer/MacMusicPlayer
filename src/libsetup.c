@@ -23,6 +23,38 @@ enum
 
 static LibraryFolder gFolder;
 static Boolean gHaveLibrary;
+static LibraryLocation gLocation;       /* where gFolder is, if any */
+
+/* Stage 8d-3: the libraries used before, most recent first. */
+static RecentLibrary gRecent[kMaxRecent];
+static short gRecentCount;
+
+/* The current library goes to the top of the recent list (once only),
+   with its folder's name as it is now, and the list is saved. */
+static void RememberRecent(const LibraryLocation *location)
+{
+    RecentLibrary entry;
+    short i;
+
+    entry.location = *location;
+    if (!Folder_Find(location, entry.folderName))
+        entry.folderName[0] = 0;
+
+    for (i = 0; i < gRecentCount; i++)
+        if (Folder_SameLocation(&gRecent[i].location, location))
+            break;
+    if (i == 0 && gRecentCount > 0
+        && EqualString(gRecent[0].folderName, entry.folderName, true, true))
+        return;                         /* already first: nothing to save */
+    if (i == gRecentCount && gRecentCount < kMaxRecent)
+        gRecentCount++;
+    if (i >= gRecentCount)
+        i = gRecentCount - 1;           /* full: the oldest goes */
+    for (; i > 0; i--)
+        gRecent[i] = gRecent[i - 1];
+    gRecent[0] = entry;
+    Prefs_SaveRecent(gRecent, gRecentCount);
+}
 
 /* DECISION (D23): during development, one alert reports skipped files. */
 static void ReportSkipped(void)
@@ -167,11 +199,13 @@ static Boolean ChooseAndRemember(Boolean findExisting)
 
     gFolder = folder;
     gHaveLibrary = true;
+    gLocation = location;
 
     /* The library is still used this session if saving fails. */
     err = Prefs_Save(&location);
     if (err != noErr)
         Message_Show(P("The library location could not be remembered."), err);
+    RememberRecent(&location);
     return true;
 }
 
@@ -180,7 +214,13 @@ void LibSetup_Startup(void)
     LibraryLocation location;
     Boolean remembered = Prefs_Load(&location);
 
+    gRecentCount = Prefs_LoadRecent(gRecent);
     gHaveLibrary = remembered && Folder_Resolve(&location, &gFolder);
+    if (gHaveLibrary)
+    {
+        gLocation = location;
+        RememberRecent(&location);  /* a library from before 8d-3 joins */
+    }
 
     if (!gHaveLibrary)
     {
@@ -219,6 +259,58 @@ Boolean LibSetup_ChooseLibrary(void)
             return ChooseAndRemember(false);
     }
     return false;
+}
+
+short LibSetup_RecentCount(void)
+{
+    return gRecentCount;
+}
+
+void LibSetup_RecentItem(short i, Str255 text, Boolean *available,
+                         Boolean *current)
+{
+    RecentLibrary *r = &gRecent[i];
+    Str31 name;
+
+    /* The folder may have been renamed in the Finder: shown as it is. */
+    *available = Folder_Find(&r->location, name);
+    if (*available)
+        BlockMove(name, r->folderName, name[0] + 1);
+    *current = gHaveLibrary && Folder_SameLocation(&r->location, &gLocation);
+
+    text[0] = 0;
+    PStrAppend(text, r->folderName[0] > 0 ? r->folderName : P("iPod Library"));
+    PStrAppend(text, P(" ("));
+    PStrAppend(text, r->location.volumeName);
+    PStrAppend(text, P(")"));
+}
+
+Boolean LibSetup_UseRecent(short i)
+{
+    LibraryLocation location;
+    LibraryFolder folder;
+    OSErr err;
+
+    if (i < 0 || i >= gRecentCount)
+        return false;
+    location = gRecent[i].location;
+    if (gHaveLibrary && Folder_SameLocation(&location, &gLocation))
+        return false;
+    if (!Folder_Resolve(&location, &folder))
+    {
+        Message_Show(P("That iPod Library can\xD5t be found. Its disk may "
+                       "not be inserted, or it may have moved."), noErr);
+        return false;
+    }
+
+    gFolder = folder;
+    gHaveLibrary = true;
+    gLocation = location;
+    err = Prefs_Save(&location);
+    if (err != noErr)
+        Message_Show(P("The library location could not be remembered."), err);
+    RememberRecent(&location);
+    return true;
 }
 
 Boolean LibSetup_HasLibrary(void)

@@ -282,6 +282,31 @@ void Folder_WriteNextID(const LibraryFolder *folder, long next)
     FlushVol(nil, folder->vRefNum);
 }
 
+Boolean Folder_Find(const LibraryLocation *location, Str31 folderName)
+{
+    CInfoPBRec pb;
+    Str63 name;
+    short vRefNum;
+
+    if (!FindVolume(location->volumeName, location->volumeCreated, &vRefNum))
+        return false;
+    pb.dirInfo.ioNamePtr = name;
+    pb.dirInfo.ioVRefNum = vRefNum;
+    pb.dirInfo.ioFDirIndex = -1;            /* look up by directory ID */
+    pb.dirInfo.ioDrDirID = location->folderID;
+    if (PBGetCatInfoSync(&pb) != noErr
+        || !(pb.dirInfo.ioFlAttrib & kDirectoryAttribute) || name[0] > 31)
+        return false;
+    BlockMove(name, folderName, name[0] + 1);
+    return true;
+}
+
+Boolean Folder_SameLocation(const LibraryLocation *a, const LibraryLocation *b)
+{
+    return a->volumeCreated == b->volumeCreated && a->folderID == b->folderID
+        && EqualString(a->volumeName, b->volumeName, false, true);
+}
+
 Boolean Folder_Resolve(const LibraryLocation *location, LibraryFolder *folder)
 {
     if (!FindVolume(location->volumeName, location->volumeCreated,
