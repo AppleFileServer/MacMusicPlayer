@@ -23,6 +23,12 @@ void LCD_EndDraw(void);
 /* Copy the LCD into the window at destRect, 1:1. CopyToWindow expects the
    window to be the current port (update events); Present sets it itself. */
 void LCD_CopyToWindow(WindowPtr window, const Rect *destRect);
+
+/* Stage 9a (S-9): the main menu's Backlight: the LCD is shown inverted
+   (black pixels white, white black), at no extra cost: the copy to the
+   window uses notSrcCopy. */
+void LCD_SetInverted(Boolean inverted);
+Boolean LCD_IsInverted(void);
 void LCD_Present(WindowPtr window, const Rect *destRect);
 
 #endif

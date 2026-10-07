@@ -8,9 +8,9 @@
    volume level. Before the app was renamed it was "MacMusicPlayer
    Prefs"; that file is renamed on first use (rename plan, R6).
 
-   Format, version 3 (Stage 8d-3), big-endian:
+   Format, version 4 (Stage 9a), big-endian:
      0  4  magic 'MMPf'
-     4  2  version (3)
+     4  2  version (4)
      6  1  1 if a library location follows, else 0
      7  1  volume level 0-7, or 0xFF if none saved
      8  -  the library location, only with a library:
@@ -21,9 +21,12 @@
            a location as above, then
            1  the library folder's name length (0-31), then the name
               (shown in the File menu when its disk isn't mounted)
+     -  1  number of settings that follow (Stage 9a), then one byte
+           each: Shuffle, Repeat, Clicker (settings.h)
 
-   Versions 1 and 2 are still read: version 2 has no recent list;
-   version 1 has the location from offset 6 and no volume either. */
+   Versions 1-3 are still read: version 3 has no settings; version 2 no
+   recent list either; version 1 has the location from offset 6 and no
+   volume. */
 
 Boolean Prefs_Load(LibraryLocation *location);
 OSErr Prefs_Save(const LibraryLocation *location);     /* keeps the volume */
@@ -40,6 +43,13 @@ typedef struct
 
 short Prefs_LoadRecent(RecentLibrary *recent);          /* kMaxRecent */
 OSErr Prefs_SaveRecent(const RecentLibrary *recent, short count);
+
+/* Stage 9a: the Settings values, one byte each. Load fills in as many
+   as were saved (leaving the rest of values as they are); Save keeps
+   everything else in the prefs. */
+#define kMaxSettings    8
+void Prefs_LoadSettings(unsigned char *values, short count);
+OSErr Prefs_SaveSettings(const unsigned char *values, short count);
 
 /* Stage 7b: the saved volume level 0-7, or -1 if none. */
 short Prefs_LoadVolume(void);

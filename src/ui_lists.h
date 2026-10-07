@@ -44,6 +44,10 @@ void UIList_Build(Screen *screen);
 ConstStringPtr UIList_ItemTitle(const Screen *screen, short index);
 Boolean UIList_ItemHasArrow(const Screen *screen, short index);
 
+/* Stage 9a: the value shown at the right of row index (a setting's
+   "Off", "Songs"...), or nil for none. */
+ConstStringPtr UIList_ItemValue(const Screen *screen, short index);
+
 /* The song shown in row index, for Songs and Audiobooks lists; kNone for
    every other kind of row. */
 short UIList_ItemSong(const Screen *screen, short index);

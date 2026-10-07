@@ -105,16 +105,23 @@ void LCDDraw_Header(ConstStringPtr title)
     LineTo(kLCDWidth - 1, kHeaderRuleY);
 }
 
-void LCDDraw_Row(short position, ConstStringPtr text, Boolean selected,
-                 Boolean hasArrow, Boolean hasScrollBar)
+void LCDDraw_Row(short position, ConstStringPtr text, ConstStringPtr value,
+                 Boolean selected, Boolean hasArrow, Boolean hasScrollBar)
 {
     short top = kRowTop0 + position * kRowHeight;
     short iconMode = selected ? srcBic : srcOr;
     short arrowLeft = hasScrollBar ? kArrowLeftWithBar : kArrowLeft;
     short barRight = hasScrollBar ? kSelRightWithBar : kSelRight;
     short textRight = (hasArrow ? arrowLeft : barRight) - kTextRightGap;
+    short valueLeft = textRight;
     Str255 fitted;
     Rect bar;
+
+    if (value != nil)
+    {
+        valueLeft = textRight - StringWidth(value);
+        textRight = valueLeft - kTextRightGap;
+    }
 
     if (selected)
     {
@@ -126,6 +133,11 @@ void LCDDraw_Row(short position, ConstStringPtr text, Boolean selected,
     FitText(text, textRight - kTextLeft, fitted);
     MoveTo(kTextLeft, top + kRowBaseline);
     DrawString(fitted);
+    if (value != nil)
+    {
+        MoveTo(valueLeft, top + kRowBaseline);
+        DrawString(value);
+    }
     TextMode(srcOr);
 
     if (hasArrow)

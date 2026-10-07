@@ -1,7 +1,7 @@
 # Stage 9 plan: the Settings menu
 
-Status: approved (2026-10-07), decisions T1-T9 made. No code has been
-changed. Builds the specification decided in Stage 8b
+Status: approved (2026-10-07), decisions T1-T9 made. 9a done; 9b-9e
+remain. Builds the specification decided in Stage 8b
 (`stage-8b-settings.md`, S-1 to S-11).
 
 ## What Stage 8b decided

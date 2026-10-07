@@ -12,7 +12,10 @@ void LCDDraw_Clear(void);
 void LCDDraw_Header(ConstStringPtr title);
 
 /* One list row at visible position 0..kVisibleRows-1. */
-void LCDDraw_Row(short position, ConstStringPtr text, Boolean selected,
+/* Stage 9a: value (nil for none) is drawn at the row's right edge, in
+   place of an arrow, as on the 4G's Settings screen. */
+void LCDDraw_Row(short position, ConstStringPtr text, ConstStringPtr value,
+                 Boolean selected,
                  Boolean hasArrow, Boolean hasScrollBar);
 
 /* The start-up screen: the Apple logo centred on a blank LCD. */

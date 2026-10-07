@@ -27,6 +27,7 @@
 #include "prefs.h"
 #include "volume.h"
 #include "editsong.h"
+#include "settings.h"
 
 /* Top of the window's content area: below the 20-pixel menu bar
    and the rDocProc title bar. */
@@ -604,8 +605,10 @@ int main(void)
     qd.randSeed = TickCount();      /* for Shuffle Songs */
     Audio_Init();                   /* if it fails, playback is silent (A8) */
     Modal_SetService(Playback_ServiceAudio);   /* 6b-2: fed in modal loops */
+    Settings_Load();                /* Stage 9a: Shuffle, Repeat, Clicker */
     {   /* 7b (N2): MacMusic opens at the volume chosen last time. */
         short level = Prefs_LoadVolume();
+
         if (level >= 0)
             Volume_Set(level);
     }

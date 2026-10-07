@@ -69,6 +69,18 @@ void LCD_Dispose(void)
     gLCDReady = false;
 }
 
+static Boolean gInverted;
+
+void LCD_SetInverted(Boolean inverted)
+{
+    gInverted = inverted;
+}
+
+Boolean LCD_IsInverted(void)
+{
+    return gInverted;
+}
+
 void LCD_CopyToWindow(WindowPtr window, const Rect *destRect)
 {
     /* Refuse anything but an exact 1:1 copy; CopyBits would scale. */
@@ -78,7 +90,8 @@ void LCD_CopyToWindow(WindowPtr window, const Rect *destRect)
         return;
 
     CopyBits(&gLCDPort.portBits, &window->portBits,
-             &gLCDPort.portRect, destRect, srcCopy, nil);
+             &gLCDPort.portRect, destRect,
+             gInverted ? notSrcCopy : srcCopy, nil);
 }
 
 void LCD_Present(WindowPtr window, const Rect *destRect)

@@ -11,12 +11,14 @@
 #define kPrefsMagic         'MMPf'
 #define kPrefsVersion1      1
 #define kPrefsVersion2      2
-#define kPrefsVersion       3
+#define kPrefsVersion3      3
+#define kPrefsVersion       4
 #define kMaxVolumeName      27
 #define kNoVolume           0xFF
 #define kLocationMax        (1 + kMaxVolumeName + 4 + 4)
 #define kPrefsMaxSize       (8 + kLocationMax + 1 \
-                             + kMaxRecent * (kLocationMax + 32))
+                             + kMaxRecent * (kLocationMax + 32) \
+                             + 1 + kMaxSettings)
 
 static const unsigned char kPrefsName[] = "\pMacMusic Prefs";
 static const unsigned char kOldPrefsName[] = "\pMacMusicPlayer Prefs";
@@ -31,6 +33,8 @@ typedef struct
     short volume;                       /* 0-7, or -1 */
     short recentCount;
     RecentLibrary recent[kMaxRecent];
+    short settingCount;                 /* Stage 9a */
+    unsigned char settings[kMaxSettings];
 } Prefs;
 
 /* Working-directory reference for the System Folder. */
@@ -97,29 +101,46 @@ static short WriteLocation(unsigned char *buf, short at,
     return 1 + nameLength + 8;
 }
 
-/* Version 3's recent list, from buf + at; stops at anything malformed. */
-static void ReadRecent(const unsigned char *buf, long count, short at,
-                       Prefs *prefs)
+/* Version 3's recent list, from buf + at; stops at anything malformed.
+   Returns where the list ends, or -1 if it was malformed. */
+static short ReadRecent(const unsigned char *buf, long count, short at,
+                        Prefs *prefs)
 {
     short n, i, nameLength;
-    RecentLibrary *r;
+    RecentLibrary *r, extra;            /* entries past kMaxRecent: skipped */
 
     if (at >= count)
-        return;
+        return -1;
     n = buf[at++];
-    for (i = 0; i < n && i < kMaxRecent; i++)
+    for (i = 0; i < n; i++)
     {
-        r = &prefs->recent[i];
+        r = i < kMaxRecent ? &prefs->recent[i] : &extra;
         if (!ReadLocation(buf, count, at, &r->location))
-            return;
+            return -1;
         at += LocationSize(&r->location);
         if (at >= count || buf[at] > 31 || at + 1 + buf[at] > count)
-            return;
+            return -1;
         nameLength = buf[at];
         BlockMove(buf + at, r->folderName, nameLength + 1);
         at += 1 + nameLength;
-        prefs->recentCount = i + 1;
+        if (i < kMaxRecent)
+            prefs->recentCount = i + 1;
     }
+    return at;
+}
+
+/* Version 4's settings, from buf + at. */
+static void ReadSettings(const unsigned char *buf, long count, short at,
+                         Prefs *prefs)
+{
+    short n, i;
+
+    if (at < 0 || at >= count)
+        return;
+    n = buf[at++];
+    for (i = 0; i < n && i < kMaxSettings && at < count; i++)
+        prefs->settings[i] = buf[at++];
+    prefs->settingCount = i;
 }
 
 /* Reads the prefs file (either version); false if there is none or it is
@@ -129,12 +150,13 @@ static Boolean ReadPrefs(Prefs *prefs)
     unsigned char buf[kPrefsMaxSize];
     long count = sizeof(buf);
     short sysFolder = SystemFolder();
-    short refNum;
+    short refNum, version, end;
     OSErr err;
 
     prefs->hasLibrary = false;
     prefs->volume = -1;
     prefs->recentCount = 0;
+    prefs->settingCount = 0;
     if (OpenDataFork(sysFolder, 0, NameToRead(sysFolder), fsRdPerm, &refNum)
         != noErr)
         return false;
@@ -148,18 +170,22 @@ static Boolean ReadPrefs(Prefs *prefs)
         prefs->hasLibrary = ReadLocation(buf, count, 6, &prefs->location);
         return true;
     }
-    if ((Get16(buf + 4) != kPrefsVersion2 && Get16(buf + 4) != kPrefsVersion)
-        || count < 8)
+    version = Get16(buf + 4);
+    if (version < kPrefsVersion2 || version > kPrefsVersion || count < 8)
         return false;
     if (buf[7] <= 7)
         prefs->volume = buf[7];
     if (buf[6])
         prefs->hasLibrary = ReadLocation(buf, count, 8, &prefs->location);
-    if (Get16(buf + 4) == kPrefsVersion
-        && (prefs->hasLibrary || !buf[6]))
-        ReadRecent(buf, count,
-                   8 + (prefs->hasLibrary ? LocationSize(&prefs->location) : 0),
-                   prefs);
+    if (version >= kPrefsVersion3 && (prefs->hasLibrary || !buf[6]))
+    {
+        end = ReadRecent(buf, count,
+                         8 + (prefs->hasLibrary
+                              ? LocationSize(&prefs->location) : 0),
+                         prefs);
+        if (version >= kPrefsVersion)
+            ReadSettings(buf, count, end, prefs);
+    }
     return true;
 }
 
@@ -198,6 +224,11 @@ static OSErr WritePrefs(const Prefs *prefs)
         n++;
     }
     buf[countAt] = (unsigned char)n;
+
+    /* Stage 9a: the settings. */
+    buf[count++] = (unsigned char)prefs->settingCount;
+    for (i = 0; i < prefs->settingCount; i++)
+        buf[count++] = prefs->settings[i];
 
     err = HCreate(sysFolder, 0, kPrefsName, kAppCreator, kPrefsFileType);
     if (err != noErr && err != dupFNErr)
@@ -278,5 +309,29 @@ OSErr Prefs_SaveRecent(const RecentLibrary *recent, short count)
     for (i = 0; i < count; i++)
         prefs.recent[i] = recent[i];
     prefs.recentCount = count;
+    return WritePrefs(&prefs);
+}
+
+void Prefs_LoadSettings(unsigned char *values, short count)
+{
+    Prefs prefs;
+    short i;
+
+    ReadPrefs(&prefs);
+    for (i = 0; i < count && i < prefs.settingCount; i++)
+        values[i] = prefs.settings[i];
+}
+
+OSErr Prefs_SaveSettings(const unsigned char *values, short count)
+{
+    Prefs prefs;
+    short i;
+
+    ReadPrefs(&prefs);                  /* keep everything else */
+    if (count > kMaxSettings)
+        count = kMaxSettings;
+    for (i = 0; i < count; i++)
+        prefs.settings[i] = values[i];
+    prefs.settingCount = count;
     return WritePrefs(&prefs);
 }

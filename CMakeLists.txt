@@ -9,6 +9,7 @@ add_application(MacMusic
     src/ipod_lcd.c
     src/lcd_draw.c
     src/prefs.c
+    src/settings.c
     src/volume.c
     src/libfolder.c
     src/libsetup.c

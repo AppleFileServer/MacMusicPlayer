@@ -1,6 +1,7 @@
 #include "ui_lists.h"
 #include "ui_menus.h"
 #include "playback.h"
+#include "settings.h"
 
 /* Music hierarchy screens. Levels below each Music item are Inferred
    (see "iPod 4G UI Specification", Music hierarchy).
@@ -103,7 +104,8 @@ Boolean UIList_ItemHasArrow(const Screen *s, short index)
         case kScreenMenu:
         {
             short action = UIMenus_Get(s->menuID)->items[s->items[index]].action;
-            return action != kActNone && action != kActShuffle;
+            return action == kActStub || action == kActMenu
+                || action == kActScreen || action == kActNowPlaying;
         }
 
         case kScreenSongs:
@@ -113,6 +115,16 @@ Boolean UIList_ItemHasArrow(const Screen *s, short index)
         default:
             return true;
     }
+}
+
+ConstStringPtr UIList_ItemValue(const Screen *s, short index)
+{
+    const MenuItemDef *def;
+
+    if (s->kind != kScreenMenu)
+        return nil;
+    def = &UIMenus_Get(s->menuID)->items[s->items[index]];
+    return def->action == kActSetting ? Settings_ValueText(def->arg) : nil;
 }
 
 short UIList_ItemSong(const Screen *s, short index)

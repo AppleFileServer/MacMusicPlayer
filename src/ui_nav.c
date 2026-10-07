@@ -12,6 +12,7 @@
 #include "prefs.h"
 #include "song_format.h"
 #include "volume.h"
+#include "settings.h"
 
 /* Deepest planned path is 7 screens (Main > Music > Genres > Genre >
    Artist > Album > Now Playing). */
@@ -759,6 +760,25 @@ static Boolean HandleSelect(void)
         return false;
     if (IsShuffleRow(s))
         return ShuffleSongs();
+    if (s->kind == kScreenMenu && s->count > 0)
+    {
+        const MenuItemDef *def = &UIMenus_Get(s->menuID)->items[s->items[s->selected]];
+
+        switch (def->action)
+        {
+            case kActSetting:           /* T2: the next value, in place */
+                Settings_Cycle(def->arg);
+                return true;
+            case kActReset:             /* Reset All Settings > Reset */
+                Settings_ResetAll();
+                return GoBack();
+            case kActBack:              /* ... > Cancel */
+                return GoBack();
+            case kActBacklight:         /* S-9: on or off, not saved */
+                LCD_SetInverted(!LCD_IsInverted());
+                return true;
+        }
+    }
     if (UIList_ItemSong(s, s->selected) != kNone)
     {
         n = UIList_RowSongs(s, s->selected, gPlayList, kMaxListItems, &start);
@@ -923,6 +943,7 @@ void UI_Render(void)
             break;
 
         LCDDraw_Row(position, UIList_ItemTitle(s, index),
+                    UIList_ItemValue(s, index),
                     index == s->selected,
                     UIList_ItemHasArrow(s, index),
                     hasScrollBar);
