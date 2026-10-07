@@ -426,6 +426,15 @@ static void RefreshMainMenus(void)
 #define kScrubSteps         (360 / kScrubStepDegrees)
 #define kScrubSettle        30          /* 0.5 s */
 
+/* 8e-1: one turn of the wheel takes the volume from silent to full, in
+   the same 3-degree steps (120 a turn) while the volume bar shows. The
+   first turn from the normal screen keeps the 15-degree step, so a small
+   wobble while pressing a wheel button isn't taken as a turn; it counts
+   as 5 fine steps. A keyboard arrow is a whole level, or 1/24 of a song
+   in the scrubber (as a 15-degree step). */
+#define kFineSteps          (kWheelStepDegrees / kScrubStepDegrees)
+#define kVolumeSteps        kScrubSteps
+
 static NowPlayingMode gMode;
 static unsigned long gModeInput;        /* TickCount of the last input */
 
@@ -517,7 +526,8 @@ static void ScrubWheel(short delta)
 
 short UI_WheelStepDegrees(void)
 {
-    if (CurrentScreen()->kind == kScreenNowPlaying && gMode == kNowScrubber)
+    if (CurrentScreen()->kind == kScreenNowPlaying
+        && (gMode == kNowScrubber || gMode == kNowVolume))
         return kScrubStepDegrees;
     return kWheelStepDegrees;
 }
@@ -565,18 +575,63 @@ NowPlayingMode UI_NowPlayingMode(void)
    level per wheel step (N1: the Plus's 8 levels), the first step opening
    volume mode, as on the 4G. Scrubber: moves the position (7c, N3).
    Rating: one star per step, 0-5 (7d). */
-static Boolean NowPlayingWheel(short delta)
+/* 8e-1: the volume's place along one turn of the wheel, 0 (silent) to
+   kVolumeSteps (full); the level is that place scaled to 0-7, rounded. */
+static short gVolumePosition;
+
+static short LevelAt(short position)
+{
+    return (short)(((long)position * kVolumeMax + kVolumeSteps / 2)
+                   / kVolumeSteps);
+}
+
+static short PositionOf(short level)
+{
+    return (short)(((long)level * kVolumeSteps + kVolumeMax / 2) / kVolumeMax);
+}
+
+/* Moves the volume by fine steps along the turn. */
+static void TurnVolume(short steps)
 {
     short level;
 
+    /* Starts from the level as it is (it may have been changed in the
+       Control Panel), so the bar never jumps. */
+    if (gMode != kNowVolume || LevelAt(gVolumePosition) != Volume_Get())
+        gVolumePosition = PositionOf(Volume_Get());
+    gVolumePosition += steps;
+    if (gVolumePosition < 0)
+        gVolumePosition = 0;
+    if (gVolumePosition > kVolumeSteps)
+        gVolumePosition = kVolumeSteps;
+
+    level = LevelAt(gVolumePosition);
+    if (level != Volume_Get())
+    {
+        Volume_Set(level);
+        gVolumeChanged = true;
+    }
+}
+
+/* A keyboard arrow: a whole volume level (8e-1). */
+static void StepVolume(short delta)
+{
+    short level = Volume_Get() + delta;
+
+    if (level >= 0 && level <= kVolumeMax)
+    {
+        Volume_Set(level);
+        gVolumeChanged = true;
+    }
+    gVolumePosition = PositionOf(Volume_Get());
+}
+
+static Boolean NowPlayingWheel(short delta)
+{
     if (gMode == kNowNormal || gMode == kNowVolume)
     {
-        level = Volume_Get() + delta;
-        if (level >= 0 && level <= kVolumeMax)
-        {
-            Volume_Set(level);
-            gVolumeChanged = true;
-        }
+        /* From the normal screen the step was 15 degrees. */
+        TurnVolume(gMode == kNowNormal ? delta * kFineSteps : delta);
         SetMode(kNowVolume);
         return true;
     }
@@ -590,6 +645,24 @@ static Boolean NowPlayingWheel(short delta)
     }
     SetMode(gMode);                     /* keeps the mode up */
     return true;
+}
+
+/* A keyboard arrow on Now Playing: a whole step (8e-1). */
+static Boolean NowPlayingArrow(short delta)
+{
+    if (gMode == kNowNormal || gMode == kNowVolume)
+    {
+        StepVolume(delta);
+        SetMode(kNowVolume);
+        return true;
+    }
+    if (gMode == kNowScrubber)
+    {
+        ScrubWheel(delta * kFineSteps);
+        SetMode(gMode);
+        return true;
+    }
+    return NowPlayingWheel(delta);      /* rating: a star, as the wheel */
 }
 
 static Boolean NowPlayingSelect(void)
@@ -744,6 +817,10 @@ Boolean UI_HandleEvent(UIEvent event)
         case kEvtWheelUp:   return onNowPlaying ? NowPlayingWheel(-1)
                                             : MoveSelection(-1);
         case kEvtWheelDown: return onNowPlaying ? NowPlayingWheel(1)
+                                            : MoveSelection(1);
+        case kEvtArrowUp:   return onNowPlaying ? NowPlayingArrow(-1)
+                                            : MoveSelection(-1);
+        case kEvtArrowDown: return onNowPlaying ? NowPlayingArrow(1)
                                             : MoveSelection(1);
         case kEvtSelect:    return onNowPlaying ? NowPlayingSelect()
                                             : HandleSelect();

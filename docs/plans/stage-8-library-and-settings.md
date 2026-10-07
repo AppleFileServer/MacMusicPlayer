@@ -315,6 +315,26 @@ Library Info. Under L1 the app never deletes or "repairs" them.
   rest of the file is unchanged;
 - manual.
 
+## 8e: follow-ups (2026-10-07)
+
+Raised after 8d, before Stage 9.
+
+**8e-1, the volume on the wheel: one turn from silent to full.**
+- While the volume bar shows, the wheel moves in 3-degree steps (as the
+  scrubber's); silent to full is one turn, a level about every 51
+  degrees. Revises 7b, where each 15-degree step was a level.
+- From the normal Now Playing screen the first turn keeps the 15-degree
+  step (counted as 5 fine steps), so a wobble while pressing a wheel
+  button isn't taken as a turn.
+- The keyboard's arrows (the emulator mapping, D8) are now whole steps:
+  a row, a volume level, 1/24 of a song in the scrubber, a star.
+
+**8e-2, at most 10 playlists** (was 64), a MacMusic decision (the 4G had
+no such limit). The Playlists menu then fits the Plus's screen without
+scrolling, and every item can be dimmed. With more than 10 playlist files
+(copied in from the Finder), the first 10 by name are used; the others
+are left on disk untouched and reported, as songs over the limit are.
+
 ## Not in Stage 8
 
 - The On-The-Go playlist (deferred; research and draft in

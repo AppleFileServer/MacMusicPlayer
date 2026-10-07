@@ -11,6 +11,8 @@ typedef enum
     kEvtNone = 0,
     kEvtWheelUp,        /* counter-clockwise: highlight moves up */
     kEvtWheelDown,      /* clockwise: highlight moves down */
+    kEvtArrowUp,        /* 8e-1: the keyboard's arrows, a whole step: */
+    kEvtArrowDown,      /* a row, a volume level, 1/24 of a song */
     kEvtSelect,
     kEvtMenu,
     kEvtPlayPause,

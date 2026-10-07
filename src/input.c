@@ -119,8 +119,8 @@ UIEvent Input_FromKey(char key, Boolean autoRepeat)
 {
     switch (key)
     {
-        case kKeyUpArrow:   return kEvtWheelUp;
-        case kKeyDownArrow: return kEvtWheelDown;
+        case kKeyUpArrow:   return kEvtArrowUp;
+        case kKeyDownArrow: return kEvtArrowDown;
     }
 
     /* Only the wheel keys auto-repeat. */
