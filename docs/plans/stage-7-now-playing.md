@@ -1,7 +1,7 @@
 # Stage 7 plan: Now Playing volume, scrubber and rating
 
-Status: approved (2026-10-07). 7a (`cede6c4`), 7b (`3016fe2`) and 7c are
-done; 7d remains. Decisions N1-N8 are recorded at the end.
+Status: **complete (2026-10-07)**: 7a (`cede6c4`), 7b (`3016fe2`), 7c
+(`de22d4d`) and 7d. Fast-forward/rewind remains deferred (N8). Decisions N1-N8 are recorded at the end.
 
 ## What the 4G iPod does (sources)
 
@@ -122,6 +122,11 @@ an actual 4G screen photograph or reference is obtained.
 - Writing while the song plays: the audio has the file open read-only;
   opening a second path with write access is allowed by the File
   Manager, but this is checked in a diagnostic first.
+- Done: the rating is kept by song ID, so it is saved to the song that
+  was rated even if the song changes first; it is also saved on quit. A
+  write is refused if the file's song ID doesn't match. Writing while
+  the song plays was verified (no underruns). On an error the library
+  keeps the old rating and a message is shown.
 - Tests: host tests for reading/writing the rating bits; a diagnostic
   that rates the playing song and rescans; manual.
 

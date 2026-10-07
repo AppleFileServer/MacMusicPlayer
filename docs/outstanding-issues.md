@@ -68,7 +68,7 @@ the real Mac Plus checks are deferred until the BlueSCSI card is available
 - Stage 6 hardware checks (when the card is available): rebuild the
   Scratch image (I7), then on the real Plus the read-pointer check (I9),
   the Finder stress test, the modal-loop tests and responsiveness.
-- Stage 7: Now Playing volume, scrubber and rating screens.
+- Press-and-hold fast-forward and rewind (N8, deferred from Stage 7).
 - Stage 8: On-The-Go playlist (D17).
 - Settings menu.
 
@@ -97,6 +97,8 @@ the real Mac Plus checks are deferred until the BlueSCSI card is available
   alerts, Standard File, window drags, wheel holds): `fa6ac35` (6b-2).
 - Small stack margin (I10): 24 KB stack, about 18 KB spare: `206cffe`
   (6b-3).
+- Stage 7, Now Playing volume, scrubber and rating: `cede6c4`,
+  `3016fe2`, `de22d4d` and the 7d commit.
 - Responsiveness at Plus speed (6b-4, Mini vMac 1x): a main-loop pass
   takes 1-2 ticks while playing; the Now Playing redraw about 6 ticks a
   second; no underruns.

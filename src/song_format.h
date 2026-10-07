@@ -26,7 +26,7 @@
    Offset Size Field
      0     2   chunk version (1)
      2     4   song ID (> 0, unique in the library)
-     6     2   flags (bit 0: audiobook)
+     6     2   flags (bit 0: audiobook; bits 1-3: rating, Stage 7d)
      8     2   track number (0 = none)
     10     4   duration in seconds, = round(audio length / sample rate)
     14     4   encoding 'PCMu': linear PCM, unsigned samples
@@ -81,6 +81,26 @@
 #define kSongMaxChunk           1024    /* whole chunk, header included */
 
 #define kSongFlagAudiobook      0x0001
+
+/* Stage 7d (N4): the rating, in flags bits 1-3. 0 = unrated, 1-5 = one
+   to five stars; 6 and 7 are invalid and read as unrated. Files from
+   before 7d have these bits clear, so the chunk version is unchanged. */
+#define kSongFlagRatingMask     0x000E
+#define kSongFlagRatingShift    1
+#define kSongMaxRating          5
+
+static inline short SongFlags_Rating(short flags)
+{
+    short rating = (flags & kSongFlagRatingMask) >> kSongFlagRatingShift;
+
+    return rating <= kSongMaxRating ? rating : 0;
+}
+
+static inline short SongFlags_WithRating(short flags, short rating)
+{
+    return (short)((flags & ~kSongFlagRatingMask)
+                   | ((rating << kSongFlagRatingShift) & kSongFlagRatingMask));
+}
 
 /* DECISION D31 (revised in 5b-2): duplicates are found by audio length
    plus a fingerprint: two running 32-bit sums,

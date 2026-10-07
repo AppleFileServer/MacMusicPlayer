@@ -41,6 +41,13 @@ OSErr SongFile_AddChunk(short refNum, const SongInfo *info);
    and restores the original RIFF size. */
 OSErr SongFile_RemoveChunk(short refNum, const SongInfo *info);
 
+/* Stage 7d: rewrites the chunk's flags field in place (two bytes),
+   after checking that the file's chunk is the song with this ID. The
+   rest of the file is not touched. Works while the song is playing (the
+   audio has its own read-only path to the file). */
+OSErr SongFile_WriteFlags(short vRefNum, long dirID, ConstStringPtr name,
+                          long id, short flags);
+
 /* The audio fingerprint (D31) of an open file. buffer needs
    kSongFingerprintSample bytes. */
 OSErr SongFile_Fingerprint(short refNum, long audioOffset, long audioLength,

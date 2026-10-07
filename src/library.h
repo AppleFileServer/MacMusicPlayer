@@ -89,6 +89,12 @@ ConstStringPtr Library_SongAlbumName(short song);    /* may be empty */
 long Library_SongSeconds(short song);
 long Library_SongAudioLength(short song);           /* bytes */
 
+/* Stage 7d: the song's rating, 0 (unrated) to 5. Setting it writes the
+   song file (SongFile_WriteFlags), then updates the library; on an error
+   the library keeps the old rating. */
+short Library_SongRating(short song);
+OSErr Library_SetSongRating(short song, short rating);
+
 /* Where a song's audio is on disk, for playback. False if there is no
    scanned library. */
 Boolean Library_SongFile(short song, short *vRefNum, long *dirID,

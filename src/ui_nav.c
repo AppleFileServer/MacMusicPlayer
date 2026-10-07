@@ -10,6 +10,7 @@
 #include "playback.h"
 #include "pstr.h"
 #include "prefs.h"
+#include "song_format.h"
 #include "volume.h"
 
 /* Deepest planned path is 7 screens (Main > Music > Genres > Genre >
@@ -192,10 +193,48 @@ static unsigned long gModeInput;        /* TickCount of the last input */
 
 static Boolean gVolumeChanged;          /* to be saved in the prefs */
 
+/* 7d (N4): the rating being set, for the song with this ID (kept by ID,
+   so a song change or rescan can't send it to another song). Written to
+   the song file only when rating mode ends, never on each wheel step. */
+static short gRating;
+static long gRatingID;
+static Boolean gRatingChanged;
+static Boolean gRatingError;
+
+static void BeginRating(void)
+{
+    short song = Playback_CurrentSong();
+
+    gRatingChanged = false;
+    gRatingID = song == kNone ? 0 : Library_SongID(song);
+    gRating = song == kNone ? 0 : Library_SongRating(song);
+}
+
+static void SaveRating(void)
+{
+    short song;
+
+    if (!gRatingChanged)
+        return;
+    gRatingChanged = false;
+    song = Library_SongForID(gRatingID);
+    if (song != kNone && Library_SetSongRating(song, gRating) != noErr)
+        gRatingError = true;
+}
+
+Boolean UI_TakeRatingError(void)
+{
+    Boolean error = gRatingError;
+
+    gRatingError = false;
+    return error;
+}
+
 /* 7b (N2): the level is saved when volume mode ends, not on every step:
    a save is several disk accesses, which made the wheel lag. */
 void UI_SaveSettings(void)
 {
+    SaveRating();
     if (!gVolumeChanged)
         return;
     gVolumeChanged = false;
@@ -259,6 +298,10 @@ static void SetMode(NowPlayingMode mode)
         UI_SaveSettings();
     if (gMode == kNowScrubber && mode != kNowScrubber)
         ApplyScrub();
+    if (gMode == kNowRating && mode != kNowRating)
+        SaveRating();
+    if (mode == kNowRating && gMode != kNowRating)
+        BeginRating();
     gMode = mode;
     gModeInput = TickCount();
 }
@@ -270,6 +313,8 @@ static void NormalMode(void)
         UI_SaveSettings();
     if (gMode == kNowScrubber)
         ApplyScrub();
+    if (gMode == kNowRating)
+        SaveRating();
     gMode = kNowNormal;
 }
 
@@ -281,7 +326,7 @@ NowPlayingMode UI_NowPlayingMode(void)
 /* The wheel on Now Playing. Normal or volume mode: changes the volume one
    level per wheel step (N1: the Plus's 8 levels), the first step opening
    volume mode, as on the 4G. Scrubber: moves the position (7c, N3).
-   Rating: 7d. */
+   Rating: one star per step, 0-5 (7d). */
 static Boolean NowPlayingWheel(short delta)
 {
     short level;
@@ -299,6 +344,12 @@ static Boolean NowPlayingWheel(short delta)
     }
     if (gMode == kNowScrubber)
         ScrubWheel(delta);
+    else if (gMode == kNowRating && gRating + delta >= 0
+             && gRating + delta <= kSongMaxRating)
+    {
+        gRating += delta;
+        gRatingChanged = true;
+    }
     SetMode(gMode);                     /* keeps the mode up */
     return true;
 }
@@ -489,11 +540,13 @@ Boolean UI_Tick(void)
     return onNowPlaying && (result & (kTickTimeChanged | kTickSongChanged));
 }
 
-/* The level or rating a mode shows (the rating comes in 7d). */
+/* The level or rating a mode shows. */
 static short ModeValue(void)
 {
     if (gMode == kNowVolume)
         return Volume_Get();
+    if (gMode == kNowRating)
+        return gRating;
     return 0;
 }
 

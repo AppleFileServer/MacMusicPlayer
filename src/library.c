@@ -855,6 +855,28 @@ ConstStringPtr Library_SongAlbumName(short song)    { return PoolString(Songs()[
 long Library_SongSeconds(short song)                { return Songs()[song].seconds; }
 long Library_SongAudioLength(short song)            { return Songs()[song].audioLength; }
 
+short Library_SongRating(short song)
+{
+    return SongFlags_Rating(Songs()[song].flags);
+}
+
+OSErr Library_SetSongRating(short song, short rating)
+{
+    short flags = SongFlags_WithRating(Songs()[song].flags, rating);
+    OSErr err;
+
+    if (!gHaveFolder)
+        return fnfErr;
+    if (flags == Songs()[song].flags)
+        return noErr;
+    err = SongFile_WriteFlags(gFolder.vRefNum, gFolder.folderID,
+                              PoolString(Songs()[song].fileName),
+                              Songs()[song].id, flags);
+    if (err == noErr)
+        Songs()[song].flags = flags;
+    return err;
+}
+
 Boolean Library_SongFile(short song, short *vRefNum, long *dirID,
                          ConstStringPtr *fileName, long *audioOffset)
 {

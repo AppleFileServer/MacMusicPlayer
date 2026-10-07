@@ -232,6 +232,8 @@ static void ReportPlaybackProblems(void)
     if (Playback_TakeFileError())
         Message_Show(P("A song\xD5s file couldn\xD5t be read, so it was "
                        "skipped."), noErr);
+    if (UI_TakeRatingError())
+        Message_Show(P("The song\xD5s rating couldn\xD5t be saved."), noErr);
 }
 
 /* Brings menus up to date with the library and the iPod's highlighted

@@ -26,8 +26,8 @@ Boolean UI_HandleEvent(UIEvent event);
 /* Stage 7: the Now Playing screen's current mode (for tests). */
 NowPlayingMode UI_NowPlayingMode(void);
 
-/* Saves settings changed on the iPod (the volume, 7b) that are still
-   pending; call before quitting. */
+/* Saves settings changed on the iPod that are still pending (the volume,
+   7b; a rating, 7d); call before quitting. */
 void UI_SaveSettings(void);
 
 /* Stage 7c: the wheel's step size now (finer in the scrubber). */
@@ -37,6 +37,9 @@ short UI_WheelStepDegrees(void);
    scrubber's seek once turning stops); UI_Tick does it too. True if the
    screen needs redrawing. */
 Boolean UI_Idle(void);
+
+/* True once after a rating could not be written to its song file. */
+Boolean UI_TakeRatingError(void);
 
 /* Draws the current screen into the offscreen LCD. */
 void UI_Render(void);
