@@ -34,7 +34,6 @@ static const MenuItemDef kSettingsItems[] = {
     { "\pAbout",              kActScreen, kScreenAbout },
     { "\pShuffle",            kActSetting, kSettingShuffle },
     { "\pRepeat",             kActSetting, kSettingRepeat },
-    { "\pClicker",            kActSetting, kSettingClicker },
     { "\pLegal",              kActScreen, kScreenLegal },
     { "\pReset All Settings", kActMenu, kMenuReset }
 };

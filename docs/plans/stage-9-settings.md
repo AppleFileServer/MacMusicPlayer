@@ -1,7 +1,7 @@
 # Stage 9 plan: the Settings menu
 
-Status: approved (2026-10-07), decisions T1-T9 made. 9a-9d done;
-9e remains. Builds the specification decided in Stage 8b
+Status: approved (2026-10-07), decisions T1-T9 made. 9a-9d done. **9e (the
+Clicker) was dropped (2026-10-07), and Stage 9 is closed.** Builds the specification decided in Stage 8b
 (`stage-8b-settings.md`, S-1 to S-11).
 
 ## What Stage 8b decided
@@ -141,7 +141,17 @@ Also from 8b:
 
   Plus a manual listening check at 1×.
 
-### 9e: Clicker
+### 9e: Clicker: dropped (2026-10-07)
+
+Not built. A click on the idle music channel was written and partly
+tested: clicks were triggered correctly (only when stopped or paused,
+not with the setting off), but none reached the hardware sound buffer,
+and the test runs that followed stopped or produced no log without an
+explanation found. You decided not to introduce the Clicker; its code
+was discarded, and its Settings row removed (the value keeps its place
+in the prefs). The original plan follows, for reference.
+
+#### The original plan
 - **When it clicks:** turning the wheel (and the keyboard arrows) on any
   screen makes a short click, only while no audio is playing (stopped or
   paused). While a song plays the wheel is silent (8b).

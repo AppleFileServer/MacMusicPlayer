@@ -3,9 +3,9 @@
 
 #include <MacTypes.h>
 
-/* Stage 9a: the iPod's Settings (specified in Stage 8b): Shuffle, Repeat
-   and Clicker, kept in the prefs. In 9a they are only stored and shown;
-   9c-9e make them act. */
+/* Stage 9a: the iPod's Settings (specified in Stage 8b): Shuffle and
+   Repeat, kept in the prefs. Clicker keeps its place in the prefs, but
+   isn't in the Settings menu: the Clicker (9e) was dropped (2026-10-07). */
 
 enum
 {

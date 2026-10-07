@@ -180,7 +180,7 @@ guide's. The guide describes each setting in its own section but gives
 | 1 | About | Read-only: Songs ("n of 500"), Available (free space on the library's disk), Version | n/a | Adapted (S-6) |
 | 2 | Shuffle | Off, Songs, Albums | Prefs | Replicated; audiobooks never shuffled (S-2) |
 | 3 | Repeat | Off, One, All | Prefs | Replicated; Next and Previous still skip with Repeat One (S-3) |
-| 4 | Clicker | On, Off | Prefs | Adapted: clicks only while no audio is playing |
+| 4 | Clicker | On, Off | Prefs | Adapted: clicks only while no audio is playing. **Dropped in Stage 9e (2026-10-07): not built, and not in the Settings menu** |
 | 5 | Legal | Read-only scrolling text | App resource | Adapted: the project's legal statement (S-11) |
 | 6 | Reset All Settings | Cancel, Reset | n/a | Replicated; resets Shuffle, Repeat and Clicker, not the volume (S-5) |
 

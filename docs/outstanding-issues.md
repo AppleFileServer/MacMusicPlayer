@@ -64,7 +64,6 @@ image). Stage 8 is planned.
   test (Duplicate, Empty Wastebasket while playing), the modal-loop tests
   (6b-2) and responsiveness. The Scratch image is current, so no image
   rebuild is needed first.
-- Press-and-hold fast-forward and rewind (N8, deferred from Stage 7).
 - The software licence that the legal statement
   (`docs/legal/legal-statement.md`) refers to: to be written later, in
   the product documentation.
@@ -74,10 +73,9 @@ image). Stage 8 is planned.
 - Ratings (7d) are recorded but not used for anything else yet. Ideas
   for later, not planned now: use them in Shuffle Songs, or to create
   playlists (e.g. songs rated 4 stars or more).
-- Stage 9, the Settings menu (`docs/plans/stage-9-settings.md`),
-  building the specification from Stage 8b
-  (`docs/plans/stage-8b-settings.md`): About, Shuffle, Repeat, Clicker,
-  Legal, Reset All Settings, and the main menu's Backlight.
+- Stage 10: press-and-hold fast-forward and rewind (N8), planned next.
+- The Clicker (Stage 9e): dropped, not planned. If it is ever tried again,
+  first explain the Stage 9e test runs that stopped without a log.
 - On-The-Go playlist (D17): deferred until after Stage 8, possibly a
   later stage. The 4G guide's description and a draft plan are in
   `docs/plans/deferred-on-the-go.md`.
@@ -97,6 +95,9 @@ image). Stage 8 is planned.
   library safeguards, Rescan and Library Info, Recent Libraries and
   Remove from Playlist (8d), plus the 8a and 8b design documents
   (`docs/plans/stage-8-library-and-settings.md`).
+- Stage 9, the Settings menu (`docs/plans/stage-9-settings.md`): About,
+  Shuffle, Repeat, Legal, Reset All Settings and the main menu's
+  Backlight; the Clicker (9e) dropped.
 - Hardware test image out of date (I7): the Scratch image was rebuilt
   with the `0692d4f` app and the old-format library removed (2026-10-07);
   the app runs correctly on the real Mac Plus.
