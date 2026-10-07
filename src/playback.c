@@ -249,6 +249,42 @@ void Playback_Previous(void)
     RestartSong();
 }
 
+void Playback_Seek(long ticks)
+{
+    short song;
+    long length, sample;
+
+    if (gState == kPlayStopped)
+        return;
+    FollowAudio();
+    song = Playback_CurrentSong();
+    if (song == kNone)
+        return;
+    length = Library_SongAudioLength(song);
+    if (ticks < 0)
+        ticks = 0;
+    /* In two parts, so a long song can't overflow. */
+    sample = ticks / 60 * kSongSampleRate + ticks % 60 * kSongSampleRate / 60;
+    if (sample > length)
+        sample = length;
+    gElapsedBase = SamplesToTicks(sample);
+    gResumedAt = TickCount();
+    gLastSecond = -1;
+
+    if (!Audio_IsAvailable())
+        return;
+    if (gState == kPlayPaused)
+    {
+        Audio_SetPausedPosition(sample);
+        return;
+    }
+    if (StartCurrent(sample, false) != noErr)
+    {
+        gFileError = true;
+        RestartSong();                  /* R8 */
+    }
+}
+
 void Playback_ServiceAudio(void)
 {
     if (gState != kPlayPlaying || !Audio_IsAvailable())

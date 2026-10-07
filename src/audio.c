@@ -677,6 +677,11 @@ long Audio_PausedPosition(void)
     return gPausedPosition;
 }
 
+void Audio_SetPausedPosition(long sample)
+{
+    gPausedPosition = sample;
+}
+
 OSErr Audio_Resume(const AudioSource *source, short tag)
 {
     return Audio_Play(source, gPausedPosition, tag);

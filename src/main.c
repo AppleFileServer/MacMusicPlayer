@@ -184,6 +184,29 @@ static void HandleUIEvent(UIEvent uiEvent)
     PresentLCD();
 }
 
+/* The sink for wheel gestures (Input_TrackWheel): the steps of one mouse
+   sample are drawn together when it sends kEvtNone, so fine steps (the
+   7c scrubber, 120 a turn) don't each cost a redraw. kEvtNone also gives
+   the UI its timed work while the button is held. */
+static Boolean gWheelRedraw;
+
+static void HandleWheelEvent(UIEvent uiEvent)
+{
+    if (uiEvent != kEvtNone)
+    {
+        if (UI_HandleEvent(uiEvent))
+            gWheelRedraw = true;
+        return;
+    }
+    if (UI_Idle())
+        gWheelRedraw = true;
+    if (!gWheelRedraw)
+        return;
+    gWheelRedraw = false;
+    UI_Render();
+    PresentLCD();
+}
+
 /* Draws the whole window now (shell and LCD) instead of waiting for an
    update event: used while no events are being handled. */
 static void RedrawWindowNow(void)
@@ -362,7 +385,7 @@ static void HandleContentClick(WindowPtr window, Point where)
     if (zone == kZoneSelect)
         HandleUIEvent(kEvtSelect);
     else if (zone != kZoneNone)
-        Input_TrackWheel(zone, HandleUIEvent);
+        Input_TrackWheel(zone, HandleWheelEvent);
 }
 
 static void HandleKey(EventRecord *event)

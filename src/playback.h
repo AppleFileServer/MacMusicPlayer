@@ -28,6 +28,11 @@ void Playback_TogglePause(void);
 void Playback_Next(void);       /* on the last song: wraps to the first (N6) */
 void Playback_Previous(void);
 
+/* Stage 7c: moves the current song to ticks from its start (clamped to
+   the song). Playing: the audio restarts there, as a new stream (with
+   the usual pre-fill). Paused: it resumes from there. */
+void Playback_Seek(long ticks);
+
 /* Stage 6b-2: only keeps the audio fed (refill, underrun recovery, queueing
    the next song); no other state changes and no drawing, so it can be
    called from inside modal loops (menus, dialogs, window drags). */

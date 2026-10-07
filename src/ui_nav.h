@@ -30,6 +30,14 @@ NowPlayingMode UI_NowPlayingMode(void);
    pending; call before quitting. */
 void UI_SaveSettings(void);
 
+/* Stage 7c: the wheel's step size now (finer in the scrubber). */
+short UI_WheelStepDegrees(void);
+
+/* Timed UI work that must also happen while the wheel is held (the
+   scrubber's seek once turning stops); UI_Tick does it too. True if the
+   screen needs redrawing. */
+Boolean UI_Idle(void);
+
 /* Draws the current screen into the offscreen LCD. */
 void UI_Render(void);
 

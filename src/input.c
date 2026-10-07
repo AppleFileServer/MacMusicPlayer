@@ -3,11 +3,6 @@
 #include "modal.h"
 #include "input.h"
 
-/* PROVISIONAL (E3, spec unknown #6): one list step per 15 degrees of
-   wheel rotation (24 per turn), no acceleration. The 4G's real step size
-   is unknown; this is the single sensitivity setting. */
-#define kWheelStepDegrees   15
-
 /* Samples closer than this to the wheel centre are ignored: the angle
    there is unstable. Doubled units, as from IPodShell_WheelOffset. */
 #define kWheelDeadRadius    (2 * 8)
@@ -58,7 +53,7 @@ void Input_TrackWheel(ShellZone startZone, UIEventSink emit)
     Point where;
     short angle;
     short lastAngle = 0;
-    short delta;
+    short delta, step;
     short accumulated = 0;
     Boolean haveAngle = false;
     Boolean dragged = false;
@@ -66,6 +61,7 @@ void Input_TrackWheel(ShellZone startZone, UIEventSink emit)
     while (StillDown())
     {
         Modal_Service();                /* 6b-2: keep the audio fed */
+        emit(kEvtNone);                 /* redraw the last sample's steps */
         GetMouse(&where);
         if (!WheelAngle(where, &angle))
             continue;
@@ -85,17 +81,19 @@ void Input_TrackWheel(ShellZone startZone, UIEventSink emit)
             delta += 360;
         lastAngle = angle;
 
-        /* Partial movement carries over to the next sample. */
+        /* Partial movement carries over to the next sample. The step
+           size can change between samples (7c: the scrubber's). */
         accumulated += delta;
-        while (accumulated >= kWheelStepDegrees)
+        step = UI_WheelStepDegrees();
+        while (accumulated >= step)
         {
-            accumulated -= kWheelStepDegrees;
+            accumulated -= step;
             dragged = true;
             emit(kEvtWheelDown);
         }
-        while (accumulated <= -kWheelStepDegrees)
+        while (accumulated <= -step)
         {
-            accumulated += kWheelStepDegrees;
+            accumulated += step;
             dragged = true;
             emit(kEvtWheelUp);
         }
@@ -104,6 +102,7 @@ void Input_TrackWheel(ShellZone startZone, UIEventSink emit)
     /* Under one step of movement: the gesture was a button press. */
     if (!dragged)
         emit(Input_FromShellZone(startZone));
+    emit(kEvtNone);
 }
 
 /* Character codes from the Mac Plus keyboard. */

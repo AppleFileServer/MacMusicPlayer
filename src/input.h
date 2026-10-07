@@ -12,10 +12,13 @@ UIEvent Input_FromKey(char key, Boolean autoRepeat);
 UIEvent Input_FromShellZone(ShellZone zone);
 
 /* Tracks a mouse gesture that started on the wheel ring (any zone except
-   Select) until the button is released. Every 15 degrees of rotation emits
-   kEvtWheelDown (clockwise) or kEvtWheelUp (counter-clockwise). If no step
-   was emitted, the gesture is a press and emits the zone's event on
-   release. The window must be the current port. */
+   Select) until the button is released. Every UI_WheelStepDegrees() of
+   rotation emits kEvtWheelDown (clockwise) or kEvtWheelUp
+   (counter-clockwise). If no step was emitted, the gesture is a press and
+   emits the zone's event on release. kEvtNone is emitted after every
+   mouse sample (and at the end): the sink redraws then, once for all the
+   steps of that sample, and can do timed work while the button is held
+   (7c). The window must be the current port. */
 typedef void (*UIEventSink)(UIEvent event);
 
 void Input_TrackWheel(ShellZone startZone, UIEventSink emit);

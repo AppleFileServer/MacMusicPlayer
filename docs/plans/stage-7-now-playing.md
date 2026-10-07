@@ -1,7 +1,7 @@
 # Stage 7 plan: Now Playing volume, scrubber and rating
 
-Status: approved (2026-10-07). 7a (`cede6c4`) and 7b are done; 7c and 7d
-remain. Decisions N1-N8 are recorded at the end.
+Status: approved (2026-10-07). 7a (`cede6c4`), 7b (`3016fe2`) and 7c are
+done; 7d remains. Decisions N1-N8 are recorded at the end.
 
 ## What the 4G iPod does (sources)
 
@@ -100,6 +100,11 @@ an actual 4G screen photograph or reference is obtained.
   resumes.
 - Gapless: a seek starts a new stream at the current song; the next song
   is queued again as usual.
+- Done: Select, Menu and Play/Pause apply a pending position at once;
+  Next/Previous and a natural song change drop it. The seek also
+  happens while the button is still held. The wheel now redraws once
+  per mouse sample rather than once per step, so the fine steps don't
+  lag. The 3-degree step and 0.5 s wait are PROVISIONAL.
 - Tests: diagnostic seeking to set positions (start, middle, near the
   end) and checking the Sound Manager position afterwards; manual.
 

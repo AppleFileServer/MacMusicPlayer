@@ -55,6 +55,9 @@ long Audio_Pause(void);
 long Audio_PausedPosition(void);
 OSErr Audio_Resume(const AudioSource *source, short tag);
 
+/* Stage 7c: while paused, moves the recorded position (a seek). */
+void Audio_SetPausedPosition(long sample);
+
 /* Follows the Sound Manager's read position and keeps the ring filled;
    restarts from the end of the valid audio after an underrun. Call often
    from the main loop while playing. */

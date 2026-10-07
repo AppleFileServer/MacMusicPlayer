@@ -175,6 +175,18 @@ static void RefreshMainMenus(void)
 #define kVolumeTimeout      120         /* 2 s */
 #define kModeTimeout        300         /* 5 s */
 
+/* PROVISIONAL (E3, spec unknown #6): one list step per 15 degrees of
+   wheel rotation (24 per turn), no acceleration. The 4G's real step size
+   is unknown; this is the single sensitivity setting. */
+#define kWheelStepDegrees   15
+
+/* 7c (N3): one turn of the wheel is the whole song, in 3-degree steps
+   (120 a turn); the audio jumps once turning has stopped for this long.
+   Both PROVISIONAL. */
+#define kScrubStepDegrees   3
+#define kScrubSteps         (360 / kScrubStepDegrees)
+#define kScrubSettle        30          /* 0.5 s */
+
 static NowPlayingMode gMode;
 static unsigned long gModeInput;        /* TickCount of the last input */
 
@@ -190,10 +202,63 @@ void UI_SaveSettings(void)
     Prefs_SaveVolume(Volume_Get());
 }
 
+/* 7c: the scrubber's position while it is being moved, not yet sent to
+   playback (N3: the audio jumps only once turning stops). */
+static Boolean gScrubPending;
+static long gScrubTicks;
+static unsigned long gScrubMoved;       /* TickCount of the last step */
+
+/* Sends a pending scrubber position to playback. */
+static void ApplyScrub(void)
+{
+    if (!gScrubPending)
+        return;
+    gScrubPending = false;
+    Playback_Seek(gScrubTicks);
+}
+
+/* Drops a pending position (the song is changing). */
+static void CancelScrub(void)
+{
+    gScrubPending = false;
+}
+
+static void ScrubWheel(short delta)
+{
+    long length = Playback_LengthTicks();
+
+    if (!gScrubPending)
+        gScrubTicks = Playback_ElapsedTicks();
+    gScrubTicks += (long)delta * length / kScrubSteps;
+    if (gScrubTicks < 0)
+        gScrubTicks = 0;
+    if (gScrubTicks > length)
+        gScrubTicks = length;
+    gScrubPending = true;
+    gScrubMoved = TickCount();
+}
+
+short UI_WheelStepDegrees(void)
+{
+    if (CurrentScreen()->kind == kScreenNowPlaying && gMode == kNowScrubber)
+        return kScrubStepDegrees;
+    return kWheelStepDegrees;
+}
+
+Boolean UI_Idle(void)
+{
+    if (!gScrubPending || TickCount() - gScrubMoved < kScrubSettle)
+        return false;
+    ApplyScrub();
+    return true;
+}
+
 static void SetMode(NowPlayingMode mode)
 {
     if (gMode == kNowVolume && mode != kNowVolume)
         UI_SaveSettings();
+    if (gMode == kNowScrubber && mode != kNowScrubber)
+        ApplyScrub();
     gMode = mode;
     gModeInput = TickCount();
 }
@@ -203,6 +268,8 @@ static void NormalMode(void)
 {
     if (gMode == kNowVolume)
         UI_SaveSettings();
+    if (gMode == kNowScrubber)
+        ApplyScrub();
     gMode = kNowNormal;
 }
 
@@ -213,7 +280,8 @@ NowPlayingMode UI_NowPlayingMode(void)
 
 /* The wheel on Now Playing. Normal or volume mode: changes the volume one
    level per wheel step (N1: the Plus's 8 levels), the first step opening
-   volume mode, as on the 4G. Scrubber and rating: 7c, 7d. */
+   volume mode, as on the 4G. Scrubber: moves the position (7c, N3).
+   Rating: 7d. */
 static Boolean NowPlayingWheel(short delta)
 {
     short level;
@@ -229,6 +297,8 @@ static Boolean NowPlayingWheel(short delta)
         SetMode(kNowVolume);
         return true;
     }
+    if (gMode == kNowScrubber)
+        ScrubWheel(delta);
     SetMode(gMode);                     /* keeps the mode up */
     return true;
 }
@@ -331,6 +401,8 @@ static Boolean HandlePlayPause(void)
     Screen *s = CurrentScreen();
     short start, n;
 
+    ApplyScrub();                       /* 7c: play/pause from there */
+
     if (s->kind != kScreenNowPlaying)
     {
         if (IsShuffleRow(s))
@@ -359,6 +431,7 @@ static Boolean HandleSkip(Boolean forward)
 {
     if (!Playback_IsActive())
         return false;
+    CancelScrub();                      /* that position was this song's */
     NormalMode();
     if (forward)
         Playback_Next();
@@ -405,7 +478,12 @@ Boolean UI_Tick(void)
         return true;
     }
     if (result & kTickSongChanged)
+    {
+        CancelScrub();
         NormalMode();
+    }
+    if (UI_Idle() && onNowPlaying)
+        return true;
     if (onNowPlaying && ModeTimedOut())
         return true;
     return onNowPlaying && (result & (kTickTimeChanged | kTickSongChanged));
@@ -431,7 +509,8 @@ static void RenderNowPlaying(void)
     }
     LCDDraw_NowPlaying(Library_SongTitle(song), Library_SongArtistName(song),
                        Library_SongAlbumName(song), Playback_Position(),
-                       Playback_QueueLength(), Playback_ElapsedTicks(),
+                       Playback_QueueLength(),
+                       gScrubPending ? gScrubTicks : Playback_ElapsedTicks(),
                        Playback_LengthTicks(),
                        Playback_State() == kPlayPaused,
                        gMode, ModeValue());
