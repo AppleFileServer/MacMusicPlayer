@@ -1,6 +1,6 @@
 # Stage 10 plan: fast-forward and rewind
 
-Status: approved (2026-10-07), decisions F1-F8 made. 10a done.
+Status: approved (2026-10-07), decisions F1-F8 made. 10a and 10b done; 10c approved (G1-G4).
 No code has been changed. Decision N8 (deferred since 5c-1, W4, and
 Stage 7). Built as close to the Stage 7c scrubber as possible.
 
@@ -151,6 +151,132 @@ There is no position movement and no fast-forward logic in 10a.
   - a song change during a hold;
   - no underruns;
   - the manual check at 1×.
+
+## 10c: Shuffle and Repeat icons on Now Playing (approved 2026-10-07)
+
+Asked for after the 10b check: with Repeat set to One, a song
+fast-forwarded to its end replays (correctly), but nothing on screen said
+Repeat was on. Now Playing will show when Shuffle and Repeat are in
+effect.
+
+### References found (2026-10-07)
+
+- **The 4G Click Wheel guide (2004)** doesn't describe shuffle or repeat
+  icons. Its only title-bar items are the battery ("upper-right corner")
+  and the optional clock.
+- **The iPod classic guide** (the later click-wheel generation), on the
+  Now Playing screen:
+  - "**Shuffle icon**: Appears if iPod classic is set to shuffle songs or
+    albums."
+  - "**Repeat icon**: Appears if iPod classic is set to repeat all songs.
+    The **Repeat Once** icon appears if iPod classic is set to repeat one
+    song."
+
+  The guide's labelled diagram of the screen couldn't be retrieved; the
+  only image fetched was a table layout.
+- **Descriptions of the shapes** (other sources, consistent with each
+  other):
+  - shuffle: two crossed arrows;
+  - repeat: two arrows, each pointing at the other's tail (a loop);
+  - Repeat One: the same with a small "1".
+- **Placement:** not stated in any source found. On the later iPods both
+  icons are recalled as sitting together on the right of the title bar,
+  just left of the battery, but this is unconfirmed.
+- **So:** the icons' meaning and shapes follow Apple's descriptions; their
+  exact artwork and position are PROVISIONAL, as N7.
+
+### Room in our title bar
+
+Now Playing's bar is 18 px tall, and the icons are at icon height
+(y 3-11):
+- the play/pause icon at x 9-17 (fast-forward and rewind to x 18);
+- "Now Playing" centred, about x 42-118 in Chicago 12 (to be measured
+  in 10c);
+- the battery at x 134-153.
+
+That leaves about x 20-40 on the left and only x 120-132 on the right:
+room for one icon on the right, not two, while the title stays centred.
+
+### Placement (G1): below the title bar, top right (proposed 2026-10-07)
+
+Asked for in review: put the icons at the top right of Now Playing,
+below the battery and below the title bar's rule, rather than in the
+title bar.
+
+**Why it fits:** below the rule (y 17), the strip down to the song
+title has only the "3 of 12" counter, on the left at y 24-30 in the
+small font. The title's ink starts at y 39, and the right side of the
+strip is empty.
+
+**Proposed layout:** two 11 x 9 px icons on the counter's row, y 23-31
+(centred on the counter's 24-30), right-aligned with the progress bar
+and the remaining time (which end at x 150-151):
+- repeat at x 141-151, under the battery (x 134-153);
+- shuffle at x 128-138, to its left, with a 2 px gap.
+
+Each icon is drawn only when on. With one icon showing, it takes the
+rightmost place (x 141-151), so a lone shuffle icon sits under the
+battery too.
+
+**What this avoids:**
+- **The title bar is unchanged:** it still matches the measured 4G
+  screenshot, and "Now Playing" stays centred.
+- **No other screen changes.**
+- **No overlap:** nothing clashes with the counter (which ends well
+  before x 100, even at "500 of 500"), the song title, or the
+  scrubber, volume or rating bars further down.
+
+**Not from a reference:** the later iPods put these icons in the title
+bar (as far as recalled). This place is a MacMusic decision for
+legibility on the 160 x 128 screen, PROVISIONAL like the artwork.
+
+**The earlier options, set aside:** in the title bar, (a) both right
+with the title shifted, (b) split either side of the title, or (c) both
+right but smaller. There is room in the title bar for only one icon
+beside the battery while the title stays centred.
+
+### What they show (G2, G3, G4)
+
+- **Repeat:** the Repeat setting, which acts on what is playing at once
+  (9d). The loop for All; the loop with a "1" for One (G4); nothing for
+  Off.
+- **Shuffle:** whether the songs now playing were shuffled (the queue's
+  own order, kept by playback for Repeat All's reshuffle, 9d). Shuffle
+  Songs from the main menu shows it too. The Shuffle setting affects only
+  the next list played (T4), so the icon follows what is actually
+  playing. Shuffle by Albums shows the same icon (G3), as the classic
+  guide's "shuffle songs or albums" suggests.
+
+### Code, tests and order
+
+- **Code:**
+  - two (three, with Repeat One) small bitmaps and a draw call in
+    `lcd_draw.c`;
+  - `LCDDraw_NowPlaying` gains the two states;
+  - `Playback_ShuffleMode()` gives the queue's mode;
+
+  Playback and the settings are unchanged.
+- **Tests:**
+  - render checks of every combination, including with the fast-forward
+    icon;
+  - that nothing overlaps the counter, the song title or the title bar;
+  - that the Repeat icon follows a change at once, and the Shuffle icon
+    only with the next list;
+  - manual at 1×.
+- **Order:** a separate step after 10b (committed).
+
+### Decisions (2026-10-07)
+
+- **G1:** below the title bar at the top right, on the counter's row:
+  repeat under the battery, shuffle to its left. PROVISIONAL.
+- **G2:** the shuffle icon is shown whenever any shuffle is happening:
+  the songs now playing were shuffled, whether by the Shuffle setting
+  (Songs or Albums) or by Shuffle Songs in the main menu. It isn't shown
+  when they play in order, including a list played in order because it
+  is audiobooks (S-2), or because Shuffle was changed only after it
+  started (T4).
+- **G3:** Shuffle by Albums shows the same shuffle icon.
+- **G4:** Repeat One is the loop with a "1". PROVISIONAL.
 
 ## Not in Stage 10
 - Audible fast-forward (see the principle above).
