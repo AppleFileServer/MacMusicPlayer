@@ -1,3 +1,5 @@
+#include <Events.h>
+
 #include "ui_nav.h"
 #include "ui_lists.h"
 #include "ui_menus.h"
@@ -157,10 +159,69 @@ static void RefreshMainMenus(void)
             RebuildScreen(&gNav[i]);
 }
 
+/* ---- Stage 7: Now Playing modes ----------------------------------------
+
+   From Apple's 4G guide: turning the wheel on Now Playing changes the
+   volume; Select shows the scrubber, and again the rating. Here Select
+   steps normal -> scrubber -> rating -> normal (from volume, Select goes
+   to the scrubber). PROVISIONAL (N5): each mode returns to normal after
+   kVolumeTimeout / kModeTimeout ticks without input. PROVISIONAL: Next,
+   Previous and a change of song return to normal (the rating and
+   scrubber belong to the song that was showing). 7a: the modes and their
+   screens; the wheel's action in each (volume, seeking, rating) comes in
+   7b-7d. */
+#define kVolumeTimeout      120         /* 2 s */
+#define kModeTimeout        300         /* 5 s */
+
+static NowPlayingMode gMode;
+static unsigned long gModeInput;        /* TickCount of the last input */
+
+static void SetMode(NowPlayingMode mode)
+{
+    gMode = mode;
+    gModeInput = TickCount();
+}
+
+NowPlayingMode UI_NowPlayingMode(void)
+{
+    return gMode;
+}
+
+/* The wheel on Now Playing: enters volume mode; in a mode, keeps it up. */
+static Boolean NowPlayingWheel(short delta)
+{
+    (void)delta;                        /* 7b-7d act on it */
+    SetMode(gMode == kNowNormal ? kNowVolume : gMode);
+    return true;
+}
+
+static Boolean NowPlayingSelect(void)
+{
+    switch (gMode)
+    {
+        case kNowScrubber:  SetMode(kNowRating);    break;
+        case kNowRating:    SetMode(kNowNormal);    break;
+        default:            SetMode(kNowScrubber);  break;  /* normal, volume */
+    }
+    return true;
+}
+
+/* True if the mode timed out (the screen needs redrawing). */
+static Boolean ModeTimedOut(void)
+{
+    unsigned long limit = gMode == kNowVolume ? kVolumeTimeout : kModeTimeout;
+
+    if (gMode == kNowNormal || TickCount() - gModeInput < limit)
+        return false;
+    gMode = kNowNormal;
+    return true;
+}
+
 static void PushNowPlaying(void)
 {
     Screen np;
 
+    gMode = kNowNormal;
     np.kind = kScreenNowPlaying;
     np.menuID = 0;
     LibFilter_Clear(&np.filter);
@@ -260,6 +321,7 @@ static Boolean HandleSkip(Boolean forward)
 {
     if (!Playback_IsActive())
         return false;
+    gMode = kNowNormal;
     if (forward)
         Playback_Next();
     else
@@ -279,11 +341,14 @@ Boolean UI_HandleEvent(UIEvent event)
 
     switch (event)
     {
-        /* The wheel does nothing on Now Playing until volume (Stage 7). */
-        case kEvtWheelUp:   return !onNowPlaying && MoveSelection(-1);
-        case kEvtWheelDown: return !onNowPlaying && MoveSelection(1);
-        case kEvtSelect:    return HandleSelect();
-        case kEvtMenu:      return GoBack();
+        case kEvtWheelUp:   return onNowPlaying ? NowPlayingWheel(-1)
+                                            : MoveSelection(-1);
+        case kEvtWheelDown: return onNowPlaying ? NowPlayingWheel(1)
+                                            : MoveSelection(1);
+        case kEvtSelect:    return onNowPlaying ? NowPlayingSelect()
+                                            : HandleSelect();
+        case kEvtMenu:      gMode = kNowNormal;
+                            return GoBack();
         case kEvtPlayPause: return HandlePlayPause();
         case kEvtNext:      return HandleSkip(true);
         case kEvtPrevious:  return HandleSkip(false);
@@ -301,7 +366,24 @@ Boolean UI_Tick(void)
         PlaybackStopped();
         return true;
     }
+    if (result & kTickSongChanged)
+        gMode = kNowNormal;
+    if (onNowPlaying && ModeTimedOut())
+        return true;
     return onNowPlaying && (result & (kTickTimeChanged | kTickSongChanged));
+}
+
+/* The level or rating a mode shows. 7a: the system volume as it is, read
+   from the low-memory SdVolume byte (0-7 in its low three bits, which is
+   what GetSoundVol returns; Retro68 has no glue for it); the rating
+   comes in 7d. */
+#define kSdVolume           0x0260
+
+static short ModeValue(void)
+{
+    if (gMode == kNowVolume)
+        return *(unsigned char *)kSdVolume & 7;
+    return 0;
 }
 
 static void RenderNowPlaying(void)
@@ -318,7 +400,8 @@ static void RenderNowPlaying(void)
                        Library_SongAlbumName(song), Playback_Position(),
                        Playback_QueueLength(), Playback_ElapsedTicks(),
                        Playback_LengthTicks(),
-                       Playback_State() == kPlayPaused);
+                       Playback_State() == kPlayPaused,
+                       gMode, ModeValue());
 }
 
 void UI_Render(void)

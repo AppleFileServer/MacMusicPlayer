@@ -25,10 +25,21 @@ void LCDDraw_SmallText(short left, short top, const char *text);
 void LCDDraw_PlayStateIcon(Boolean paused);
 void LCDDraw_ProgressBar(long done, long total);
 
-/* The whole Now Playing screen; position is 0-based. */
+/* Stage 7: what Now Playing shows in place of the progress bar. */
+typedef enum
+{
+    kNowNormal = 0,     /* progress bar and times */
+    kNowVolume,         /* volume bar (value = level 0-7); times hidden */
+    kNowScrubber,       /* progress bar with a marker; times shown */
+    kNowRating          /* five bullets/stars (value = rating 0-5) */
+} NowPlayingMode;
+
+/* The whole Now Playing screen; position is 0-based. value is the mode's
+   volume level or rating. */
 void LCDDraw_NowPlaying(ConstStringPtr title, ConstStringPtr artist,
                         ConstStringPtr album, short position, short count,
-                        long elapsedTicks, long lengthTicks, Boolean paused);
+                        long elapsedTicks, long lengthTicks, Boolean paused,
+                        NowPlayingMode mode, short value);
 
 /* Scroll bar for a list of total items whose first visible item is top. */
 void LCDDraw_ScrollBar(short total, short top);

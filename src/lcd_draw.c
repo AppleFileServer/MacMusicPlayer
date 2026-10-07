@@ -260,16 +260,16 @@ void LCDDraw_PlayStateIcon(Boolean paused)
              kPlayIconSize, kPlayIconSize, kPlayIconLeft, kPlayIconTop, srcOr);
 }
 
-/* The rounded progress bar: 1 px outline whose ends round off over two
-   pixels (as measured), filled black from the left for fraction
-   done/total. */
-void LCDDraw_ProgressBar(long done, long total)
+/* A rounded bar from x left to right - 1 at the progress bar's height:
+   1 px outline whose ends round off over two pixels (as measured), filled
+   black from the left for fraction done/total. */
+static void DrawBar(short left, short right, long done, long total)
 {
-    short left = kProgressLeft, right = kProgressRight - 1;
     short top = kProgressTop, bottom = kProgressBottom - 1;
     short fillRight, y, rowLeft, rowRight;
     Rect r;
 
+    right--;
     MoveTo(left + 2, top);      LineTo(right - 2, top);
     MoveTo(left + 2, bottom);   LineTo(right - 2, bottom);
     MoveTo(left + 1, top + 1);  LineTo(left + 1, top + 1);
@@ -295,6 +295,81 @@ void LCDDraw_ProgressBar(long done, long total)
             continue;
         SetRect(&r, rowLeft, y, (fillRight < rowRight ? fillRight : rowRight) + 1, y + 1);
         PaintRect(&r);
+    }
+}
+
+void LCDDraw_ProgressBar(long done, long total)
+{
+    DrawBar(kProgressLeft, kProgressRight, done, total);
+}
+
+/* ---- Stage 7 mode bars. PROVISIONAL (N7): the functions are as in
+   Apple's 4G guide; the exact pixel artwork is designed here, as no 4G
+   screen photograph of these modes was available. ---- */
+
+static const unsigned short kSpeakerSmallBits[7] = {    /* 5 x 7 */
+    0x1000, 0x3000, 0xF000, 0xF000, 0xF000, 0x3000, 0x1000
+};
+static const unsigned short kSpeakerLargeBits[7] = {    /* 9 x 7 */
+    0x1100, 0x3480, 0xF280, 0xF280, 0xF280, 0x3480, 0x1100
+};
+static const unsigned short kDiamondBits[7] = {         /* 7 x 7 */
+    0x1000, 0x3800, 0x7C00, 0xFE00, 0x7C00, 0x3800, 0x1000
+};
+static const unsigned short kBulletBits[3] = {          /* 3 x 3 */
+    0x4000, 0xE000, 0x4000
+};
+static const unsigned short kStarBits[7] = {            /* 7 x 7 */
+    0x1000, 0x1000, 0xFE00, 0x7C00, 0x3800, 0x6C00, 0x4400
+};
+
+#define kBarMiddle          ((kProgressTop + kProgressBottom - 1) / 2)
+#define kVolumeBarLeft      (kProgressLeft + 10)
+#define kVolumeBarRight     (kProgressRight - 14)
+#define kVolumeLevels       7
+#define kRatingSpacing      16
+
+/* Volume: a bar between a small and a large speaker, filled to level/7. */
+static void DrawVolumeBar(short level)
+{
+    DrawIcon(kSpeakerSmallBits, 2, 5, 7, kProgressLeft, kBarMiddle - 3, srcOr);
+    DrawIcon(kSpeakerLargeBits, 2, 9, 7, kProgressRight - 9, kBarMiddle - 3,
+             srcOr);
+    DrawBar(kVolumeBarLeft, kVolumeBarRight, level, kVolumeLevels);
+}
+
+/* Scrubber: the progress bar's outline with a diamond at the position.
+   The 7 x 7 diamond fits inside the outline (rows 100-106, between the
+   lines at 99 and 107) and is drawn without a background, so the
+   outline is never covered. */
+static void DrawScrubber(long done, long total)
+{
+    short x;
+
+    DrawBar(kProgressLeft, kProgressRight, 0, total);
+    if (total <= 0)
+        return;
+    if (done > total)
+        done = total;
+    if (done < 0)
+        done = 0;
+    x = kProgressLeft
+        + (short)(((long)(kProgressRight - kProgressLeft - 1) * done) / total);
+    DrawIcon(kDiamondBits, 2, 7, 7, x - 3, kBarMiddle - 3, srcOr);
+}
+
+/* Rating: five places, stars for the rating and bullets after it. */
+static void DrawRating(short rating)
+{
+    short i, centre, left = (kLCDWidth - 4 * kRatingSpacing) / 2;
+
+    for (i = 0; i < 5; i++)
+    {
+        centre = left + i * kRatingSpacing;
+        if (i < rating)
+            DrawIcon(kStarBits, 2, 7, 7, centre - 3, kBarMiddle - 3, srcOr);
+        else
+            DrawIcon(kBulletBits, 2, 3, 3, centre - 1, kBarMiddle - 1, srcOr);
     }
 }
 
@@ -435,7 +510,8 @@ static void DrawCentredLine(short line, short baseline, ConstStringPtr text)
 
 void LCDDraw_NowPlaying(ConstStringPtr title, ConstStringPtr artist,
                         ConstStringPtr album, short position, short count,
-                        long elapsedTicks, long lengthTicks, Boolean paused)
+                        long elapsedTicks, long lengthTicks, Boolean paused,
+                        NowPlayingMode mode, short value)
 {
     char text[32];
     long elapsed = elapsedTicks / 60;
@@ -459,7 +535,21 @@ void LCDDraw_NowPlaying(ConstStringPtr title, ConstStringPtr artist,
     DrawCentredLine(1, kNowLineBaseline0 + kNowLineSpacing, artist);
     DrawCentredLine(2, kNowLineBaseline0 + 2 * kNowLineSpacing, album);
 
-    LCDDraw_ProgressBar(elapsedTicks, lengthTicks);
+    switch (mode)
+    {
+        case kNowVolume:
+            DrawVolumeBar(value);
+            return;                     /* no times */
+        case kNowRating:
+            DrawRating(value);
+            return;
+        case kNowScrubber:
+            DrawScrubber(elapsedTicks, lengthTicks);
+            break;
+        default:
+            LCDDraw_ProgressBar(elapsedTicks, lengthTicks);
+            break;
+    }
 
     if (remaining < 0)
         remaining = 0;

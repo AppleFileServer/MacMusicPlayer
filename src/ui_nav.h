@@ -3,6 +3,8 @@
 
 #include <MacTypes.h>
 
+#include "lcd_draw.h"
+
 /* Abstract iPod input events (Stage 1 subset). */
 typedef enum
 {
@@ -20,6 +22,9 @@ void UI_Init(void);
 
 /* Returns true if the LCD needs redrawing. */
 Boolean UI_HandleEvent(UIEvent event);
+
+/* Stage 7: the Now Playing screen's current mode (for tests). */
+NowPlayingMode UI_NowPlayingMode(void);
 
 /* Draws the current screen into the offscreen LCD. */
 void UI_Render(void);
