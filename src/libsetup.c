@@ -8,6 +8,7 @@
 #include "message.h"
 #include "library.h"
 #include "prefs.h"
+#include "fileops.h"
 
 /* DECISION L1 (5b-3): finding an existing library and creating a new
    one are separate choices, at startup (ALRT 129, with Not Now) and in
@@ -54,6 +55,62 @@ static void ReportSkipped(void)
     PStrAppend(text, P(" not recognised and "));
     PStrAppend(text, skipped == 1 ? P("was skipped.") : P("were skipped."));
     Message_Show(text, noErr);
+}
+
+/* ---- Library Info (Stage 8d-2) ---------------------------------------- */
+
+#define kInfoAlert          141
+
+/* Appends a size in megabytes, with one decimal place. */
+static void AppendMB(Str255 text, long bytes)
+{
+    Str255 number;
+    long tenths = (bytes / 1024 * 10 + 512) / 1024;
+
+    NumToString(tenths / 10, number);
+    PStrAppend(text, number);
+    PStrAppend(text, P("."));
+    NumToString(tenths % 10, number);
+    PStrAppend(text, number);
+    PStrAppend(text, P(" MB"));
+}
+
+static void AppendNumber(Str255 text, long n)
+{
+    Str255 number;
+
+    NumToString(n, number);
+    PStrAppend(text, number);
+}
+
+void LibSetup_ShowInfo(void)
+{
+    Str255 text;
+    short overLimit = Library_OverLimitCount();
+
+    if (!gHaveLibrary)
+        return;
+
+    /* Songs counts audiobooks too: every song file in the library. */
+    text[0] = 0;
+    PStrAppend(text, P("Songs: "));
+    AppendNumber(text, Library_SongCount());
+    PStrAppend(text, P(" of 500\rPlaylists: "));
+    AppendNumber(text, Library_PlaylistCount());
+    PStrAppend(text, P("\rSize: "));
+    AppendMB(text, Library_TotalAudioBytes());
+    PStrAppend(text, P("\rFree: "));
+    AppendMB(text, FreeBytes(gFolder.vRefNum));
+    PStrAppend(text, P("\rUnreadable Files: "));
+    AppendNumber(text, Library_SkippedCount());
+    if (overLimit > 0)
+    {
+        PStrAppend(text, P("\rOver the Limit: "));
+        AppendNumber(text, overLimit);
+    }
+
+    ParamText(text, P(""), P(""), P(""));
+    Alert(kInfoAlert, Modal_DialogFilter);
 }
 
 void LibSetup_Rescan(void)

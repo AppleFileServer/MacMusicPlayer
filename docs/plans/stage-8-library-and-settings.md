@@ -3,8 +3,8 @@
 Status: approved (2026-10-07), decisions L1-L11 made. 8a decided:
 Option A (`stage-8a-multiple-libraries.md`, M1-M4). 8b decided
 (`stage-8b-settings.md`). 8c done. 8d in progress, in four parts:
-8d-1 safeguards (done), 8d-2 Rescan and Library Info, 8d-3 Recent
-Libraries, 8d-4 Remove from Playlist.
+8d-1 safeguards (done), 8d-2 Rescan and Library Info (done), 8d-3
+Recent Libraries, 8d-4 Remove from Playlist.
 No code has been changed.
 
 Replaces the earlier Stage 8 (On-The-Go), now deferred
@@ -249,14 +249,24 @@ it is (R5).
 or changed in the Finder. It stays on the same screen where possible,
 using 8c's rebuild.
 
-**Library Info…:** a dialog showing:
-- the numbers of songs and playlists;
-- the total size of the songs;
-- the free space on the library's disk;
-- the files that couldn't be read: their number, and names up to a
-  limit.
+**Library Info… (revised after review, 2026-10-07):** an alert with one
+item a line:
+- **Songs:** n of 500, audiobooks included;
+- **Playlists:** their number;
+- **Size:** the songs' audio, in MB;
+- **Free:** the free space on the library's disk, in MB;
+- **Unreadable Files:** their number, as the scan reports at startup
+  (no names);
+- **Over the Limit:** only if a scan left song files out because the
+  library already holds 500.
 
 No path is shown (L6).
+
+**Done in 8d-2:** Rescan Library pauses the audio during the scan (as
+import does, A5) and keeps the screens, found again by name and song ID
+(a rescan renumbers songs and playlists as well as groups). A playlist
+or album that has gone closes to its parent; if the playing song's file
+has gone, playback moves on.
 
 **Reveal Library in Finder (L6): left out (2026-10-07).** The
 feasibility check found no reliable way on System 6:

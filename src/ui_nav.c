@@ -162,13 +162,17 @@ short UI_SongToEdit(void)
 
 /* ---- Stage 8c: staying on screen after an edit (L4) ------------------- */
 
-/* A screen's choices and highlighted row, by name, noted before the
-   library's artist, album, genre and composer numbers change. */
+/* A screen's choices and highlighted row, by name (or song ID), noted
+   before the library's numbers change: an edit renumbers the artists,
+   albums, genres and composers; a rescan (8d-2) the songs and playlists
+   too. */
 typedef struct
 {
     Str63 genre, artist, album, composer;   /* empty: not chosen */
-    Str63 selectedName;                     /* a group list's row */
-    short selectedItem;                     /* any other list's row */
+    Str63 playlist;
+    Str63 selectedName;                     /* a named row (group, playlist) */
+    long selectedID;                        /* a song row: its ID */
+    short selectedItem;                     /* any other row (menus) */
 } ScreenNames;
 
 static ScreenNames gSavedNames[kMaxNavDepth];
@@ -185,10 +189,17 @@ static void NoteName(short group, ConstStringPtr (*name)(short), Str63 out)
     BlockMove(s + 1, out + 1, out[0]);
 }
 
-static Boolean IsGroupList(short kind)
+/* Lists whose rows are found again by name. */
+static Boolean IsNamedList(short kind)
 {
     return kind == kScreenGenres || kind == kScreenArtists
-        || kind == kScreenAlbums || kind == kScreenComposers;
+        || kind == kScreenAlbums || kind == kScreenComposers
+        || kind == kScreenPlaylists;
+}
+
+static Boolean IsSongList(short kind)
+{
+    return kind == kScreenSongs || kind == kScreenAudiobooks;
 }
 
 void UI_BeginLibraryEdit(void)
@@ -206,10 +217,13 @@ void UI_BeginLibraryEdit(void)
         NoteName(s->filter.artist, Library_ArtistName, n->artist);
         NoteName(s->filter.album, Library_AlbumName, n->album);
         NoteName(s->filter.composer, Library_ComposerName, n->composer);
+        NoteName(s->filter.playlist, Library_PlaylistName, n->playlist);
 
         n->selectedName[0] = 0;
         n->selectedItem = s->count > 0 ? s->items[s->selected] : kNone;
-        if (IsGroupList(s->kind) && n->selectedItem != kAllItem
+        n->selectedID = IsSongList(s->kind) && n->selectedItem != kNone
+                        ? Library_SongID(n->selectedItem) : 0;
+        if (IsNamedList(s->kind) && n->selectedItem != kAllItem
             && n->selectedItem != kNone)
         {
             title = UIList_ItemTitle(s, s->selected);
@@ -245,6 +259,9 @@ static Boolean RetitleFromChoice(Screen *s, const Screen *parent)
     else if (s->filter.composer != kNone
              && s->filter.composer != parent->filter.composer)
         s->title = Library_ComposerName(s->filter.composer);
+    else if (s->filter.playlist != kNone
+             && s->filter.playlist != parent->filter.playlist)
+        s->title = Library_PlaylistName(s->filter.playlist);
     else
         return false;
     return true;
@@ -273,21 +290,30 @@ static Boolean FindScreenAgain(Screen *s, const Screen *parent,
     if (!FindAgain(n->genre, Library_FindGenre, &s->filter.genre)
         || !FindAgain(n->artist, Library_FindArtist, &s->filter.artist)
         || !FindAgain(n->album, Library_FindAlbum, &s->filter.album)
-        || !FindAgain(n->composer, Library_FindComposer, &s->filter.composer))
+        || !FindAgain(n->composer, Library_FindComposer, &s->filter.composer)
+        || !FindAgain(n->playlist, Library_FindPlaylist, &s->filter.playlist))
         return false;
     byChoice = parent != nil && RetitleFromChoice(s, parent);
 
     UIList_Build(s);
-    if (byChoice && (s->count == 0 || (s->count == 1 && s->items[0] == kAllItem)))
+    if (byChoice && s->filter.playlist == kNone
+        && (s->count == 0 || (s->count == 1 && s->items[0] == kAllItem)))
         return false;               /* nothing left under that name */
 
     for (i = 0; i < s->count; i++)
     {
-        if (IsGroupList(s->kind) && n->selectedName[0] != 0
-            ? s->items[i] != kAllItem
-              && EqualString(UIList_ItemTitle(s, i), n->selectedName,
-                             true, true)
-            : s->items[i] == n->selectedItem)
+        Boolean same;
+
+        if (IsNamedList(s->kind) && n->selectedName[0] != 0)
+            same = s->items[i] != kAllItem
+                && EqualString(UIList_ItemTitle(s, i), n->selectedName,
+                               true, true);
+        else if (IsSongList(s->kind))
+            same = n->selectedID != 0
+                && Library_SongID(s->items[i]) == n->selectedID;
+        else
+            same = s->items[i] == n->selectedItem;
+        if (same)
         {
             s->selected = i;
             break;
@@ -299,8 +325,14 @@ static Boolean FindScreenAgain(Screen *s, const Screen *parent,
 
 void UI_EndLibraryEdit(void)
 {
-    Boolean nowPlayingOnTop = CurrentScreen()->kind == kScreenNowPlaying;
+    /* A rescan may have stopped playback (its songs gone): Now Playing
+       then goes, as at the end of the last song (N4). */
+    Boolean nowPlayingOnTop = CurrentScreen()->kind == kScreenNowPlaying
+                              && Playback_IsActive();
     short i, kept;
+
+    if (CurrentScreen()->kind == kScreenNowPlaying && !Playback_IsActive())
+        gNavDepth--;
 
     for (kept = 0; kept < gNavDepth; kept++)
     {

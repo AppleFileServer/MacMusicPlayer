@@ -47,8 +47,10 @@ enum
     kMenuFile = 129,
     kItemImport = 1,            /* enabled only when a library is set */
     kItemExport = 2,            /* ... and the highlight is on a song */
-    kItemChooseLibrary = 3,
-    kItemQuit = 5,
+    kItemChooseLibrary = 4,
+    kItemRescan = 5,            /* Stage 8d-2; with a library */
+    kItemLibraryInfo = 6,       /* Stage 8d-2; with a library */
+    kItemQuit = 8,
 
     kMenuEdit = 130,
     kItemEditSong = 8,          /* Stage 8c; items 1-6 are for DAs */
@@ -104,6 +106,7 @@ static void ExportSongPausingAudio(void);
 static void UpdateFileMenu(void);
 static void PlaylistsChanged(void);
 static void EditSong(void);
+static void RescanLibrary(void);
 
 static void ShowAboutBox(void)
 {
@@ -137,6 +140,13 @@ static void HandleMenuChoice(long choice)
                 ExportSongPausingAudio();
             else if (menuItem == kItemChooseLibrary)
                 ChooseLibrary();
+            else if (menuItem == kItemRescan)
+                RescanLibrary();
+            else if (menuItem == kItemLibraryInfo)
+            {
+                HiliteMenu(0);
+                LibSetup_ShowInfo();
+            }
             else if (menuItem == kItemQuit)
                 gQuit = true;
             break;
@@ -273,9 +283,17 @@ static void UpdateFileMenu(void)
     MenuHandle fileMenu = GetMenuHandle(kMenuFile);
 
     if (LibSetup_HasLibrary())
+    {
         EnableItem(fileMenu, kItemImport);
+        EnableItem(fileMenu, kItemRescan);
+        EnableItem(fileMenu, kItemLibraryInfo);
+    }
     else
+    {
         DisableItem(fileMenu, kItemImport);
+        DisableItem(fileMenu, kItemRescan);
+        DisableItem(fileMenu, kItemLibraryInfo);
+    }
 
     /* Plan item 3: Export acts only on a highlighted song. */
     if (LibSetup_HasLibrary() && UI_SelectedSong() != kNone)
@@ -376,6 +394,33 @@ static void EditSong(void)
         return;
     }
     UI_EndLibraryEdit();
+    UI_Render();
+    PresentLCD();
+}
+
+/* File > Rescan Library (Stage 8d-2): reads the library folder again,
+   for files added or changed in the Finder. Not an iPod restart: the
+   screens are found again by name and stay where they were (L4). The
+   audio pauses during the scan, as for import (A5): a large library
+   takes longer to read than the ring lasts. */
+static void RescanLibrary(void)
+{
+    Boolean wasPlaying = Playback_State() == kPlayPlaying;
+
+    HiliteMenu(0);
+    if (!LibSetup_HasLibrary())
+        return;
+    if (wasPlaying)
+        Playback_TogglePause();
+    UI_BeginLibraryEdit();
+    SetCursor(*GetCursor(watchCursor));
+    LibSetup_Rescan();
+    InitCursor();
+    Playback_LibraryChanged();
+    UI_EndLibraryEdit();
+    if (wasPlaying && Playback_State() == kPlayPaused)
+        Playback_TogglePause();
+    RedrawWindowNow();          /* alerts may have covered the window */
     UI_Render();
     PresentLCD();
 }

@@ -452,6 +452,21 @@ short Library_OverLimitCount(void)
     return gOverLimit;
 }
 
+long Library_TotalAudioBytes(void)
+{
+    long total = 0;
+    short i;
+
+    for (i = 0; i < gSongCount; i++)
+        total += Songs()[i].audioLength;
+    return total;
+}
+
+short Library_PlaylistCount(void)
+{
+    return gPlaylistCount;
+}
+
 /* One more than the highest valid ID found by the last scan. Import also
    takes the library's next-ID counter into account (M4), so an ID is
    never given out twice, even after the highest-numbered song has been

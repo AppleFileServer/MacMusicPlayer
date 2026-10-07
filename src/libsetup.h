@@ -17,6 +17,12 @@ Boolean LibSetup_ChooseLibrary(void);
 /* Rebuilds the library from the current folder (empty if none). */
 void LibSetup_Rescan(void);
 
+/* File > Library Info... (Stage 8d-2): Songs (of the 500-song limit,
+   audiobooks included), Playlists, Size (the songs' audio), Free (on the
+   library's disk), Unreadable Files (as the scan reports), and Over the
+   Limit if any song files were left out. */
+void LibSetup_ShowInfo(void);
+
 Boolean LibSetup_HasLibrary(void);
 const LibraryFolder *LibSetup_Folder(void);
 

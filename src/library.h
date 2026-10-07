@@ -44,6 +44,11 @@ long Library_NextSongID(void);      /* one more than the largest ID */
 short Library_SongCount(void);
 short Library_OverLimitCount(void);
 
+/* Stage 8d-2, for Library Info: the songs' audio in bytes, and the
+   number of playlists. */
+long Library_TotalAudioBytes(void);
+short Library_PlaylistCount(void);
+
 /* A song whose audio has this length and fingerprint (D31), or kNone. */
 short Library_FindAudioMatch(long audioLength, unsigned long fingerprint);
 

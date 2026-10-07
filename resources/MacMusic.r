@@ -43,17 +43,22 @@ resource 'MENU' (128) {
     }
 };
 
-/* Items 1 (Import Song...), 2 (Export Song...) and 4 (divider) start
-   disabled: mask 0x7FFFFFF4 clears their bits. Import is enabled at run
-   time once a library is set; Export while the highlight is on a song. */
+/* Items 1 (Import Song...), 2 (Export Song...), 5 (Rescan Library), 6
+   (Library Info...) and the dividers (3, 7) start disabled: mask
+   0x7FFFFF88 clears their bits. Import, Rescan and Library Info are
+   enabled at run time once a library is set; Export while the highlight
+   is on a song. Stage 8d-2 added Rescan Library and Library Info.... */
 resource 'MENU' (129) {
     129, textMenuProc;
-    0x7FFFFFF4, enabled;
+    0x7FFFFF88, enabled;
     "File";
     {
         "Import Song\0xC9", noIcon, noKey, noMark, plain;
         "Export Song\0xC9", noIcon, noKey, noMark, plain;
+        "-", noIcon, noKey, noMark, plain;
         "Choose Library\0xC9", noIcon, noKey, noMark, plain;
+        "Rescan Library", noIcon, noKey, noMark, plain;
+        "Library Info\0xC9", noIcon, noKey, noMark, plain;
         "-", noIcon, noKey, noMark, plain;
         "Quit", noIcon, "Q", noMark, plain;
     }
@@ -496,5 +501,31 @@ resource 'DITL' (140) {
         StaticText { disabled, "This folder is already an iPod Library. "
                                "Use it, instead of creating a new library "
                                "inside it?" };
+    }
+};
+
+/* Library Info... (Stage 8d-2): ^0 the counts and sizes, one a line. */
+resource 'ALRT' (141) {
+    { 70, 136, 236, 376 },
+    141,
+    {
+        OK, visible, silent;
+        OK, visible, silent;
+        OK, visible, silent;
+        OK, visible, silent;
+    },
+    noAutoCenter
+};
+
+resource 'DITL' (141) {
+    {
+        { 134, 150, 154, 230 },
+        Button { enabled, "OK" };
+
+        { 12, 16, 30, 230 },
+        StaticText { disabled, "Library Info" };
+
+        { 38, 16, 126, 230 },
+        StaticText { disabled, "^0" };
     }
 };
