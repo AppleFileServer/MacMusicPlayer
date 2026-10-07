@@ -31,6 +31,9 @@ void LibSetup_ShowInfo(void);
    false if it is already the current one or can't be found (a message
    then says so). The caller then rescans and restarts, as for Choose
    Library.... */
+/* Appends a size in megabytes with one decimal place ("7.5 MB"). */
+void LibSetup_AppendMB(Str255 text, long bytes);
+
 short LibSetup_RecentCount(void);
 void LibSetup_RecentItem(short i, Str255 text, Boolean *available,
                          Boolean *current);

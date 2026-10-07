@@ -1,7 +1,7 @@
 # Stage 9 plan: the Settings menu
 
-Status: approved (2026-10-07), decisions T1-T9 made. 9a done; 9b-9e
-remain. Builds the specification decided in Stage 8b
+Status: approved (2026-10-07), decisions T1-T9 made. 9a and 9b done;
+9c-9e remain. Builds the specification decided in Stage 8b
 (`stage-8b-settings.md`, S-1 to S-11).
 
 ## What Stage 8b decided
@@ -82,6 +82,9 @@ Also from 8b:
     (T6).
 - **Tests:** render checks of both screens, scrolling to the end and
   back, and long words and paragraphs wrapping; manual.
+- **Done:** Legal is shown in Geneva 9 (asked for in review: Chicago has
+  no 9-point bitmap on System 6), 9 lines at a time; the text resource
+  is `resources/legal.r`, made by `tools/make-legal-r.py`.
 
 ### 9c: Shuffle
 - **What it applies to:** playing from any list (songs, an album, an

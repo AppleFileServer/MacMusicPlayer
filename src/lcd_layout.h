@@ -36,6 +36,14 @@
 #define kArrowLeftWithBar       140     /* x 140-145 */
 #define kArrowTopOffset         5       /* below row top */
 
+/* Stage 9b: the Legal screen's small text: Geneva 9 (Chicago has no
+   9-point bitmap on System 6, and a scaled one is hard to read), 12-px
+   lines, 9 of them below the header. PROVISIONAL: the 4G's Legal screen
+   used a smaller font than its lists; its exact layout is unknown. */
+#define kSmallLineTop0          20      /* top of the first line */
+#define kSmallLineHeight        12
+#define kSmallLines             9
+
 /* Scroll bar: 1-px frame, 1-px gap, 5-px thumb */
 #define kScrollLeft             151     /* frame x 151-159 */
 #define kScrollRight            160

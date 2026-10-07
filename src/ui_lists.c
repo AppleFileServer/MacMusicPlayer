@@ -2,6 +2,21 @@
 #include "ui_menus.h"
 #include "playback.h"
 #include "settings.h"
+#include "legal.h"
+#include "libsetup.h"
+#include "fileops.h"
+#include "pstr.h"
+#include "message.h"
+
+/* Stage 9b: the version About shows (also in the About box, DITL 128). */
+static const unsigned char kAppVersion[] = "\p0.1";
+
+/* Stage 9b: About's rows (S-6). */
+enum { kAboutSongs = 0, kAboutAvailable, kAboutVersion, kAboutRows };
+static ConstStringPtr const kAboutTitles[kAboutRows] = {
+    (ConstStringPtr)"\pSongs", (ConstStringPtr)"\pAvailable",
+    (ConstStringPtr)"\pVersion"
+};
 
 /* Music hierarchy screens. Levels below each Music item are Inferred
    (see "iPod 4G UI Specification", Music hierarchy).
@@ -71,6 +86,20 @@ void UIList_Build(Screen *s)
             s->count = Library_ListAudiobooks(s->items, kMaxListItems);
             break;
 
+        case kScreenAbout:
+            s->count = kAboutRows;
+            for (i = 0; i < s->count; i++)
+                s->items[i] = i;
+            break;
+
+        case kScreenLegal:
+            s->count = Legal_LineCount();
+            if (s->count > kMaxListItems)
+                s->count = kMaxListItems;
+            for (i = 0; i < s->count; i++)
+                s->items[i] = i;
+            break;
+
         default:
             s->count = 0;
             break;
@@ -93,6 +122,14 @@ ConstStringPtr UIList_ItemTitle(const Screen *s, short index)
         case kScreenArtists:    return Library_ArtistName(item);
         case kScreenAlbums:     return Library_AlbumName(item);
         case kScreenComposers:  return Library_ComposerName(item);
+        case kScreenAbout:      return kAboutTitles[item];
+        case kScreenLegal:
+        {
+            static Str255 line;
+
+            Legal_Line(item, line);
+            return line;
+        }
         default:                return Library_SongTitle(item);
     }
 }
@@ -110,6 +147,8 @@ Boolean UIList_ItemHasArrow(const Screen *s, short index)
 
         case kScreenSongs:
         case kScreenAudiobooks:
+        case kScreenAbout:
+        case kScreenLegal:
             return false;       /* songs are leaves (Observed) */
 
         default:
@@ -120,7 +159,35 @@ Boolean UIList_ItemHasArrow(const Screen *s, short index)
 ConstStringPtr UIList_ItemValue(const Screen *s, short index)
 {
     const MenuItemDef *def;
+    static Str255 value;
 
+    if (s->kind == kScreenAbout)
+    {
+        value[0] = 0;
+        switch (s->items[index])
+        {
+            case kAboutSongs:       /* S-6: of the 500-song limit */
+            {
+                Str255 number;
+
+                NumToString(Library_SongCount(), number);
+                PStrAppend(value, number);
+                PStrAppend(value, P(" of 500"));
+                break;
+            }
+            case kAboutAvailable:   /* free on the library's disk */
+                if (LibSetup_HasLibrary())
+                    LibSetup_AppendMB(value,
+                                      FreeBytes(LibSetup_Folder()->vRefNum));
+                else
+                    PStrAppend(value, P("\xD0"));
+                break;
+            default:
+                PStrAppend(value, kAppVersion);
+                break;
+        }
+        return value;
+    }
     if (s->kind != kScreenMenu)
         return nil;
     def = &UIMenus_Get(s->menuID)->items[s->items[index]];

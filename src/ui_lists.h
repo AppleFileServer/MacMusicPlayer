@@ -17,6 +17,8 @@ typedef enum
     kScreenSongs,
     kScreenComposers,
     kScreenAudiobooks,
+    kScreenAbout,           /* Stage 9b: Settings > About, read-only rows */
+    kScreenLegal,           /* Stage 9b: Settings > Legal, scrolling text */
     kScreenNowPlaying       /* not a list: drawn by LCDDraw_NowPlaying */
 } ScreenKind;
 

@@ -106,8 +106,7 @@ static void ReportSkipped(void)
 
 #define kInfoAlert          141
 
-/* Appends a size in megabytes, with one decimal place. */
-static void AppendMB(Str255 text, long bytes)
+void LibSetup_AppendMB(Str255 text, long bytes)
 {
     Str255 number;
     long tenths = (bytes / 1024 * 10 + 512) / 1024;
@@ -143,9 +142,9 @@ void LibSetup_ShowInfo(void)
     PStrAppend(text, P(" of 500\rPlaylists: "));
     AppendNumber(text, Library_PlaylistCount());
     PStrAppend(text, P("\rSize: "));
-    AppendMB(text, Library_TotalAudioBytes());
+    LibSetup_AppendMB(text, Library_TotalAudioBytes());
     PStrAppend(text, P("\rFree: "));
-    AppendMB(text, FreeBytes(gFolder.vRefNum));
+    LibSetup_AppendMB(text, FreeBytes(gFolder.vRefNum));
     PStrAppend(text, P("\rUnreadable Files: "));
     AppendNumber(text, Library_SkippedCount());
     if (overLimit > 0)

@@ -105,6 +105,12 @@ void LCDDraw_Header(ConstStringPtr title)
     LineTo(kLCDWidth - 1, kHeaderRuleY);
 }
 
+short LCDDraw_RowTextWidth(Boolean hasScrollBar)
+{
+    return (hasScrollBar ? kSelRightWithBar : kSelRight) - kTextRightGap
+           - kTextLeft;
+}
+
 void LCDDraw_Row(short position, ConstStringPtr text, ConstStringPtr value,
                  Boolean selected, Boolean hasArrow, Boolean hasScrollBar)
 {
@@ -147,6 +153,28 @@ void LCDDraw_Row(short position, ConstStringPtr text, ConstStringPtr value,
 
 void LCDDraw_ScrollBar(short total, short top)
 {
+    LCDDraw_ScrollBarFor(total, top, kVisibleRows);
+}
+
+void LCDDraw_UseSmallFont(Boolean small)
+{
+    TextFont(small ? kFontIDGeneva : kLCDFont);
+    TextSize(small ? 9 : kLCDFontSize);
+}
+
+void LCDDraw_SmallLine(short position, ConstStringPtr text)
+{
+    FontInfo info;
+
+    LCDDraw_UseSmallFont(true);
+    GetFontInfo(&info);
+    MoveTo(kTextLeft, kSmallLineTop0 + position * kSmallLineHeight + info.ascent);
+    DrawString(text);
+    LCDDraw_UseSmallFont(false);
+}
+
+void LCDDraw_ScrollBarFor(short total, short top, short visible)
+{
     Rect frame;
     Rect thumb;
     short track = kTrackBottom - kTrackTop;
@@ -161,14 +189,14 @@ void LCDDraw_ScrollBar(short total, short top)
        proportional to visible/total, at least kThumbMinHeight. Apple's rule
        is unknown; this gives 92 px for the 7-item Music menu where Apple's
        screenshot measures 101 px. The mismatch is known and deliberate. */
-    thumbHeight = (short)(((long)track * kVisibleRows + total / 2) / total);
+    thumbHeight = (short)(((long)track * visible + total / 2) / total);
     if (thumbHeight < kThumbMinHeight)
         thumbHeight = kThumbMinHeight;
 
     thumbTop = kTrackTop;
-    if (total > kVisibleRows)
+    if (total > visible)
         thumbTop += (short)(((long)(track - thumbHeight) * top)
-                            / (total - kVisibleRows));
+                            / (total - visible));
 
     SetRect(&thumb, kThumbLeft, thumbTop, kThumbRight, thumbTop + thumbHeight);
     PaintRect(&thumb);

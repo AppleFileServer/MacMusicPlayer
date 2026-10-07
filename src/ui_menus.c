@@ -28,14 +28,14 @@ static const MenuItemDef kMusicItems[] = {
 };
 
 /* Settings (Stage 9a): the specification decided in Stage 8b. The order
-   is PROVISIONAL (the 4G guide gives no complete list). About and Legal
-   come in 9b. */
+   is PROVISIONAL (the 4G guide gives no complete list). About and Legal:
+   Stage 9b. */
 static const MenuItemDef kSettingsItems[] = {
-    { "\pAbout",              kActStub, 0 },
+    { "\pAbout",              kActScreen, kScreenAbout },
     { "\pShuffle",            kActSetting, kSettingShuffle },
     { "\pRepeat",             kActSetting, kSettingRepeat },
     { "\pClicker",            kActSetting, kSettingClicker },
-    { "\pLegal",              kActStub, 0 },
+    { "\pLegal",              kActScreen, kScreenLegal },
     { "\pReset All Settings", kActMenu, kMenuReset }
 };
 

@@ -69,6 +69,23 @@ static Boolean MoveSelection(short delta)
     Screen *s = CurrentScreen();
     short next = s->selected + delta;
 
+    /* Stage 9b: About has nothing to choose; Legal scrolls a line at a
+       time (the wheel and the arrows alike). */
+    if (s->kind == kScreenAbout)
+        return false;
+    if (s->kind == kScreenLegal)
+    {
+        next = s->top + delta;
+        if (next > s->count - kSmallLines)
+            next = s->count - kSmallLines;
+        if (next < 0)
+            next = 0;
+        if (next == s->top)
+            return false;
+        s->top = next;
+        return true;
+    }
+
     /* PROVISIONAL (D1, spec unknown #3): the highlight stops at the first
        and last items rather than wrapping. Real 4G behaviour unknown. */
     if (next < 0 || next >= s->count)
@@ -931,6 +948,22 @@ void UI_Render(void)
     short position;
     short index;
 
+    /* Stage 9b: Legal is small text, kSmallLines lines at a time. */
+    if (s->kind == kScreenLegal)
+    {
+        LCD_BeginDraw();
+        LCDDraw_Clear();
+        LCDDraw_Header(s->title);
+        for (position = 0; position < kSmallLines; position++)
+            if (s->top + position < s->count)
+                LCDDraw_SmallLine(position,
+                                  UIList_ItemTitle(s, s->top + position));
+        if (s->count > kSmallLines)
+            LCDDraw_ScrollBarFor(s->count, s->top, kSmallLines);
+        LCD_EndDraw();
+        return;
+    }
+
     LCD_BeginDraw();
 
     LCDDraw_Clear();
@@ -944,7 +977,8 @@ void UI_Render(void)
 
         LCDDraw_Row(position, UIList_ItemTitle(s, index),
                     UIList_ItemValue(s, index),
-                    index == s->selected,
+                    index == s->selected && s->kind != kScreenAbout
+                    && s->kind != kScreenLegal,
                     UIList_ItemHasArrow(s, index),
                     hasScrollBar);
     }

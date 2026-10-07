@@ -10,6 +10,7 @@ add_application(MacMusic
     src/lcd_draw.c
     src/prefs.c
     src/settings.c
+    src/legal.c
     src/volume.c
     src/libfolder.c
     src/libsetup.c
@@ -31,4 +32,5 @@ add_application(MacMusic
     src/ui_nav.c
     src/input.c
     resources/MacMusic.r
+    resources/legal.r
 )

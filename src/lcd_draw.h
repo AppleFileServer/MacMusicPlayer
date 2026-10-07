@@ -14,6 +14,19 @@ void LCDDraw_Header(ConstStringPtr title);
 /* One list row at visible position 0..kVisibleRows-1. */
 /* Stage 9a: value (nil for none) is drawn at the row's right edge, in
    place of an arrow, as on the 4G's Settings screen. */
+/* Stage 9b: small text (Legal): sets the small font for measuring or
+   drawing, and back to the LCD's own font; draws one line of it at
+   visible position 0..kSmallLines-1. */
+void LCDDraw_UseSmallFont(Boolean small);
+void LCDDraw_SmallLine(short position, ConstStringPtr text);
+
+/* A scroll bar for a view showing `visible` lines of `total`. */
+void LCDDraw_ScrollBarFor(short total, short top, short visible);
+
+/* Stage 9b: the width text can take in a list row with no arrow or
+   value, beside the scroll bar or not. */
+short LCDDraw_RowTextWidth(Boolean hasScrollBar);
+
 void LCDDraw_Row(short position, ConstStringPtr text, ConstStringPtr value,
                  Boolean selected,
                  Boolean hasArrow, Boolean hasScrollBar);
