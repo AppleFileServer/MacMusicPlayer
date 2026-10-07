@@ -74,7 +74,8 @@ image). Stage 8 is planned.
 - Ratings (7d) are recorded but not used for anything else yet. Ideas
   for later, not planned now: use them in Shuffle Songs, or to create
   playlists (e.g. songs rated 4 stars or more).
-- Building the Settings menu specified in Stage 8b
+- Stage 9, the Settings menu (`docs/plans/stage-9-settings.md`),
+  building the specification from Stage 8b
   (`docs/plans/stage-8b-settings.md`): About, Shuffle, Repeat, Clicker,
   Legal, Reset All Settings, and the main menu's Backlight.
 - On-The-Go playlist (D17): deferred until after Stage 8, possibly a
