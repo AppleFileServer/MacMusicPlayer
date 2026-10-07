@@ -562,14 +562,70 @@ short UI_WheelStepDegrees(void)
     return kWheelStepDegrees;
 }
 
-/* ---- Stage 10a: holding Next or Previous on Now Playing ---------------
+/* ---- Stage 10: holding Next or Previous on Now Playing -----------------
 
-   10a recognises a hold and shows it (the fast-forward or rewind icon);
-   10b gives it its effect. A hold from the wheel ends on release
-   (kEvtHoldEnd); from the keyboard, when its auto-repeats stop. */
+   10a recognises a hold and shows it (the fast-forward or rewind icon).
+   A hold from the wheel ends on release (kEvtHoldEnd); from the keyboard,
+   when its auto-repeats stop.
+
+   10b: fast-forward and rewind move the scrubber's pending position
+   (gScrubTicks, 7c); the song carries on playing while the display races
+   to it (F3), and the release makes one jump (ApplyScrub). The target is
+   worked out afresh from the time held (F4), so a busy Plus doesn't
+   change where it lands: 4x for the first 2 s, then 16x. PROVISIONAL. */
 static short gHold;                     /* 1 Next, -1 Previous, 0 none */
 static Boolean gHoldByKey;
 static unsigned long gHoldKeyLast;      /* TickCount of the last repeat */
+static long gHoldBase;                  /* where the hold started (song ticks) */
+static unsigned long gHoldStarted;      /* TickCount it started */
+
+#define kHoldFastAfter      120         /* 2 s at 4x, then 16x */
+#define kHoldSlowRate       4
+#define kHoldFastRate       16
+
+static void NormalMode(void);
+
+/* Song ticks moved after held ticks. */
+static long HoldOffset(unsigned long held)
+{
+    if (held <= kHoldFastAfter)
+        return (long)held * kHoldSlowRate;
+    return (long)kHoldFastAfter * kHoldSlowRate
+           + (long)(held - kHoldFastAfter) * kHoldFastRate;
+}
+
+/* (Re)starts the target at the song's position now. */
+static void BeginHoldTarget(void)
+{
+    gHoldBase = Playback_ElapsedTicks();
+    gHoldStarted = TickCount();
+    gScrubTicks = gHoldBase;
+    gScrubPending = true;
+}
+
+/* The target for the time held so far; true if what is shown changes
+   (the second, which the times and progress bar follow closely). */
+static Boolean MoveHoldTarget(void)
+{
+    long length = Playback_LengthTicks();
+    long target = gHoldBase + gHold * HoldOffset(TickCount() - gHoldStarted);
+    Boolean shown;
+
+    if (target < 0)
+        target = 0;                     /* F5: rewind stops at 0:00 */
+    if (target > length)
+        target = length;                /* F5: fast-forward at the end */
+    shown = target / 60 != gScrubTicks / 60;
+    gScrubTicks = target;
+    gScrubPending = true;
+    return shown;
+}
+
+/* Drops a hold without jumping (a skip). */
+static void DropHold(void)
+{
+    gHold = 0;
+}
 
 #define kKeyRepThresh       0x0190      /* low memory: the repeat rate */
 
@@ -595,16 +651,22 @@ static Boolean StartHold(short direction, Boolean byKey)
         gHoldKeyLast = TickCount();
     if (gHold != 0)
         return false;                   /* already held: one at a time */
+    NormalMode();                       /* any scrubber position applied */
     gHold = direction;
     gHoldByKey = byKey;
+    BeginHoldTarget();                  /* 10b */
     return true;
 }
 
+/* Released: one jump to the target (F3). At the song's end that finishes
+   the song, and the next plays as Repeat and Shuffle say (F5); paused,
+   it becomes the paused position (F7). */
 static Boolean EndHold(void)
 {
     if (gHold == 0)
         return false;
     gHold = 0;
+    ApplyScrub();
     return true;
 }
 
@@ -629,6 +691,8 @@ Boolean UI_Idle(void)
         return true;
     if (gHold != 0 && !UI_HoldAllowed())
         return EndHold();               /* playback stopped meanwhile */
+    if (gHold != 0)
+        return MoveHoldTarget();        /* 10b; no settle while held */
     if (!gScrubPending || TickCount() - gScrubMoved < kScrubSettle)
         return false;
     ApplyScrub();
@@ -883,6 +947,8 @@ static Boolean HandlePlayPause(void)
     Screen *s = CurrentScreen();
     short start, n;
 
+    if (gHold != 0)
+        EndHold();                      /* 10b: jumps, then play/pause */
     ApplyScrub();                       /* 7c: play/pause from there */
 
     if (s->kind != kScreenNowPlaying)
@@ -916,6 +982,7 @@ static Boolean HandleSkip(Boolean forward)
 {
     if (!Playback_IsActive())
         return false;
+    DropHold();                         /* a skip ends a (key) hold */
     CancelScrub();                      /* that position was this song's */
     NormalMode();
     if (forward)
@@ -975,6 +1042,8 @@ Boolean UI_Tick(void)
     {
         CancelScrub();
         NormalMode();
+        if (gHold != 0 && Playback_IsActive())
+            BeginHoldTarget();          /* 10b: on from the new song */
     }
     if (UI_Idle() && onNowPlaying)
         return true;
