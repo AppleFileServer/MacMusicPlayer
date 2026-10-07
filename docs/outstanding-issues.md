@@ -60,6 +60,11 @@ image). Stage 8 is planned.
   longest line (an overflow there caused crashes in Stage 6a-2 testing).
 
 ## Roadmap items (not defects)
+- Real Mac Plus test with a large library (2026-10-07): a 1980 MB
+  BlueSCSI image, `HD50_512 Scratch 1980 MB.hda`, holding MacMusic
+  (`6436450`) and 307 real songs, built with `tools/library-image/`.
+  Results to record here: does the 1980 MB disk mount, how long is the
+  first scan, does playback stay smooth.
 - Further real Mac Plus checks, not yet done there: the Finder stress
   test (Duplicate, Empty Wastebasket while playing), the modal-loop tests
   (6b-2) and responsiveness. The Scratch image is current, so no image
