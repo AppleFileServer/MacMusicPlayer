@@ -65,6 +65,9 @@ image). Stage 8 is planned.
   (6b-2) and responsiveness. The Scratch image is current, so no image
   rebuild is needed first.
 - Press-and-hold fast-forward and rewind (N8, deferred from Stage 7).
+- Move a song between libraries with its details: today that means export
+  then import, and export strips the iPod details and rating. A "Move to
+  Library…" command that keeps them (noted in Stage 8a, not planned).
 - Ratings (7d) are recorded but not used for anything else yet. Ideas
   for later, not planned now: use them in Shuffle Songs, or to create
   playlists (e.g. songs rated 4 stars or more).

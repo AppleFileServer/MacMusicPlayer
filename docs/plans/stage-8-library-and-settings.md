@@ -1,6 +1,7 @@
 # Stage 8 plan: library management and settings
 
-Status: approved (2026-10-07), decisions L1-L11 made.
+Status: approved (2026-10-07), decisions L1-L11 made. 8a decided:
+Option A (`stage-8a-multiple-libraries.md`, M1-M4).
 No code has been changed.
 
 Replaces the earlier Stage 8 (On-The-Go), now deferred
@@ -116,6 +117,11 @@ A written comparison, decided before any implementation (L8).
 recommendation, for your decision. If the choice changes anything 8c or
 8d depend on, this plan is revised before they start.
 
+**Result (2026-10-07):** Option A, one active library at a time, in
+`stage-8a-multiple-libraries.md`. 8c is unaffected. 8d gains a Recent
+Libraries list (M2), the 500-song check (M3) and a song ID counter that
+never reuses IDs (M4).
+
 ## 8b: Settings menu audit (no code)
 
 1. List every Settings item of the 4G (iPod software 3.x), from Apple's
@@ -198,6 +204,32 @@ Import, export and Choose Library keep their restart (D26).
 Choose Library…, Rescan Library, Library Info… and Reveal Library in
 Finder, then Quit.
 
+**Recent Libraries (M2):** a submenu or list beside Choose Library…,
+remembering the libraries used before. Each entry shows the library's
+folder name and its disk. A library whose disk isn't mounted is shown but
+can't be chosen. Choosing one switches to it, as Choose Library… does
+(playback stops, the iPod restarts). The locations are kept in the prefs,
+which gain a list; version 2 prefs files are still read. How many to keep
+is decided in 8d.
+
+**The 500-song limit (M3):**
+- Import checks the number of songs first. With 500 already, it stops
+  with a message before touching the file, for example: "The iPod Library
+  is full (500 songs). Export a song to make room."
+- The scan reports songs over the limit separately from unreadable files
+  (they can be there if files were copied in from the Finder), so the
+  message says which it is.
+
+**Song IDs are never reused (M4):**
+- Each library keeps a "next song ID" counter, stored with the library
+  (in or beside its marker file; the exact form is decided in 8d). It
+  only ever goes up.
+- A new song gets the counter's value, or one more than the highest ID
+  present if that is higher (for songs copied in from elsewhere).
+- If the counter can't be read or written (a library from before 8d, a
+  locked disk), the app falls back to the current rule (highest ID + 1)
+  and creates the counter when it can.
+
 **Rescan Library:** rescans now, which is useful after files were added
 or changed in the Finder. It stays on the same screen where possible,
 using 8c's rebuild.
@@ -232,6 +264,12 @@ Library Info. Under L1 the app never deletes or "repairs" them.
 **Tests:**
 - a diagnostic for Rescan, with files added and removed in between;
 - a diagnostic for Library Info's counts;
+- a diagnostic for Recent Libraries, including a library whose disk is
+  missing;
+- a diagnostic for the 500-song check (import refused at 500, nothing
+  moved) and the scan's over-limit report;
+- a diagnostic for ID allocation: export the highest-numbered song, then
+  import: the new song gets a new ID, not the exported one's;
 - a diagnostic for Remove from Playlist: only that entry goes, and the
   rest of the file is unchanged;
 - manual.
