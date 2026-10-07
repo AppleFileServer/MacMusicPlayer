@@ -65,6 +65,14 @@ image). Stage 8 is planned.
   (6b-2) and responsiveness. The Scratch image is current, so no image
   rebuild is needed first.
 - Press-and-hold fast-forward and rewind (N8, deferred from Stage 7).
+- Rename the app from MacMusicPlayer to **MacMusic** (decided 2026-10-07):
+  the application file, window title, menus, About box, prefs file name
+  and documentation. Plan first (it touches the build, the resources and
+  the prefs file name, so existing prefs need carrying over). The Finder
+  creator and file types stay the same.
+- The software licence that the legal statement
+  (`docs/legal/legal-statement.md`) refers to: to be written later, in
+  the product documentation.
 - Move a song between libraries with its details: today that means export
   then import, and export strips the iPod details and rating. A "Move to
   Library…" command that keeps them (noted in Stage 8a, not planned).
