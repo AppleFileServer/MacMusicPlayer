@@ -729,6 +729,110 @@ static void PushNowPlaying(void)
 }
 
 /* Plays songs[start..] and shows Now Playing (manual p. 15). */
+/* ---- Stage 9c: Shuffle ------------------------------------------------ */
+
+static short RandomBelow(short n)
+{
+    return (short)((unsigned short)Random() % n);
+}
+
+/* Fisher-Yates over songs[first..n-1]. */
+static void ShuffleRange(short *songs, short first, short n)
+{
+    short i, j, t;
+
+    for (i = n - 1; i > first; i--)
+    {
+        j = first + RandomBelow(i - first + 1);
+        t = songs[i];
+        songs[i] = songs[j];
+        songs[j] = t;
+    }
+}
+
+static short gShuffleOut[kMaxListItems];
+static short gAlbumOrder[kMaxListItems];
+
+/* Shuffle Albums: the albums in random order, the chosen song's album
+   first (T3), each album's songs in track order. Songs without an album
+   are one group. Returns where the chosen song is (0 for none). */
+static short ShuffleAlbums(short *songs, short n, short chosen)
+{
+    short albums = 0, i, j, k, a, out = 0, start = 0, s;
+    Boolean seen;
+
+    for (i = 0; i < n; i++)
+    {
+        a = Library_SongAlbum(songs[i]);
+        seen = false;
+        for (j = 0; j < albums; j++)
+            if (gAlbumOrder[j] == a)
+                seen = true;
+        if (!seen)
+            gAlbumOrder[albums++] = a;
+    }
+    ShuffleRange(gAlbumOrder, 0, albums);
+    if (chosen != kNone)
+        for (j = 0; j < albums; j++)
+            if (gAlbumOrder[j] == Library_SongAlbum(chosen))
+            {
+                gAlbumOrder[j] = gAlbumOrder[0];
+                gAlbumOrder[0] = Library_SongAlbum(chosen);
+                break;
+            }
+
+    for (j = 0; j < albums; j++)
+    {
+        k = out;
+        for (i = 0; i < n; i++)
+        {
+            if (Library_SongAlbum(songs[i]) != gAlbumOrder[j])
+                continue;
+            /* Insert in track order (DECISION D13, as an album plays). */
+            s = songs[i];
+            for (a = out; a > k && Library_SongTrack(gShuffleOut[a - 1])
+                                   > Library_SongTrack(s); a--)
+                gShuffleOut[a] = gShuffleOut[a - 1];
+            gShuffleOut[a] = s;
+            out++;
+        }
+    }
+    for (i = 0; i < n; i++)
+    {
+        songs[i] = gShuffleOut[i];
+        if (songs[i] == chosen)
+            start = i;
+    }
+    return start;
+}
+
+/* Orders a list for the Shuffle setting before it plays (Stage 9c).
+   songRow: a song was chosen (songs[start]); it plays first (T3).
+   Otherwise (a list's row: an album, an artist...) the order is wholly
+   random. Off, and audiobooks (S-2: never shuffled), keep the list's
+   order. Returns where to start. */
+static short ApplyShuffle(short *songs, short n, short start, Boolean songRow)
+{
+    short mode = Settings_Get(kSettingShuffle), t;
+
+    if (n <= 1 || mode == kShuffleOff
+        || Library_SongIsAudiobook(songs[start]))
+        return start;
+    if (mode == kShuffleAlbums)
+        return ShuffleAlbums(songs, n, songRow ? songs[start] : kNone);
+
+    if (!songRow)
+    {
+        ShuffleRange(songs, 0, n);
+        return 0;
+    }
+    t = songs[0];
+    songs[0] = songs[start];
+    songs[start] = t;
+    ShuffleRange(songs, 1, n);
+    return 0;
+}
+
 static Boolean PlayAndShow(const short *songs, short count, short start)
 {
     if (count <= 0)
@@ -745,17 +849,11 @@ static Boolean PlayAndShow(const short *songs, short count, short start)
 static Boolean ShuffleSongs(void)
 {
     LibFilter all;
-    short n, i, j, t;
+    short n;
 
     LibFilter_Clear(&all);
     n = Library_ListSongs(&all, gPlayList, kMaxListItems);
-    for (i = n - 1; i > 0; i--)
-    {
-        j = (short)((unsigned short)Random() % (i + 1));
-        t = gPlayList[i];
-        gPlayList[i] = gPlayList[j];
-        gPlayList[j] = t;
-    }
+    ShuffleRange(gPlayList, 0, n);
     return PlayAndShow(gPlayList, n, 0);
 }
 
@@ -799,7 +897,8 @@ static Boolean HandleSelect(void)
     if (UIList_ItemSong(s, s->selected) != kNone)
     {
         n = UIList_RowSongs(s, s->selected, gPlayList, kMaxListItems, &start);
-        return PlayAndShow(gPlayList, n, start);
+        return PlayAndShow(gPlayList, n,
+                           ApplyShuffle(gPlayList, n, start, true));
     }
     return SelectItem();
 }
@@ -819,7 +918,10 @@ static Boolean HandlePlayPause(void)
             return ShuffleSongs();
         n = UIList_RowSongs(s, s->selected, gPlayList, kMaxListItems, &start);
         if (n > 0)
-            return PlayAndShow(gPlayList, n, start);
+            return PlayAndShow(gPlayList, n,
+                               ApplyShuffle(gPlayList, n, start,
+                                            UIList_ItemSong(s, s->selected)
+                                            != kNone));
     }
     if (!Playback_IsActive())
         return false;

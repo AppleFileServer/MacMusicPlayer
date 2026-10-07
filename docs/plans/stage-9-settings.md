@@ -1,7 +1,7 @@
 # Stage 9 plan: the Settings menu
 
-Status: approved (2026-10-07), decisions T1-T9 made. 9a and 9b done;
-9c-9e remain. Builds the specification decided in Stage 8b
+Status: approved (2026-10-07), decisions T1-T9 made. 9a-9c done;
+9d and 9e remain. Builds the specification decided in Stage 8b
 (`stage-8b-settings.md`, S-1 to S-11).
 
 ## What Stage 8b decided
@@ -102,6 +102,9 @@ Also from 8b:
   not the queue already playing (T4).
 - **Gapless playback** is unaffected, because only the order of the queue
   changes.
+- **Done:** with Albums, the chosen album is queued from its first track
+  and plays from the chosen song (PROVISIONAL); a list whose first song
+  to play is an audiobook keeps its order.
 - **Tests:** a diagnostic that plays lists with each setting:
   - every song exactly once;
   - the chosen song first;

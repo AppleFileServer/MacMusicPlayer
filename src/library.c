@@ -1013,6 +1013,13 @@ ConstStringPtr Library_SongAlbumName(short song)    { return PoolString(Songs()[
 long Library_SongSeconds(short song)                { return Songs()[song].seconds; }
 long Library_SongAudioLength(short song)            { return Songs()[song].audioLength; }
 
+short Library_SongAlbum(short song)        { return Songs()[song].album; }
+short Library_SongTrack(short song)        { return Songs()[song].track; }
+Boolean Library_SongIsAudiobook(short song)
+{
+    return (Songs()[song].flags & kSongFlagAudiobook) != 0;
+}
+
 short Library_SongRating(short song)
 {
     return SongFlags_Rating(Songs()[song].flags);

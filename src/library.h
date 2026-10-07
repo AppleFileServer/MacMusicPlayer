@@ -126,6 +126,12 @@ long Library_SongAudioLength(short song);           /* bytes */
 /* Stage 7d: the song's rating, 0 (unrated) to 5. Setting it writes the
    song file (SongFile_WriteFlags), then updates the library; on an error
    the library keeps the old rating. */
+/* Stage 9c, for Shuffle by album: the song's album (a group number, or
+   kNone), track number, and whether it is an audiobook. */
+short Library_SongAlbum(short song);
+short Library_SongTrack(short song);
+Boolean Library_SongIsAudiobook(short song);
+
 short Library_SongRating(short song);
 OSErr Library_SetSongRating(short song, short rating);
 
