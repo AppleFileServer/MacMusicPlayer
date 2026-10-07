@@ -127,6 +127,11 @@ an actual 4G screen photograph or reference is obtained.
   write is refused if the file's song ID doesn't match. Writing while
   the song plays was verified (no underruns). On an error the library
   keeps the old rating and a message is shown.
+- Note: the rating is currently only recorded (shown and set on the
+  rating screen, stored in the song file); nothing else uses it yet.
+  Possible later uses: weighting Shuffle Songs by rating, or playlists
+  made from ratings (as iTunes smart playlists). Not planned now; see the
+  issues log's roadmap.
 - Tests: host tests for reading/writing the rating bits; a diagnostic
   that rates the playing song and rescans; manual.
 

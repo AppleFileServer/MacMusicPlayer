@@ -69,6 +69,9 @@ the real Mac Plus checks are deferred until the BlueSCSI card is available
   Scratch image (I7), then on the real Plus the read-pointer check (I9),
   the Finder stress test, the modal-loop tests and responsiveness.
 - Press-and-hold fast-forward and rewind (N8, deferred from Stage 7).
+- Ratings (7d) are recorded but not used for anything else yet. Ideas
+  for later, not planned now: use them in Shuffle Songs, or to create
+  playlists (e.g. songs rated 4 stars or more).
 - Stage 8: On-The-Go playlist (D17).
 - Settings menu.
 
