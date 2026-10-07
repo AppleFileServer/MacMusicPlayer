@@ -4,8 +4,9 @@
 #include <MacTypes.h>
 #include <Menus.h>
 
-/* The Playlists menu (MENU 131): "New Playlist...", "Remove from
-   Playlist" (Stage 8d-4, L7), then, below a divider, one "Add to <name>"
+/* The Playlists menu (MENU 131): "New Playlist...", "Rename
+   Playlist..." (Stage 8e-4), "Delete Playlist..." (Stage 8e-3), "Remove from Playlist" (Stage 8d-4, L7),
+   then, below a divider, one "Add to <name>"
    item per playlist (DECISION P6). Songs are added and removed only from
    here, never from the iPod screen. */
 

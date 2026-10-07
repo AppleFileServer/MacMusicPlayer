@@ -61,8 +61,21 @@ static void ReportSkipped(void)
 {
     short skipped = Library_SkippedCount();
     short overLimit = Library_OverLimitCount();
+    short playlistsOver = Library_PlaylistsOverLimitCount();
     Str255 text;
     Str255 number;
+
+    /* Stage 8e-2: playlists left out because there are already 10. */
+    if (playlistsOver > 0)
+    {
+        NumToString(playlistsOver, number);
+        text[0] = 0;
+        PStrAppend(text, number);
+        PStrAppend(text, playlistsOver == 1 ? P(" playlist wasn\xD5t")
+                                            : P(" playlists weren\xD5t"));
+        PStrAppend(text, P(" loaded: MacMusic can have up to 10 playlists."));
+        Message_Show(text, noErr);
+    }
 
     /* Stage 8d (M3): songs left out because the library is full. */
     if (overLimit > 0)
@@ -137,8 +150,13 @@ void LibSetup_ShowInfo(void)
     AppendNumber(text, Library_SkippedCount());
     if (overLimit > 0)
     {
-        PStrAppend(text, P("\rOver the Limit: "));
+        PStrAppend(text, P("\rSongs Over the Limit: "));
         AppendNumber(text, overLimit);
+    }
+    if (Library_PlaylistsOverLimitCount() > 0)
+    {
+        PStrAppend(text, P("\rPlaylists Over the Limit: "));
+        AppendNumber(text, Library_PlaylistsOverLimitCount());
     }
 
     ParamText(text, P(""), P(""), P(""));

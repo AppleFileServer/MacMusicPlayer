@@ -13,7 +13,7 @@
 
 #define kMaxSongs       500
 #define kMaxGroups      256     /* per kind: artists, albums, genres... */
-#define kMaxPlaylists   64
+#define kMaxPlaylists   10      /* 8e-2: a MacMusic limit, not the 4G's */
 #define kMaxPlaylistEntries 1000    /* songs read from one playlist file */
 #define kNone           (-1)
 
@@ -43,6 +43,10 @@ long Library_NextSongID(void);      /* one more than the largest ID */
    (copied in from the Finder, for example). */
 short Library_SongCount(void);
 short Library_OverLimitCount(void);
+
+/* Stage 8e-2: playlist files the last scan left out because there were
+   already kMaxPlaylists (the first ones by name are used). */
+short Library_PlaylistsOverLimitCount(void);
 
 /* Stage 8d-2, for Library Info: the songs' audio in bytes, and the
    number of playlists. */
@@ -75,6 +79,14 @@ OSErr Library_AppendToPlaylist(short playlist, short song);
    export: the song leaves the library). Other lines are kept exactly;
    files without the ID are not rewritten. Returns the first error. */
 OSErr Library_RemoveFromPlaylists(long id);
+
+/* Stage 8e-4: renames a playlist's file; its number stays the same.
+   dupFNErr if another playlist (or file there) has the name already. */
+OSErr Library_RenamePlaylist(short playlist, ConstStringPtr name);
+
+/* Stage 8e-3: deletes a playlist's file (only the playlist: its songs
+   stay in the library). Playlist numbers after it move down by one. */
+OSErr Library_DeletePlaylist(short playlist);
 
 /* Stage 8d-4 (L7): removes one entry from a playlist file: the nth
    (0-based) line for song ID id, so a song listed twice keeps its other

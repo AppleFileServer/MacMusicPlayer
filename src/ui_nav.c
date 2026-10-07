@@ -166,6 +166,17 @@ void UI_Refresh(void)
     }
 }
 
+short UI_HighlightedPlaylist(void)
+{
+    Screen *s = CurrentScreen();
+
+    if (s->kind == kScreenPlaylists && s->count > 0)
+        return s->items[s->selected];
+    if (s->kind == kScreenSongs && s->filter.playlist != kNone)
+        return s->filter.playlist;
+    return kNone;
+}
+
 Boolean UI_SelectedPlaylistEntry(short *playlist, long *id, short *nth)
 {
     Screen *s = CurrentScreen();

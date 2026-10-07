@@ -19,8 +19,9 @@ void LibSetup_Rescan(void);
 
 /* File > Library Info... (Stage 8d-2): Songs (of the 500-song limit,
    audiobooks included), Playlists, Size (the songs' audio), Free (on the
-   library's disk), Unreadable Files (as the scan reports), and Over the
-   Limit if any song files were left out. */
+   library's disk), Unreadable Files (as the scan reports), and, only if
+   a scan left files out, Songs Over the Limit and Playlists Over the
+   Limit (8e-2). */
 void LibSetup_ShowInfo(void);
 
 /* Stage 8d-3: the libraries used before, most recent first (the current

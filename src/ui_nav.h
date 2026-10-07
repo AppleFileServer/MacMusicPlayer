@@ -61,6 +61,10 @@ void UI_Refresh(void);
    that took its place, not on another entry for the same song. */
 void UI_KeepRowOnRefresh(void);
 
+/* Stage 8e-3: the playlist highlighted in the Playlists list, or the one
+   being shown; kNone if neither. */
+short UI_HighlightedPlaylist(void);
+
 /* Stage 8d-4: if the highlight is on a song inside a playlist, that
    playlist, the song's ID and which of the song's entries it is (0 for
    the first, if the song is listed more than once); else false. */

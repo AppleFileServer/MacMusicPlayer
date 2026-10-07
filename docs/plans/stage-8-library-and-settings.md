@@ -334,6 +334,20 @@ no such limit). The Playlists menu then fits the Plus's screen without
 scrolling, and every item can be dimmed. With more than 10 playlist files
 (copied in from the Finder), the first 10 by name are used; the others
 are left on disk untouched and reported, as songs over the limit are.
+New Playlist... gives the limit before asking for a name. Library Info
+labels its lines "Songs Over the Limit" and "Playlists Over the Limit"
+(each only when there are any).
+
+**8e-3, Delete Playlist...** in the Playlists menu, naming the playlist
+highlighted in the Playlists list or being shown ("Delete "Mix"...").
+It asks first (Cancel is the default) and deletes only the playlist's
+file: its songs stay in the library (consistent with L1, which is about
+songs). A screen inside that playlist closes to the Playlists list.
+
+**8e-4, Rename Playlist...**, acting on the same playlist, in the New
+Playlist window filled with its name and with a Rename button. The usual
+name checks apply; a change of capitals only is allowed. The screens stay
+where they are, showing the new name.
 
 ## Not in Stage 8
 

@@ -88,14 +88,18 @@ resource 'MBAR' (128) {
 };
 
 /* Playlists (Stage 3C, P3/P6). The playlist items after the divider are
-   added and enabled at run time. Stage 8d-4 (L7): Remove from Playlist
-   (item 2) starts disabled with the divider: mask 0x7FFFFFF9. */
+   added and enabled at run time. Rename Playlist... (8e-4, item 2) and
+   Delete Playlist... (8e-3, item 3), whose texts name the playlist at run
+   time, and Remove from Playlist (8d-4, item 4) start disabled with the
+   divider: mask 0x7FFFFFE1. */
 resource 'MENU' (131) {
     131, textMenuProc;
-    0x7FFFFFF9, enabled;
+    0x7FFFFFE1, enabled;
     "Playlists";
     {
         "New Playlist\0xC9", noIcon, noKey, noMark, plain;
+        "Rename Playlist\0xC9", noIcon, noKey, noMark, plain;
+        "Delete Playlist\0xC9", noIcon, noKey, noMark, plain;
         "Remove from Playlist", noIcon, noKey, noMark, plain;
         "-", noIcon, noKey, noMark, plain;
     }
@@ -506,9 +510,10 @@ resource 'DITL' (140) {
     }
 };
 
-/* Library Info... (Stage 8d-2): ^0 the counts and sizes, one a line. */
+/* Library Info... (Stage 8d-2): ^0 the counts and sizes, one a line
+   (up to seven with the over-the-limit lines, 8e-2). */
 resource 'ALRT' (141) {
-    { 70, 136, 236, 376 },
+    { 60, 136, 256, 376 },
     141,
     {
         OK, visible, silent;
@@ -521,13 +526,41 @@ resource 'ALRT' (141) {
 
 resource 'DITL' (141) {
     {
-        { 134, 150, 154, 230 },
+        { 164, 150, 184, 230 },
         Button { enabled, "OK" };
 
         { 12, 16, 30, 230 },
         StaticText { disabled, "Library Info" };
 
-        { 38, 16, 126, 230 },
+        { 38, 16, 154, 230 },
         StaticText { disabled, "^0" };
+    }
+};
+
+/* Delete Playlist... (Stage 8e-3): ^0 the playlist. Cancel is item 1, so
+   Return cancels: deleting can't be undone. */
+resource 'ALRT' (142) {
+    { 116, 96, 226, 416 },
+    142,
+    {
+        OK, visible, sound1;
+        OK, visible, sound1;
+        OK, visible, sound1;
+        OK, visible, sound1;
+    },
+    noAutoCenter
+};
+
+resource 'DITL' (142) {
+    {
+        { 78, 216, 98, 306 },
+        Button { enabled, "Cancel" };
+
+        { 78, 112, 98, 206 },
+        Button { enabled, "Delete" };
+
+        { 12, 16, 68, 306 },
+        StaticText { disabled, "Delete the playlist \0xD2^0\0xD3? The songs "
+                               "in it stay in the library." };
     }
 };

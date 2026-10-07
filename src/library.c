@@ -5,6 +5,7 @@
 #include "library.h"
 #include "fileopen.h"
 #include "songfile.h"
+#include "fileops.h"
 
 #define kDirectoryAttribute     0x10    /* ioFlAttrib bit 4 */
 
@@ -57,6 +58,7 @@ static long gPlaylistIDs[kMaxPlaylistEntries];
 static long gMaxSongID;
 static short gSkipped;
 static short gOverLimit;                /* song files beyond kMaxSongs */
+static short gPlaylistsOverLimit;       /* playlist files beyond kMaxPlaylists */
 
 /* One song file as read; static to keep it off the small stack. */
 static SongInfo gInfo;
@@ -208,6 +210,7 @@ void Library_Clear(void)
     gMaxSongID = 0;
     gSkipped = 0;
     gOverLimit = 0;
+    gPlaylistsOverLimit = 0;
 }
 
 /* Appends a Pascal string to the pool; returns its offset or -1. */
@@ -324,7 +327,10 @@ static Boolean ScanPlaylists(const LibraryFolder *folder)
     Str63 name;
     short index;
 
-    for (index = 1; gPlaylistCount < kMaxPlaylists; index++)
+    /* The catalog lists files by name, so with more than kMaxPlaylists
+       the first ones by name are used; the rest are only counted (8e-2),
+       and left on the disk as they are. */
+    for (index = 1; ; index++)
     {
         pb.hFileInfo.ioNamePtr = name;
         pb.hFileInfo.ioVRefNum = folder->vRefNum;
@@ -338,6 +344,11 @@ static Boolean ScanPlaylists(const LibraryFolder *folder)
 
         if (name[0] > 31)
             continue;                   /* HFS names never are */
+        if (gPlaylistCount >= kMaxPlaylists)
+        {
+            gPlaylistsOverLimit++;
+            continue;
+        }
         BlockMove(name, gPlaylistNames[gPlaylistCount++], name[0] + 1);
     }
     return true;
@@ -450,6 +461,11 @@ short Library_SongCount(void)
 short Library_OverLimitCount(void)
 {
     return gOverLimit;
+}
+
+short Library_PlaylistsOverLimitCount(void)
+{
+    return gPlaylistsOverLimit;
 }
 
 long Library_TotalAudioBytes(void)
@@ -808,6 +824,44 @@ OSErr Library_RemoveFromPlaylists(long id)
     }
     FlushVol(nil, gFolder.vRefNum);
     return first;
+}
+
+OSErr Library_RenamePlaylist(short playlist, ConstStringPtr name)
+{
+    short other = Library_FindPlaylist(name);
+    OSErr err;
+
+    if (!gHaveFolder || playlist < 0 || playlist >= gPlaylistCount
+        || name[0] < 1 || name[0] > 31)
+        return paramErr;
+    if (other != kNone && other != playlist)
+        return dupFNErr;            /* a change of case only is allowed */
+    err = RenameFile(gFolder.vRefNum, gFolder.playlistsID,
+                     gPlaylistNames[playlist], name);
+    if (err != noErr)
+        return err;
+    FlushVol(nil, gFolder.vRefNum);
+    BlockMove(name, gPlaylistNames[playlist], name[0] + 1);
+    return noErr;
+}
+
+OSErr Library_DeletePlaylist(short playlist)
+{
+    OSErr err;
+    short i;
+
+    if (!gHaveFolder || playlist < 0 || playlist >= gPlaylistCount)
+        return paramErr;
+    err = HDelete(gFolder.vRefNum, gFolder.playlistsID,
+                  gPlaylistNames[playlist]);
+    if (err != noErr)
+        return err;
+    FlushVol(nil, gFolder.vRefNum);
+    for (i = playlist; i < gPlaylistCount - 1; i++)
+        BlockMove(gPlaylistNames[i + 1], gPlaylistNames[i],
+                  gPlaylistNames[i + 1][0] + 1);
+    gPlaylistCount--;
+    return noErr;
 }
 
 OSErr Library_RemoveFromPlaylist(short playlist, long id, short nth)
