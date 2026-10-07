@@ -1,7 +1,8 @@
 # Stage 8 plan: library management and settings
 
 Status: approved (2026-10-07), decisions L1-L11 made. 8a decided:
-Option A (`stage-8a-multiple-libraries.md`, M1-M4).
+Option A (`stage-8a-multiple-libraries.md`, M1-M4). 8b decided
+(`stage-8b-settings.md`). 8c done. 8d remains.
 No code has been changed.
 
 Replaces the earlier Stage 8 (On-The-Go), now deferred
@@ -187,6 +188,13 @@ iPod's navigation is then checked, from the top:
 This is new UI code, so a diagnostic covers each case. Restarting to the
 main menu, as import does, is only a fallback if it proves unworkable.
 Import, export and Choose Library keep their restart (D26).
+
+**Done (2026-10-07):** the library is updated in memory
+(`Library_UpdateSong`), without rereading the song files or restarting
+the iPod, so even a large library doesn't hold up playback. The song
+window is shared code (`songdialog.c`), used by Import and Edit Song.
+A diagnostic checked the edit while the song plays (no underruns, audio
+bytes unchanged) and each stay-on-screen case.
 
 **Tests:**
 - host tests for rebuilding the chunk: every field, maximum lengths, the

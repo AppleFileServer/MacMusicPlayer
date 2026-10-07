@@ -151,6 +151,181 @@ void UI_Refresh(void)
         RebuildScreen(&gNav[i]);
 }
 
+short UI_SongToEdit(void)
+{
+    Screen *s = CurrentScreen();
+
+    if (s->kind == kScreenNowPlaying)
+        return Playback_CurrentSong();
+    return UIList_ItemSong(s, s->selected);
+}
+
+/* ---- Stage 8c: staying on screen after an edit (L4) ------------------- */
+
+/* A screen's choices and highlighted row, by name, noted before the
+   library's artist, album, genre and composer numbers change. */
+typedef struct
+{
+    Str63 genre, artist, album, composer;   /* empty: not chosen */
+    Str63 selectedName;                     /* a group list's row */
+    short selectedItem;                     /* any other list's row */
+} ScreenNames;
+
+static ScreenNames gSavedNames[kMaxNavDepth];
+
+static void NoteName(short group, ConstStringPtr (*name)(short), Str63 out)
+{
+    ConstStringPtr s;
+
+    out[0] = 0;
+    if (group == kNone)
+        return;
+    s = name(group);
+    out[0] = s[0] <= 63 ? s[0] : 63;
+    BlockMove(s + 1, out + 1, out[0]);
+}
+
+static Boolean IsGroupList(short kind)
+{
+    return kind == kScreenGenres || kind == kScreenArtists
+        || kind == kScreenAlbums || kind == kScreenComposers;
+}
+
+void UI_BeginLibraryEdit(void)
+{
+    ScreenNames *n;
+    Screen *s;
+    ConstStringPtr title;
+    short i;
+
+    for (i = 0; i < gNavDepth; i++)
+    {
+        s = &gNav[i];
+        n = &gSavedNames[i];
+        NoteName(s->filter.genre, Library_GenreName, n->genre);
+        NoteName(s->filter.artist, Library_ArtistName, n->artist);
+        NoteName(s->filter.album, Library_AlbumName, n->album);
+        NoteName(s->filter.composer, Library_ComposerName, n->composer);
+
+        n->selectedName[0] = 0;
+        n->selectedItem = s->count > 0 ? s->items[s->selected] : kNone;
+        if (IsGroupList(s->kind) && n->selectedItem != kAllItem
+            && n->selectedItem != kNone)
+        {
+            title = UIList_ItemTitle(s, s->selected);
+            n->selectedName[0] = title[0] <= 63 ? title[0] : 63;
+            BlockMove(title + 1, n->selectedName + 1, n->selectedName[0]);
+        }
+    }
+}
+
+/* Finds a noted choice again by its name; false if it has gone. */
+static Boolean FindAgain(ConstStringPtr name,
+                         short (*find)(ConstStringPtr), short *group)
+{
+    if (*group == kNone)
+        return true;
+    *group = find(name);
+    return *group != kNone;
+}
+
+/* True if the screen was opened by choosing an artist, album, genre or
+   composer (its filter adds one to its parent's); its title is then that
+   name, which has moved. */
+static Boolean RetitleFromChoice(Screen *s, const Screen *parent)
+{
+    if (s->filter.genre != kNone && s->filter.genre != parent->filter.genre)
+        s->title = Library_GenreName(s->filter.genre);
+    else if (s->filter.artist != kNone
+             && s->filter.artist != parent->filter.artist)
+        s->title = Library_ArtistName(s->filter.artist);
+    else if (s->filter.album != kNone
+             && s->filter.album != parent->filter.album)
+        s->title = Library_AlbumName(s->filter.album);
+    else if (s->filter.composer != kNone
+             && s->filter.composer != parent->filter.composer)
+        s->title = Library_ComposerName(s->filter.composer);
+    else
+        return false;
+    return true;
+}
+
+/* Keeps the highlight visible, as RebuildScreen does. */
+static void ClampScroll(Screen *s)
+{
+    if (s->selected >= s->count)
+        s->selected = s->count > 0 ? s->count - 1 : 0;
+    if (s->top > s->selected)
+        s->top = s->selected;
+    if (s->selected >= s->top + kVisibleRows)
+        s->top = s->selected - kVisibleRows + 1;
+    if (s->top > 0 && s->top + kVisibleRows > s->count)
+        s->top = s->count > kVisibleRows ? s->count - kVisibleRows : 0;
+}
+
+/* Rebuilds one screen after an edit; false if it no longer exists. */
+static Boolean FindScreenAgain(Screen *s, const Screen *parent,
+                               const ScreenNames *n)
+{
+    Boolean byChoice;
+    short i;
+
+    if (!FindAgain(n->genre, Library_FindGenre, &s->filter.genre)
+        || !FindAgain(n->artist, Library_FindArtist, &s->filter.artist)
+        || !FindAgain(n->album, Library_FindAlbum, &s->filter.album)
+        || !FindAgain(n->composer, Library_FindComposer, &s->filter.composer))
+        return false;
+    byChoice = parent != nil && RetitleFromChoice(s, parent);
+
+    UIList_Build(s);
+    if (byChoice && (s->count == 0 || (s->count == 1 && s->items[0] == kAllItem)))
+        return false;               /* nothing left under that name */
+
+    for (i = 0; i < s->count; i++)
+    {
+        if (IsGroupList(s->kind) && n->selectedName[0] != 0
+            ? s->items[i] != kAllItem
+              && EqualString(UIList_ItemTitle(s, i), n->selectedName,
+                             true, true)
+            : s->items[i] == n->selectedItem)
+        {
+            s->selected = i;
+            break;
+        }
+    }
+    ClampScroll(s);
+    return true;
+}
+
+void UI_EndLibraryEdit(void)
+{
+    Boolean nowPlayingOnTop = CurrentScreen()->kind == kScreenNowPlaying;
+    short i, kept;
+
+    for (kept = 0; kept < gNavDepth; kept++)
+    {
+        if (gNav[kept].kind == kScreenNowPlaying)
+            continue;               /* stays (drawn from the song itself) */
+        if (!FindScreenAgain(&gNav[kept], kept > 0 ? &gNav[kept - 1] : nil,
+                             &gSavedNames[kept]))
+            break;
+    }
+    if (kept >= gNavDepth)
+        return;
+
+    /* Screens from the first that has gone are closed; Now Playing, if
+       it was showing, stays on top of what remains. */
+    if (nowPlayingOnTop)
+    {
+        gNav[kept] = gNav[gNavDepth - 1];
+        gNav[kept].items = gNavItems[kept];
+        kept++;
+    }
+    gNavDepth = kept;
+    for (i = 0; i < gNavDepth; i++)
+        ClampScroll(&gNav[i]);
+}
+
 /* The main menu lists Now Playing only while something plays (N1):
    rebuild it wherever it is on the stack when that changes. */
 static void RefreshMainMenus(void)

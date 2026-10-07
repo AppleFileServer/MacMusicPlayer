@@ -19,6 +19,8 @@ add_application(MacMusic
     src/songfile.c
     src/fileops.c
     src/import.c
+    src/songdialog.c
+    src/editsong.c
     src/export.c
     src/playlists.c
     src/playback.c

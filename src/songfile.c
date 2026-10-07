@@ -135,38 +135,73 @@ Boolean SongFile_Read(short vRefNum, long dirID, ConstStringPtr name,
     return ok;
 }
 
-OSErr SongFile_WriteFlags(short vRefNum, long dirID, ConstStringPtr name,
-                          long id, short flags)
+/* Opens a song file for writing and finds its chunk: the trailer gives
+   the chunk's start, whose header and song ID must match. */
+static OSErr OpenChunk(short vRefNum, long dirID, ConstStringPtr name,
+                       long id, short *refNum, long *chunkStart)
 {
-    unsigned char bytes[8 + kSongOffsetFlags];
-    long fileLength, chunkStart;
-    short refNum;
+    unsigned char bytes[8 + kSongOffsetID + 4];
+    long fileLength;
     OSErr err;
 
-    err = OpenDataFork(vRefNum, dirID, name, fsRdWrPerm, &refNum);
+    err = OpenDataFork(vRefNum, dirID, name, fsRdWrPerm, refNum);
     if (err != noErr)
         return err;
 
-    /* The trailer gives the chunk's start; its header and ID must match. */
-    err = GetEOF(refNum, &fileLength);
+    err = GetEOF(*refNum, &fileLength);
     if (err == noErr && !(fileLength >= 12 + 8 + kSongMinPayload
-                          && ReadAt(refNum, fileLength - 8, 8, bytes)
+                          && ReadAt(*refNum, fileLength - 8, 8, bytes)
                           && Get32(bytes + 4) == kSongChunkID))
         err = badFormat;
     if (err == noErr)
     {
-        chunkStart = (long)Get32(bytes);
-        if (chunkStart < 12 || chunkStart > fileLength - 8 - kSongMinPayload
-            || !ReadAt(refNum, chunkStart, sizeof(bytes), bytes)
+        *chunkStart = (long)Get32(bytes);
+        if (*chunkStart < 12 || *chunkStart > fileLength - 8 - kSongMinPayload
+            || !ReadAt(*refNum, *chunkStart, sizeof(bytes), bytes)
             || Get32(bytes) != kSongChunkID
             || (long)Get32(bytes + 8 + kSongOffsetID) != id)
             err = badFormat;
     }
+    if (err != noErr)
+        FSClose(*refNum);
+    return err;
+}
+
+OSErr SongFile_WriteFlags(short vRefNum, long dirID, ConstStringPtr name,
+                          long id, short flags)
+{
+    unsigned char bytes[2];
+    long chunkStart;
+    short refNum;
+    OSErr err;
+
+    err = OpenChunk(vRefNum, dirID, name, id, &refNum, &chunkStart);
+    if (err != noErr)
+        return err;
+    Put16(bytes, flags);
+    err = WriteAt(refNum, chunkStart + 8 + kSongOffsetFlags, 2, bytes);
+    FSClose(refNum);
     if (err == noErr)
-    {
-        Put16(bytes, flags);
-        err = WriteAt(refNum, chunkStart + 8 + kSongOffsetFlags, 2, bytes);
-    }
+        err = FlushVol(nil, vRefNum);
+    return err;
+}
+
+OSErr SongFile_WriteInfo(short vRefNum, long dirID, ConstStringPtr name,
+                         const SongInfo *info)
+{
+    long chunkStart;
+    short refNum;
+    OSErr err;
+
+    err = OpenChunk(vRefNum, dirID, name, info->id, &refNum, &chunkStart);
+    if (err != noErr)
+        return err;
+
+    /* The chunk always starts straight after the original file. */
+    if (chunkStart != info->originalLength + (info->originalLength & 1))
+        err = badFormat;
+    if (err == noErr)
+        err = SongFile_AddChunk(refNum, info);
     FSClose(refNum);
     if (err == noErr)
         err = FlushVol(nil, vRefNum);

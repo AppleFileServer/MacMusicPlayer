@@ -26,6 +26,7 @@
 #include "input.h"
 #include "prefs.h"
 #include "volume.h"
+#include "editsong.h"
 
 /* Top of the window's content area: below the 20-pixel menu bar
    and the rDocProc title bar. */
@@ -50,6 +51,7 @@ enum
     kItemQuit = 5,
 
     kMenuEdit = 130,
+    kItemEditSong = 8,          /* Stage 8c; items 1-6 are for DAs */
 
     kMenuPlaylists = 131,
 
@@ -101,6 +103,7 @@ static void ImportSongPausingAudio(void);
 static void ExportSongPausingAudio(void);
 static void UpdateFileMenu(void);
 static void PlaylistsChanged(void);
+static void EditSong(void);
 
 static void ShowAboutBox(void)
 {
@@ -139,7 +142,10 @@ static void HandleMenuChoice(long choice)
             break;
 
         case kMenuEdit:
-            SystemEdit(menuItem - 1);
+            if (menuItem == kItemEditSong)
+                EditSong();
+            else
+                SystemEdit(menuItem - 1);
             break;
 
         case kMenuPlaylists:
@@ -241,7 +247,13 @@ static void ReportPlaybackProblems(void)
    looked up. */
 static void AdjustMenus(void)
 {
+    MenuHandle editMenu = GetMenuHandle(kMenuEdit);
+
     UpdateFileMenu();
+    if (LibSetup_HasLibrary() && UI_SongToEdit() != kNone)
+        EnableItem(editMenu, kItemEditSong);
+    else
+        DisableItem(editMenu, kItemEditSong);
     Playlists_AdjustMenu(GetMenuHandle(kMenuPlaylists),
                          LibSetup_HasLibrary());
 }
@@ -339,6 +351,33 @@ static void ImportSongPausingAudio(void)
     ImportSong();
     if (wasPlaying && Playback_State() == kPlayPaused)
         Playback_TogglePause();
+}
+
+/* Edit > Edit Song... (Stage 8c). Not an iPod restart: the screens are
+   found again by name and stay where they were (L4); playback carries on.
+   Only if the library can't be updated in memory is it rescanned, with
+   the usual restart. */
+static void EditSong(void)
+{
+    Boolean rescan;
+
+    HiliteMenu(0);
+    if (!LibSetup_HasLibrary())
+        return;
+    UI_BeginLibraryEdit();
+    if (!EditSong_Run(UI_SongToEdit(), &rescan))
+        return;
+    if (rescan)
+    {
+        BeginRestart();
+        LibSetup_Rescan();
+        Playback_LibraryChanged();
+        EndRestart();
+        return;
+    }
+    UI_EndLibraryEdit();
+    UI_Render();
+    PresentLCD();
 }
 
 /* File > Export Song... */

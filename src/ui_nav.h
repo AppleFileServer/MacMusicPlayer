@@ -53,6 +53,19 @@ short UI_SelectedSong(void);
    still exists. Does not draw. */
 void UI_Refresh(void);
 
+/* Stage 8c: the song Edit > Edit Song... acts on: the song playing on Now
+   Playing (L2), else the highlighted song row; kNone if neither. */
+short UI_SongToEdit(void);
+
+/* Stage 8c (L4): call Begin before a song's details change in the
+   library and End after, to stay on the same screens. Each screen is
+   found again by the names of its choices: a list whose album, artist,
+   genre or composer has no songs left is closed (its parent shows), and
+   highlights follow their items, else stay at the same row. Now Playing
+   stays. Does not draw. */
+void UI_BeginLibraryEdit(void);
+void UI_EndLibraryEdit(void);
+
 /* Advances playback; returns true if the LCD needs redrawing (time or
    song changed on Now Playing, or playback stopped). Call often. */
 Boolean UI_Tick(void);

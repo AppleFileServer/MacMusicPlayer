@@ -48,6 +48,13 @@ OSErr SongFile_RemoveChunk(short refNum, const SongInfo *info);
 OSErr SongFile_WriteFlags(short vRefNum, long dirID, ConstStringPtr name,
                           long id, short flags);
 
+/* Stage 8c: rewrites the whole chunk in place from info (the song's
+   details after editing), after checking that the file's chunk is the
+   song with info->id. The audio is not touched; the file's length and
+   RIFF size follow the new chunk. Works while the song is playing. */
+OSErr SongFile_WriteInfo(short vRefNum, long dirID, ConstStringPtr name,
+                         const SongInfo *info);
+
 /* The audio fingerprint (D31) of an open file. buffer needs
    kSongFingerprintSample bytes. */
 OSErr SongFile_Fingerprint(short refNum, long audioOffset, long audioLength,

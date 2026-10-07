@@ -59,6 +59,9 @@ resource 'MENU' (129) {
     }
 };
 
+/* Items 1-6 are for desk accessories. Stage 8c: Edit Song... (item 8)
+   is enabled at run time while a song is highlighted or playing on Now
+   Playing. */
 resource 'MENU' (130) {
     130, textMenuProc;
     0, enabled;
@@ -70,6 +73,8 @@ resource 'MENU' (130) {
         "Copy", noIcon, "C", noMark, plain;
         "Paste", noIcon, "V", noMark, plain;
         "Clear", noIcon, noKey, noMark, plain;
+        "-", noIcon, noKey, noMark, plain;
+        "Edit Song\0xC9", noIcon, noKey, noMark, plain;
     }
 };
 

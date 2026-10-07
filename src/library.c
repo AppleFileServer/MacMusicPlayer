@@ -168,9 +168,8 @@ static Boolean InsertName(long *names, short *count, short max, long offset)
     return true;
 }
 
-static short FindName(const NameSet *set, long offset)
+static short FindNameString(const NameSet *set, ConstStringPtr name)
 {
-    ConstStringPtr name = PoolString(offset);
     short i;
 
     for (i = 0; i < set->count; i++)
@@ -178,6 +177,16 @@ static short FindName(const NameSet *set, long offset)
             return i;
     return kNone;
 }
+
+static short FindName(const NameSet *set, long offset)
+{
+    return FindNameString(set, PoolString(offset));
+}
+
+short Library_FindArtist(ConstStringPtr name)   { return FindNameString(&gArtists, name); }
+short Library_FindAlbum(ConstStringPtr name)    { return FindNameString(&gAlbums, name); }
+short Library_FindGenre(ConstStringPtr name)    { return FindNameString(&gGenres, name); }
+short Library_FindComposer(ConstStringPtr name) { return FindNameString(&gComposers, name); }
 
 /* ---- Scanning --------------------------------------------------------- */
 
@@ -657,13 +666,16 @@ static long LineID(const unsigned char *text, long at, long length)
     return id;
 }
 
-/* Rewrites one playlist file without the lines for id. */
-static OSErr RemoveFromPlaylist(short playlist, long id)
+/* Rewrites one playlist file without the lines for id, or (title not
+   nil, Stage 8c) with those lines rewritten as "<id><tab><title>", each
+   keeping its own line ending. Files without the ID are not rewritten. */
+static OSErr RewritePlaylist(short playlist, long id, ConstStringPtr title)
 {
-    Ptr text;
-    long length, count, at, end, kept = 0;
+    Ptr text, out = nil;
+    long length, count, at, end, body, kept = 0;
     short refNum;
     Boolean changed = false;
+    Str255 number;
     OSErr err;
 
     err = OpenDataFork(gFolder.vRefNum, gFolder.playlistsID,
@@ -681,25 +693,47 @@ static OSErr RemoveFromPlaylist(short playlist, long id)
     if (err == noErr && count != length)
         err = ioErr;
 
-    /* Compact in place: each line (with its CR, LF or CRLF ending) is
-       kept unless it starts with this ID. */
+    /* The output: no longer than the file when removing; a rewritten line
+       ("<id><tab><title>") is at most 11 + 1 + 63 characters plus its
+       ending, so allow for every line being one. */
+    if (err == noErr)
+    {
+        out = NewPtr(title == nil ? (length > 0 ? length : 1)
+                                  : length + (length / 2 + 1) * 80);
+        if (out == nil)
+            err = memFullErr;
+    }
+    NumToString(id, number);
+
+    /* Each line (with its CR, LF or CRLF ending) is copied unless it
+       starts with this ID; such a line is dropped, or rewritten. */
     for (at = 0; err == noErr && at < length; at = end)
     {
         end = at;
         while (end < length && text[end] != '\r' && text[end] != '\n')
             end++;
+        body = end;
         if (end < length && text[end] == '\r')
             end++;
         if (end < length && text[end] == '\n')
             end++;
 
-        if (LineID((unsigned char *)text, at, length) == id)
-            changed = true;
-        else
+        if (LineID((unsigned char *)text, at, length) != id)
         {
-            BlockMove(text + at, text + kept, end - at);
+            BlockMove(text + at, out + kept, end - at);
             kept += end - at;
+            continue;
         }
+        changed = true;
+        if (title == nil)
+            continue;
+        BlockMove(number + 1, out + kept, number[0]);
+        kept += number[0];
+        out[kept++] = '\t';
+        BlockMove(title + 1, out + kept, title[0]);
+        kept += title[0];
+        BlockMove(text + body, out + kept, end - body);
+        kept += end - body;
     }
 
     if (err == noErr && changed)
@@ -707,10 +741,12 @@ static OSErr RemoveFromPlaylist(short playlist, long id)
         count = kept;
         err = SetFPos(refNum, fsFromStart, 0);
         if (err == noErr)
-            err = FSWrite(refNum, &count, text);
+            err = FSWrite(refNum, &count, out);
         if (err == noErr)
             err = SetEOF(refNum, kept);
     }
+    if (out != nil)
+        DisposePtr(out);
     if (text != nil)
         DisposePtr(text);
     FSClose(refNum);
@@ -726,7 +762,24 @@ OSErr Library_RemoveFromPlaylists(long id)
         return noErr;
     for (i = 0; i < gPlaylistCount; i++)
     {
-        err = RemoveFromPlaylist(i, id);
+        err = RewritePlaylist(i, id, nil);
+        if (first == noErr)
+            first = err;
+    }
+    FlushVol(nil, gFolder.vRefNum);
+    return first;
+}
+
+OSErr Library_RetitleInPlaylists(long id, ConstStringPtr title)
+{
+    short i;
+    OSErr err, first = noErr;
+
+    if (!gHaveFolder || id <= 0)
+        return noErr;
+    for (i = 0; i < gPlaylistCount; i++)
+    {
+        err = RewritePlaylist(i, id, title);
         if (first == noErr)
             first = err;
     }
@@ -875,6 +928,43 @@ OSErr Library_SetSongRating(short song, short rating)
     if (err == noErr)
         Songs()[song].flags = flags;
     return err;
+}
+
+Boolean Library_UpdateSong(short song, const SongInfo *info)
+{
+    long offsets[kSongTagCount];
+    SongRec *rec;
+    short i;
+    Boolean ok = true;
+
+    /* The new names go on the end of the pool; the old ones stay unused
+       until the next scan. The pool must be unlocked to grow, so it may
+       move: everything that points into it is rebuilt by the caller. */
+    HUnlock(gPoolH);
+    for (i = 0; i < kSongTagCount && ok; i++)
+    {
+        offsets[i] = PoolAdd(info->text[i]);
+        ok = offsets[i] >= 0;
+    }
+    MoveHHi(gPoolH);
+    HLock(gPoolH);
+    if (!ok)
+        return false;
+
+    rec = &Songs()[song];
+    rec->title = offsets[0];
+    rec->artistName = offsets[1];
+    rec->albumName = offsets[2];
+    rec->genreName = offsets[3];
+    rec->composerName = offsets[4];
+    rec->track = info->track;
+    rec->flags = info->flags;
+
+    /* The groups and sort orders are rebuilt from the records, as after a
+       scan, without reading any file. */
+    gArtists.count = gAlbums.count = gGenres.count = gComposers.count = 0;
+    IndexSongs();
+    return true;
 }
 
 Boolean Library_SongFile(short song, short *vRefNum, long *dirID,

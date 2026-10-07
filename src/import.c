@@ -15,19 +15,8 @@
 #include "pstr.h"
 #include "fileops.h"
 #include "songfile.h"
+#include "songdialog.h"
 #include "wav.h"
-
-/* Import Song window (DLOG/DITL 131). */
-enum
-{
-    kImportDialog = 131,
-    kItemImport = 1,
-    kItemCancel = 2,
-    kItemTitle = 3,             /* edit fields 3-7: title ... composer */
-    kItemTrack = 8,
-    kItemAudiobook = 9,
-    kItemOutline = 17           /* user item: default button outline */
-};
 
 /* Already-imported warning (ALRT 132). */
 enum
@@ -53,19 +42,6 @@ enum
    kSongFingerprintSample, which the fingerprint reads with it. */
 #define kCopyBufferSize     32768L
 
-
-typedef struct
-{
-    Str63 text[kSongTagCount];      /* title, artist, album, genre, composer */
-    short track;
-    Boolean audiobook;
-} SongDetails;
-
-static ConstStringPtr const kFieldNames[kSongTagCount] = {
-    P("The title"), P("The artist"), P("The album"), P("The genre"),
-    P("The composer")
-};
-
 /* ---- Small helpers ---------------------------------------------------- */
 
 /* "IPOD" + the ID, at least four digits. */
@@ -80,19 +56,6 @@ static void MakeSongFileName(long id, Str63 name)
     for (pad = digits[0]; pad < 4; pad++)
         PStrAppend(name, P("0"));
     PStrAppend(name, digits);
-}
-
-/* "m:ss" for a number of seconds. */
-static void FormatDuration(long seconds, Str255 out)
-{
-    Str255 number;
-
-    NumToString(seconds / 60, out);
-    PStrAppend(out, P(":"));
-    if (seconds % 60 < 10)
-        PStrAppend(out, P("0"));
-    NumToString(seconds % 60, number);
-    PStrAppend(out, number);
 }
 
 /* The source file name without a ".wav" ending (any case), at most 63. */
@@ -114,154 +77,31 @@ static void TitleFromFileName(ConstStringPtr fileName, Str63 title)
 
 /* ---- Import Song window ----------------------------------------------- */
 
-/* Draws the thick outline round the default (Import) button. */
-static pascal void DrawDefaultOutline(DialogPtr dialog, short item)
-{
-    short type;
-    Handle handle;
-    Rect r;
-
-    (void)item;
-    GetDialogItem(dialog, kItemImport, &type, &handle, &r);
-    InsetRect(&r, -4, -4);
-    PenSize(3, 3);
-    FrameRoundRect(&r, 16, 16);
-    PenNormal();
-}
-
-static Handle ItemHandle(DialogPtr dialog, short item)
-{
-    short type;
-    Handle handle;
-    Rect r;
-
-    GetDialogItem(dialog, item, &type, &handle, &r);
-    return handle;
-}
-
-/* Checks the fields; on a problem explains it, selects the field and
-   returns false (DECISION D25: the title may not be blank). */
-static Boolean ReadDetails(DialogPtr dialog, SongDetails *details)
-{
-    Str255 text, message;
-    short i;
-    long track;
-
-    for (i = 0; i < kSongTagCount; i++)
-    {
-        GetDialogItemText(ItemHandle(dialog, kItemTitle + i), text);
-        if (text[0] > kSongMaxString)
-        {
-            message[0] = 0;
-            PStrAppend(message, kFieldNames[i]);
-            PStrAppend(message, P(" is longer than 63 characters."));
-            Message_Show(message, noErr);
-            SelectDialogItemText(dialog, kItemTitle + i, 0, 32767);
-            return false;
-        }
-        BlockMove(text, details->text[i], text[0] + 1);
-    }
-
-    if (details->text[0][0] == 0)
-    {
-        Message_Show(P("Please enter a title."), noErr);
-        SelectDialogItemText(dialog, kItemTitle, 0, 32767);
-        return false;
-    }
-
-    GetDialogItemText(ItemHandle(dialog, kItemTrack), text);
-    track = 0;
-    if (text[0] > 0)
-    {
-        for (i = 1; i <= text[0]; i++)
-            if (text[i] < '0' || text[i] > '9')
-                break;
-        if (i <= text[0] || text[0] > 4)
-        {
-            Message_Show(P("Track must be a whole number from 0 to 9999."), noErr);
-            SelectDialogItemText(dialog, kItemTrack, 0, 32767);
-            return false;
-        }
-        StringToNum(text, &track);
-    }
-    details->track = (short)track;
-
-    details->audiobook =
-        GetControlValue((ControlHandle)ItemHandle(dialog, kItemAudiobook)) != 0;
-    return true;
-}
-
-/* Shows the Import Song window. Returns true with the details if the
-   user clicks Import, false on Cancel. */
+/* Shows the song window for a new song. Returns true with the details if
+   the user clicks Import, false on Cancel. */
 static Boolean AskForDetails(ConstStringPtr fileName, const WavInfo *wav,
                              SongDetails *details)
 {
-    DialogPtr dialog;
-    Str255 duration, number;
-    Str63 title;
-    short item, type;
-    Handle handle;
-    ControlHandle checkbox;
-    Rect r;
-    Boolean ok = false;
+    short i;
 
     /* DECISION D28: defaults from the WAV's INFO tags; without a title
        tag, the file name minus ".wav". */
     if (wav->title[0] > 0)
-        BlockMove(wav->title, title, wav->title[0] + 1);
+        BlockMove(wav->title, details->text[0], wav->title[0] + 1);
     else
-        TitleFromFileName(fileName, title);
+        TitleFromFileName(fileName, details->text[0]);
+    BlockMove(wav->artist, details->text[1], wav->artist[0] + 1);
+    BlockMove(wav->album, details->text[2], wav->album[0] + 1);
+    BlockMove(wav->genre, details->text[3], wav->genre[0] + 1);
+    for (i = 4; i < kSongTagCount; i++)
+        details->text[i][0] = 0;
+    details->track = wav->track > 0 ? wav->track : 0;
+    details->audiobook = false;
 
-    FormatDuration((wav->dataLength + kSongSampleRate / 2) / kSongSampleRate,
-                   duration);
-    ParamText(fileName, duration, P(""), P(""));
-
-    dialog = GetNewDialog(kImportDialog, nil, (WindowPtr)-1);
-    if (dialog == nil)
-    {
-        Message_Show(P("The Import Song window could not be opened."), noErr);
-        return false;
-    }
-
-    SetDialogItemText(ItemHandle(dialog, kItemTitle), title);
-    SetDialogItemText(ItemHandle(dialog, kItemTitle + 1), wav->artist);
-    SetDialogItemText(ItemHandle(dialog, kItemTitle + 2), wav->album);
-    SetDialogItemText(ItemHandle(dialog, kItemTitle + 3), wav->genre);
-    if (wav->track > 0)
-    {
-        NumToString(wav->track, number);
-        SetDialogItemText(ItemHandle(dialog, kItemTrack), number);
-    }
-
-    GetDialogItem(dialog, kItemOutline, &type, &handle, &r);
-    SetDialogItem(dialog, kItemOutline, type, (Handle)DrawDefaultOutline, &r);
-
-    SelectDialogItemText(dialog, kItemTitle, 0, 32767);
-    ShowWindow(dialog);
-
-    for (;;)
-    {
-        ModalDialog(Modal_DialogFilter, &item);
-
-        if (item == kItemImport)
-        {
-            if (ReadDetails(dialog, details))
-            {
-                ok = true;
-                break;
-            }
-        }
-        else if (item == kItemCancel)
-            break;
-        else if (item == kItemAudiobook)
-        {
-            checkbox = (ControlHandle)ItemHandle(dialog, kItemAudiobook);
-            SetControlValue(checkbox, !GetControlValue(checkbox));
-        }
-    }
-
-    DisposeDialog(dialog);
-    return ok;
+    return SongDialog_Run(P("Import"), fileName,
+                          (wav->dataLength + kSongSampleRate / 2)
+                              / kSongSampleRate,
+                          details);
 }
 
 /* ---- The source file ---------------------------------------------------- */

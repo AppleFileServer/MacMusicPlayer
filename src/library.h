@@ -4,6 +4,7 @@
 #include <MacTypes.h>
 
 #include "libfolder.h"
+#include "songfile.h"
 
 /* The music library: built by scanning the iPod Library folder's song
    files (song_format.h) and its Playlists folder. Only metadata is held
@@ -64,6 +65,11 @@ OSErr Library_AppendToPlaylist(short playlist, short song);
    files without the ID are not rewritten. Returns the first error. */
 OSErr Library_RemoveFromPlaylists(long id);
 
+/* Stage 8c (L11): rewrites every playlist line for song ID id with this
+   title (playlist files show the title as text; membership stays by ID).
+   Files without the ID are not rewritten. Returns the first error. */
+OSErr Library_RetitleInPlaylists(long id, ConstStringPtr title);
+
 /* Each List function writes item indexes, in display order, to out
    (at most max) and returns how many it wrote. */
 short Library_ListGenres(short *out, short max);
@@ -94,6 +100,21 @@ long Library_SongAudioLength(short song);           /* bytes */
    the library keeps the old rating. */
 short Library_SongRating(short song);
 OSErr Library_SetSongRating(short song, short rating);
+
+/* Stage 8c: the song's details changed (its file already rewritten from
+   info): the library takes the new title, artist, album, genre, composer,
+   track and flags without a rescan. Song indexes and IDs are unchanged;
+   artist, album, genre and composer numbers may all change, and pointers
+   into the old names must not be kept. False if memory ran out (the
+   caller then rescans). */
+Boolean Library_UpdateSong(short song, const SongInfo *info);
+
+/* The artist, album, genre or composer with exactly this name (as the
+   lists group them), or kNone. */
+short Library_FindArtist(ConstStringPtr name);
+short Library_FindAlbum(ConstStringPtr name);
+short Library_FindGenre(ConstStringPtr name);
+short Library_FindComposer(ConstStringPtr name);
 
 /* Where a song's audio is on disk, for playback. False if there is no
    scanned library. */
