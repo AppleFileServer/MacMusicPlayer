@@ -76,6 +76,11 @@ OSErr Library_AppendToPlaylist(short playlist, short song);
    files without the ID are not rewritten. Returns the first error. */
 OSErr Library_RemoveFromPlaylists(long id);
 
+/* Stage 8d-4 (L7): removes one entry from a playlist file: the nth
+   (0-based) line for song ID id, so a song listed twice keeps its other
+   line. Other lines are kept exactly. */
+OSErr Library_RemoveFromPlaylist(short playlist, long id, short nth);
+
 /* Stage 8c (L11): rewrites every playlist line for song ID id with this
    title (playlist files show the title as text; membership stays by ID).
    Files without the ID are not rewritten. Returns the first error. */

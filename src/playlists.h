@@ -4,9 +4,10 @@
 #include <MacTypes.h>
 #include <Menus.h>
 
-/* The Playlists menu (MENU 131): "New Playlist..." then, below a divider,
-   one "Add to <name>" item per playlist (DECISION P6). Songs are added
-   only from here, never from the iPod screen. */
+/* The Playlists menu (MENU 131): "New Playlist...", "Remove from
+   Playlist" (Stage 8d-4, L7), then, below a divider, one "Add to <name>"
+   item per playlist (DECISION P6). Songs are added and removed only from
+   here, never from the iPod screen. */
 
 /* Rebuilds the playlist items and sets what is enabled. Call before
    MenuSelect/MenuKey. hasLibrary: a library is set. */

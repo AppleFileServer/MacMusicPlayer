@@ -88,13 +88,15 @@ resource 'MBAR' (128) {
 };
 
 /* Playlists (Stage 3C, P3/P6). The playlist items after the divider are
-   added and enabled at run time. */
+   added and enabled at run time. Stage 8d-4 (L7): Remove from Playlist
+   (item 2) starts disabled with the divider: mask 0x7FFFFFF9. */
 resource 'MENU' (131) {
     131, textMenuProc;
-    0x7FFFFFFD, enabled;
+    0x7FFFFFF9, enabled;
     "Playlists";
     {
         "New Playlist\0xC9", noIcon, noKey, noMark, plain;
+        "Remove from Playlist", noIcon, noKey, noMark, plain;
         "-", noIcon, noKey, noMark, plain;
     }
 };

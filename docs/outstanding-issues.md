@@ -74,9 +74,9 @@ image). Stage 8 is planned.
 - Ratings (7d) are recorded but not used for anything else yet. Ideas
   for later, not planned now: use them in Shuffle Songs, or to create
   playlists (e.g. songs rated 4 stars or more).
-- Stage 8: library management and settings (song metadata editing,
-  library administration, a multiple-libraries investigation, and a
-  Settings menu audit): `docs/plans/stage-8-library-and-settings.md`.
+- Building the Settings menu specified in Stage 8b
+  (`docs/plans/stage-8b-settings.md`): About, Shuffle, Repeat, Clicker,
+  Legal, Reset All Settings, and the main menu's Backlight.
 - On-The-Go playlist (D17): deferred until after Stage 8, possibly a
   later stage. The 4G guide's description and a draft plan are in
   `docs/plans/deferred-on-the-go.md`.
@@ -92,6 +92,10 @@ image). Stage 8 is planned.
   the build, window, menus, About box and prefs file ("MacMusicPlayer
   Prefs" is renamed to "MacMusic Prefs" on first launch). The project
   folder keeps its old name for now (R2).
+- Stage 8, library management and settings: metadata editing (8c),
+  library safeguards, Rescan and Library Info, Recent Libraries and
+  Remove from Playlist (8d), plus the 8a and 8b design documents
+  (`docs/plans/stage-8-library-and-settings.md`).
 - Hardware test image out of date (I7): the Scratch image was rebuilt
   with the `0692d4f` app and the old-format library removed (2026-10-07);
   the app runs correctly on the real Mac Plus.

@@ -13,7 +13,8 @@
 enum
 {
     kItemNewPlaylist = 1,
-    kItemFirstPlaylist = 3,     /* after the divider */
+    kItemRemove = 2,            /* Stage 8d-4 (L7) */
+    kItemFirstPlaylist = 4,     /* after the divider */
 
     kNewPlaylistDialog = 133,
     kItemCreate = 1,
@@ -70,6 +71,38 @@ void Playlists_AdjustMenu(MenuHandle menu, Boolean hasLibrary)
         EnableItem(menu, kItemNewPlaylist);
     else
         DisableItem(menu, kItemNewPlaylist);
+
+    {
+        short playlist, nth;
+        long id;
+
+        if (hasLibrary && UI_SelectedPlaylistEntry(&playlist, &id, &nth))
+            EnableItem(menu, kItemRemove);
+        else
+            DisableItem(menu, kItemRemove);
+    }
+}
+
+/* ---- Remove from Playlist (Stage 8d-4, L7) ----------------------------- */
+
+/* Removes the highlighted entry from the playlist being shown. Only that
+   playlist line goes: the song stays in the library (L1). */
+static Boolean RemoveFromPlaylist(void)
+{
+    short playlist, nth;
+    long id;
+    OSErr err;
+
+    if (!UI_SelectedPlaylistEntry(&playlist, &id, &nth))
+        return false;
+    err = Library_RemoveFromPlaylist(playlist, id, nth);
+    if (err != noErr)
+    {
+        Message_Show(P("The song could not be removed from the playlist."), err);
+        return false;
+    }
+    UI_KeepRowOnRefresh();
+    return true;
 }
 
 /* ---- New Playlist... -------------------------------------------------- */
@@ -245,6 +278,8 @@ Boolean Playlists_HandleMenu(short item)
 
     if (item == kItemNewPlaylist)
         return NewPlaylist();
+    if (item == kItemRemove)
+        return RemoveFromPlaylist();
     if (index >= 0 && index < gMenuPlaylistCount)
         return AddToPlaylist(gMenuPlaylists[index]);
     return false;

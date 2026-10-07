@@ -143,12 +143,43 @@ static void RebuildScreen(Screen *s)
         s->top = s->count > kVisibleRows ? s->count - kVisibleRows : 0;
 }
 
+static Boolean gKeepRow;
+static void ClampScroll(Screen *s);
+
+void UI_KeepRowOnRefresh(void)
+{
+    gKeepRow = true;
+}
+
 void UI_Refresh(void)
 {
-    short i;
+    Screen *s = CurrentScreen();
+    short i, row = s->selected;
 
     for (i = 0; i < gNavDepth; i++)
         RebuildScreen(&gNav[i]);
+    if (gKeepRow)
+    {
+        gKeepRow = false;
+        s->selected = row;
+        ClampScroll(s);
+    }
+}
+
+Boolean UI_SelectedPlaylistEntry(short *playlist, long *id, short *nth)
+{
+    Screen *s = CurrentScreen();
+    short song = UIList_ItemSong(s, s->selected), i;
+
+    if (s->kind != kScreenSongs || s->filter.playlist == kNone || song == kNone)
+        return false;
+    *playlist = s->filter.playlist;
+    *id = Library_SongID(song);
+    *nth = 0;
+    for (i = 0; i < s->selected; i++)
+        if (s->items[i] == song)
+            (*nth)++;
+    return true;
 }
 
 short UI_SongToEdit(void)

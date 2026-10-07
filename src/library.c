@@ -703,9 +703,13 @@ static long LineID(const unsigned char *text, long at, long length)
 
 /* Rewrites one playlist file without the lines for id, or (title not
    nil, Stage 8c) with those lines rewritten as "<id><tab><title>", each
-   keeping its own line ending. Files without the ID are not rewritten. */
-static OSErr RewritePlaylist(short playlist, long id, ConstStringPtr title)
+   keeping its own line ending. With nth >= 0 (Stage 8d-4) only the nth
+   line for id (0-based) is affected. Files without the ID are not
+   rewritten. */
+static OSErr RewritePlaylist(short playlist, long id, ConstStringPtr title,
+                             short nth)
 {
+    short seen = 0;
     Ptr text, out = nil;
     long length, count, at, end, body, kept = 0;
     short refNum;
@@ -753,7 +757,8 @@ static OSErr RewritePlaylist(short playlist, long id, ConstStringPtr title)
         if (end < length && text[end] == '\n')
             end++;
 
-        if (LineID((unsigned char *)text, at, length) != id)
+        if (LineID((unsigned char *)text, at, length) != id
+            || (nth >= 0 && seen++ != nth))
         {
             BlockMove(text + at, out + kept, end - at);
             kept += end - at;
@@ -797,12 +802,23 @@ OSErr Library_RemoveFromPlaylists(long id)
         return noErr;
     for (i = 0; i < gPlaylistCount; i++)
     {
-        err = RewritePlaylist(i, id, nil);
+        err = RewritePlaylist(i, id, nil, -1);
         if (first == noErr)
             first = err;
     }
     FlushVol(nil, gFolder.vRefNum);
     return first;
+}
+
+OSErr Library_RemoveFromPlaylist(short playlist, long id, short nth)
+{
+    OSErr err;
+
+    if (!gHaveFolder || playlist < 0 || playlist >= gPlaylistCount || nth < 0)
+        return paramErr;
+    err = RewritePlaylist(playlist, id, nil, nth);
+    FlushVol(nil, gFolder.vRefNum);
+    return err;
 }
 
 OSErr Library_RetitleInPlaylists(long id, ConstStringPtr title)
@@ -814,7 +830,7 @@ OSErr Library_RetitleInPlaylists(long id, ConstStringPtr title)
         return noErr;
     for (i = 0; i < gPlaylistCount; i++)
     {
-        err = RewritePlaylist(i, id, title);
+        err = RewritePlaylist(i, id, title, -1);
         if (first == noErr)
             first = err;
     }

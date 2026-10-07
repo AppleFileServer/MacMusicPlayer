@@ -53,6 +53,17 @@ short UI_SelectedSong(void);
    still exists. Does not draw. */
 void UI_Refresh(void);
 
+/* Stage 8d-4: the next UI_Refresh keeps the current screen's highlight
+   at the same row (clamped) instead of following its item: after the
+   highlighted entry has been removed, the highlight lands on the row
+   that took its place, not on another entry for the same song. */
+void UI_KeepRowOnRefresh(void);
+
+/* Stage 8d-4: if the highlight is on a song inside a playlist, that
+   playlist, the song's ID and which of the song's entries it is (0 for
+   the first, if the song is listed more than once); else false. */
+Boolean UI_SelectedPlaylistEntry(short *playlist, long *id, short *nth);
+
 /* Stage 8c: the song Edit > Edit Song... acts on: the song playing on Now
    Playing (L2), else the highlighted song row; kNone if neither. */
 short UI_SongToEdit(void);

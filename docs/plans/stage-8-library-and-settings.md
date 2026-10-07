@@ -4,7 +4,8 @@ Status: approved (2026-10-07), decisions L1-L11 made. 8a decided:
 Option A (`stage-8a-multiple-libraries.md`, M1-M4). 8b decided
 (`stage-8b-settings.md`). 8c done. 8d in progress, in four parts:
 8d-1 safeguards (done), 8d-2 Rescan and Library Info (done), 8d-3
-Recent Libraries (done), 8d-4 Remove from Playlist.
+Recent Libraries (done), 8d-4 Remove from Playlist (done). **Stage 8 is
+complete in Mini vMac (2026-10-07).**
 No code has been changed.
 
 Replaces the earlier Stage 8 (On-The-Go), now deferred
@@ -291,6 +292,11 @@ No path is shown instead.
 **Remove from Playlist (L7):** a Playlists menu item, enabled when the
 highlight is on a song inside a playlist. It removes that one entry from
 the playlist file, and the song stays in the library.
+
+**Done in 8d-4:** if a song is listed twice, only the highlighted entry
+goes; every other line is kept exactly. Afterwards the highlight keeps
+its row, landing on the entry that moved up, not on the song's other
+entry.
 
 **Missing or corrupt songs:** the scan already skips unreadable files,
 and playback skips songs whose files have gone (R8). 8d lists them in
