@@ -1,7 +1,7 @@
 # Stage 9 plan: the Settings menu
 
-Status: approved (2026-10-07), decisions T1-T9 made. 9a-9c done;
-9d and 9e remain. Builds the specification decided in Stage 8b
+Status: approved (2026-10-07), decisions T1-T9 made. 9a-9d done;
+9e remains. Builds the specification decided in Stage 8b
 (`stage-8b-settings.md`, S-1 to S-11).
 
 ## What Stage 8b decided
@@ -158,6 +158,14 @@ Also from 8b:
   back to you.
 - **Tests:** that diagnostic; clicks never sound while playing; Clicker
   Off is silent; manual listening at 1×.
+
+## Found during 9d: volume level 0 isn't silent (accepted)
+
+On the Mac Plus the lowest hardware volume level still plays at about an
+eighth of full amplitude (confirmed in Mini vMac's sound emulation);
+true silence needs the VIA's sound-disable bit, which the system clears
+again within a tick while sound is in use. **Decision (2026-10-07):** the
+wheel's level 0 is the Plus's quietest level, not silence; no change.
 
 ## Not in Stage 9
 - Extras (audited later, S-7).

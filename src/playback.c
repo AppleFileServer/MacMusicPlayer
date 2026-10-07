@@ -4,6 +4,8 @@
 #include "library.h"
 #include "song_format.h"
 #include "audio.h"
+#include "settings.h"
+#include "shuffle.h"
 
 /* PROVISIONAL (N5, spec unknown #5): Previous restarts the current song
    once more than this has played; up to and including it, Previous goes
@@ -26,6 +28,28 @@ static unsigned long gResumedAt;
 static long gLastSecond;
 static Boolean gFileError;              /* a song could not be played (R8) */
 static short gQueuedUpTo;               /* last position handed to audio */
+static short gShuffleMode;              /* the queue's order (9d, T5) */
+
+/* Stage 9d: each song handed to the audio stream is tagged with a fresh
+   sequence number, not its queue position, because with Repeat the same
+   position comes round again (One) or goes back to 0 (All). This table
+   gives the queue position (and song ID) for each recent sequence number;
+   the stream holds at most a few songs, far fewer than kSeqSlots. */
+#define kSeqSlots   16
+#define kSeqWrap    20000               /* restarted with a new stream */
+static short gSeqPosition[kSeqSlots];
+static long gSeqID[kSeqSlots];
+static short gNextSeq = 1;
+static short gCurrentSeq;               /* the song gPosition is playing */
+
+static short NewSeq(short position)
+{
+    short seq = gNextSeq++;
+
+    gSeqPosition[seq % kSeqSlots] = position;
+    gSeqID[seq % kSeqSlots] = gQueue[position];
+    return seq;
+}
 
 /* Audio position in song time: samples at the song's 22050 Hz, so the
    times and progress bar reach the song's length exactly at its end even
@@ -50,7 +74,7 @@ short Playback_CurrentSong(void)
 long Playback_ElapsedTicks(void)
 {
     if (Audio_IsAvailable() && gState == kPlayPlaying
-        && Audio_CurrentTag() != gPosition)
+        && Audio_CurrentTag() != gCurrentSeq)
         return Playback_LengthTicks();  /* moved on; Tick catches up */
     if (Audio_IsAvailable())
         return SamplesToTicks(gState == kPlayPlaying ? Audio_Position()
@@ -81,20 +105,86 @@ static Boolean SourceAt(short position, AudioSource *source)
     return true;
 }
 
+/* Stage 9d (T5): Repeat All, at the end of a shuffled queue: shuffled
+   again for the next time round, in the mode it was first shuffled
+   with. Positions noted for the songs still in the stream are found
+   again by song ID. */
+static void Reshuffle(void)
+{
+    static short songs[kMaxQueue];
+    short i, j, t;
+    long playing = gQueue[gPosition];
+    long last = gQueue[gQueuedUpTo];    /* the round's last song: queued
+                                           ahead, perhaps not yet heard */
+
+    for (i = 0; i < gQueueLength; i++)
+        if ((songs[i] = Library_SongForID(gQueue[i])) == kNone)
+            return;                     /* changed meanwhile: leave it */
+    Shuffle_Order(songs, gQueueLength, 0, false, gShuffleMode);
+    /* Not the round's last song straight away again (Songs mode). */
+    if (gShuffleMode == kShuffleSongs && gQueueLength > 1
+        && Library_SongID(songs[0]) == last)
+    {
+        j = 1 + (short)((unsigned short)Random() % (gQueueLength - 1));
+        t = songs[0];
+        songs[0] = songs[j];
+        songs[j] = t;
+    }
+    for (i = 0; i < gQueueLength; i++)
+        gQueue[i] = Library_SongID(songs[i]);
+
+    for (j = 0; j < kSeqSlots; j++)
+        for (i = 0; i < gQueueLength; i++)
+            if (gQueue[i] == gSeqID[j])
+            {
+                gSeqPosition[j] = i;
+                break;
+            }
+    for (i = 0; i < gQueueLength; i++)
+        if (gQueue[i] == playing)
+        {
+            gPosition = i;
+            break;
+        }
+}
+
+/* Stage 9d: the queue position after position p as the Repeat setting
+   has it, or -1 at the end. Off: the next, and the end after the last
+   (N4). One: the same song again. All: after the last, the first (the
+   queue reshuffled first if it was shuffled, T5). Next and Previous
+   don't use this: they still move to another song (S-3). */
+static short NextPosition(short p, Boolean reshuffle)
+{
+    short repeat = Settings_Get(kSettingRepeat);
+
+    if (repeat == kRepeatOne)
+        return p;
+    if (p + 1 < gQueueLength)
+        return p + 1;
+    if (repeat != kRepeatAll)
+        return -1;
+    if (reshuffle && gShuffleMode != kShuffleOff)
+        Reshuffle();
+    return 0;
+}
+
 /* Stage 5c, DECISION G3: the song after the last one handed to the audio
    stream is queued as soon as the stream can take it, so its audio
-   follows without a gap however slowly the main loop runs. The last song
-   in the queue has nothing after it, so its natural end stops (N4). */
+   follows without a gap however slowly the main loop runs. With Repeat
+   Off the last song in the queue has nothing after it, so its natural
+   end stops (N4); with Repeat One or All there is always a next song. */
 static void QueueAhead(void)
 {
     AudioSource source;
+    short next, tries = 0;
 
     while (gState == kPlayPlaying && Audio_WantsNext()
-           && gQueuedUpTo + 1 < gQueueLength)
+           && tries++ <= gQueueLength
+           && (next = NextPosition(gQueuedUpTo, true)) >= 0)
     {
-        gQueuedUpTo++;
+        gQueuedUpTo = next;
         if (SourceAt(gQueuedUpTo, &source))
-            Audio_Queue(&source, gQueuedUpTo);
+            Audio_Queue(&source, NewSeq(gQueuedUpTo));
     }
 }
 
@@ -107,8 +197,11 @@ static OSErr StartCurrent(long sample, Boolean resume)
 
     if (!SourceAt(gPosition, &source))
         return fnfErr;
-    err = resume ? Audio_Resume(&source, gPosition)
-                 : Audio_Play(&source, sample, gPosition);
+    if (gNextSeq > kSeqWrap)
+        gNextSeq = 1;                   /* a new stream: nothing in it */
+    gCurrentSeq = NewSeq(gPosition);
+    err = resume ? Audio_Resume(&source, gCurrentSeq)
+                 : Audio_Play(&source, sample, gCurrentSeq);
     if (err == noErr)
     {
         gQueuedUpTo = gPosition;
@@ -126,9 +219,11 @@ static Boolean FollowAudio(void)
     if (gState != kPlayPlaying || !Audio_IsAvailable())
         return false;
     tag = Audio_CurrentTag();
-    if (tag <= gPosition || tag >= gQueueLength)
+    if (tag <= 0 || (short)(tag - gCurrentSeq) <= 0
+        || gSeqPosition[tag % kSeqSlots] >= gQueueLength)
         return false;
-    gPosition = tag;
+    gCurrentSeq = tag;
+    gPosition = gSeqPosition[tag % kSeqSlots];
     gLastSecond = -1;
     return true;
 }
@@ -180,7 +275,8 @@ static void RestartSong(void)
     }
 }
 
-void Playback_Start(const short *songs, short count, short start)
+void Playback_Start(const short *songs, short count, short start,
+                    short shuffle)
 {
     short i;
 
@@ -195,6 +291,7 @@ void Playback_Start(const short *songs, short count, short start)
         gQueue[i] = Library_SongID(songs[i]);
     gQueueLength = count;
     gPosition = start;
+    gShuffleMode = shuffle;
     gState = kPlayPlaying;
     RestartSong();
 }
@@ -325,11 +422,13 @@ short Playback_Tick(void)
         && (Audio_IsAvailable() ? Audio_Ended()
                                 : elapsed >= Playback_LengthTicks()))
     {
-        /* DECISION N4: at the natural end of the last song, stop. With
-           sound, the stream ran out early only if the songs after it
-           could not be queued (gone from the library): try the next. */
-        next = Audio_IsAvailable() ? gQueuedUpTo + 1 : gPosition + 1;
-        if (next >= gQueueLength)
+        /* DECISION N4: at the natural end of the last song, stop (Repeat
+           Off). With sound, the stream ran out early only if the songs
+           after it could not be queued (gone from the library): try the
+           next. Without sound, Repeat decides the next song here (9d). */
+        next = NextPosition(Audio_IsAvailable() ? gQueuedUpTo : gPosition,
+                            !Audio_IsAvailable());
+        if (next < 0)
         {
             Playback_Stop();
             return result | kTickStopped;

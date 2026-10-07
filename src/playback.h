@@ -20,8 +20,11 @@ typedef enum
 #define kTickStopped        0x04    /* reached the end and stopped */
 
 /* Plays songs[start], then the rest of songs in order (N2). songs are
-   library song indexes; count may be 0 (does nothing). */
-void Playback_Start(const short *songs, short count, short start);
+   library song indexes; count may be 0 (does nothing). shuffle: the
+   Shuffle mode the list was put in order with (settings.h), used to
+   reshuffle each time round with Repeat All (Stage 9d, T5). */
+void Playback_Start(const short *songs, short count, short start,
+                    short shuffle);
 
 void Playback_Stop(void);
 void Playback_TogglePause(void);

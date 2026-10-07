@@ -10,6 +10,7 @@ add_application(MacMusic
     src/lcd_draw.c
     src/prefs.c
     src/settings.c
+    src/shuffle.c
     src/legal.c
     src/volume.c
     src/libfolder.c
