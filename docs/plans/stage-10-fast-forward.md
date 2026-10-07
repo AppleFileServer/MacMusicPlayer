@@ -1,6 +1,6 @@
 # Stage 10 plan: fast-forward and rewind
 
-Status: approved (2026-10-07), decisions F1-F8 made. 10a and 10b done; 10c approved (G1-G4).
+Status: **complete (2026-10-07)**: 10a, 10b and 10c done (F1-F8, G1-G4).
 No code has been changed. Decision N8 (deferred since 5c-1, W4, and
 Stage 7). Built as close to the Stage 7c scrubber as possible.
 
@@ -276,7 +276,8 @@ beside the battery while the title stays centred.
   is audiobooks (S-2), or because Shuffle was changed only after it
   started (T4).
 - **G3:** Shuffle by Albums shows the same shuffle icon.
-- **G4:** Repeat One is the loop with a "1". PROVISIONAL.
+- **G4 (reversed in review, 2026-10-07):** Repeat One shows the same loop
+  as Repeat All, without a "1": the icon only says Repeat is on.
 
 ## Not in Stage 10
 - Audible fast-forward (see the principle above).

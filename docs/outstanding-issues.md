@@ -73,7 +73,6 @@ image). Stage 8 is planned.
 - Ratings (7d) are recorded but not used for anything else yet. Ideas
   for later, not planned now: use them in Shuffle Songs, or to create
   playlists (e.g. songs rated 4 stars or more).
-- Stage 10: press-and-hold fast-forward and rewind (N8), planned next.
 - The Clicker (Stage 9e): dropped, not planned. If it is ever tried again,
   first explain the Stage 9e test runs that stopped without a log.
 - On-The-Go playlist (D17): deferred until after Stage 8, possibly a
@@ -95,6 +94,8 @@ image). Stage 8 is planned.
   library safeguards, Rescan and Library Info, Recent Libraries and
   Remove from Playlist (8d), plus the 8a and 8b design documents
   (`docs/plans/stage-8-library-and-settings.md`).
+- Stage 10, fast-forward and rewind (N8) and the Shuffle and Repeat
+  icons on Now Playing (`docs/plans/stage-10-fast-forward.md`).
 - Stage 9, the Settings menu (`docs/plans/stage-9-settings.md`): About,
   Shuffle, Repeat, Legal, Reset All Settings and the main menu's
   Backlight; the Clicker (9e) dropped.

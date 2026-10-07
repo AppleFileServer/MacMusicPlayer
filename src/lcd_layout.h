@@ -78,6 +78,16 @@
 #define kElapsedLeft            10      /* "1:28" (its 1 sits at x 11) */
 #define kRemainingRight         152     /* exclusive: "-0:56" ends at x 151 */
 
+/* Stage 10c (G1, PROVISIONAL): the shuffle and repeat icons, 11x9, below
+   the title bar at the top right, on the counter's row (y 23-31),
+   right-aligned with the progress bar and remaining time. The rightmost
+   icon showing is under the battery. */
+#define kStatusIconRight        152     /* exclusive: the last ends at x 151 */
+#define kStatusIconTop          23
+#define kStatusIconWidth        11
+#define kStatusIconHeight       9
+#define kStatusIconGap          2
+
 /* Small font (counter, times): 7 px tall glyphs. */
 #define kSmallFontHeight        7
 

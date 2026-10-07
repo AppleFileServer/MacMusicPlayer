@@ -304,6 +304,33 @@ static const unsigned short kRewindIconBits[kPlayIconSize] = {
     0x0840, 0x18C0, 0x39C0, 0x7BC0, 0xFFC0, 0x7BC0, 0x39C0, 0x18C0, 0x0840
 };
 
+/* Stage 10c (G3, G4; PROVISIONAL artwork, after the classic iPod
+   guide's descriptions): shuffle, two crossed arrows; repeat, two arrows
+   in a loop, the same for Repeat One and Repeat All (G4, reversed). */
+static const unsigned short kShuffleIconBits[kStatusIconHeight] = {
+    0x0080, 0xE1E0, 0x1280, 0x0C00, 0x0C00, 0x1280, 0xE1E0, 0x0080, 0x0000
+};
+static const unsigned short kRepeatIconBits[kStatusIconHeight] = {
+    0x0200, 0x7F00, 0x8220, 0x8020, 0x8020, 0x8020, 0x8820, 0x1FC0, 0x0800
+};
+
+/* The icons showing, from the right: repeat, then shuffle (G1). */
+static void DrawStatusIcons(Boolean shuffled, short repeat)
+{
+    short left = kStatusIconRight - kStatusIconWidth;
+
+    if (repeat != 0)
+    {
+        DrawIcon(kRepeatIconBits, 2,
+                 kStatusIconWidth, kStatusIconHeight, left, kStatusIconTop,
+                 srcOr);
+        left -= kStatusIconWidth + kStatusIconGap;
+    }
+    if (shuffled)
+        DrawIcon(kShuffleIconBits, 2, kStatusIconWidth, kStatusIconHeight,
+                 left, kStatusIconTop, srcOr);
+}
+
 void LCDDraw_PlayStateIcon(short icon)
 {
     const unsigned short *bits = kPlayIconBits;
@@ -572,6 +599,7 @@ static void DrawCentredLine(short line, short baseline, ConstStringPtr text)
 void LCDDraw_NowPlaying(ConstStringPtr title, ConstStringPtr artist,
                         ConstStringPtr album, short position, short count,
                         long elapsedTicks, long lengthTicks, short icon,
+                        Boolean shuffled, short repeat,
                         NowPlayingMode mode, short value)
 {
     char text[32];
@@ -590,6 +618,7 @@ void LCDDraw_NowPlaying(ConstStringPtr title, ConstStringPtr artist,
         AppendNumber(p, count);
     }
     LCDDraw_SmallText(kCounterLeft, kCounterTop, text);
+    DrawStatusIcons(shuffled, repeat);         /* Stage 10c */
 
     /* DECISION N8: an empty artist or album leaves its line blank. */
     DrawCentredLine(0, kNowLineBaseline0, title);

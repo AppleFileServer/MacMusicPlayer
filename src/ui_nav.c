@@ -866,6 +866,10 @@ static short gPlayShuffle;
 static short ApplyShuffle(short *songs, short n, short start, Boolean songRow)
 {
     gPlayShuffle = Settings_Get(kSettingShuffle);
+    /* G2 (10c): only a list really reordered counts as shuffled: not one
+       song, nor audiobooks (S-2), which keep their order. */
+    if (n <= 1 || Library_SongIsAudiobook(songs[start]))
+        gPlayShuffle = kShuffleOff;
     return Shuffle_Order(songs, n, start, songRow, gPlayShuffle);
 }
 
@@ -890,7 +894,7 @@ static Boolean ShuffleSongs(void)
     LibFilter_Clear(&all);
     n = Library_ListSongs(&all, gPlayList, kMaxListItems);
     Shuffle_Range(gPlayList, 0, n);
-    gPlayShuffle = kShuffleSongs;       /* reshuffled each time round */
+    gPlayShuffle = n > 1 ? kShuffleSongs : kShuffleOff;  /* 9d, 10c */
     return PlayAndShow(gPlayList, n, 0);
 }
 
@@ -1078,6 +1082,8 @@ static void RenderNowPlaying(void)
                        gScrubPending ? gScrubTicks : Playback_ElapsedTicks(),
                        Playback_LengthTicks(),
                        NowPlayingIcon(),
+                       Playback_IsShuffled(),        /* 10c, G2 */
+                       Settings_Get(kSettingRepeat),
                        gMode, ModeValue());
 }
 

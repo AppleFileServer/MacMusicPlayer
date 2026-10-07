@@ -36,6 +36,10 @@ void Playback_Previous(void);
    the usual pre-fill). Paused: it resumes from there. */
 void Playback_Seek(long ticks);
 
+/* Stage 10c: whether the songs now playing were put in shuffled order
+   (the Shuffle setting or Shuffle Songs), for Now Playing's icon. */
+Boolean Playback_IsShuffled(void);
+
 /* Stage 6b-2: only keeps the audio fed (refill, underrun recovery, queueing
    the next song); no other state changes and no drawing, so it can be
    called from inside modal loops (menus, dialogs, window drags). */

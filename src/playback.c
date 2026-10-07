@@ -63,6 +63,7 @@ PlayState Playback_State(void)  { return gState; }
 Boolean Playback_IsActive(void) { return gState != kPlayStopped; }
 short Playback_Position(void)   { return gPosition; }
 short Playback_QueueLength(void){ return gQueueLength; }
+Boolean Playback_IsShuffled(void) { return gShuffleMode != kShuffleOff; }
 
 short Playback_CurrentSong(void)
 {

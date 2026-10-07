@@ -55,9 +55,12 @@ typedef enum
 
 /* The whole Now Playing screen; position is 0-based. value is the mode's
    volume level or rating. */
+/* Stage 10c: Now Playing's Repeat states (settings.h's kRepeatOff,
+   kRepeatOne, kRepeatAll, by value). */
 void LCDDraw_NowPlaying(ConstStringPtr title, ConstStringPtr artist,
                         ConstStringPtr album, short position, short count,
                         long elapsedTicks, long lengthTicks, short icon,
+                        Boolean shuffled, short repeat,
                         NowPlayingMode mode, short value);
 
 /* Scroll bar for a list of total items whose first visible item is top. */
