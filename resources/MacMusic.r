@@ -38,7 +38,7 @@ resource 'MENU' (128) {
     0x7FFFFFFD, enabled;
     apple;
     {
-        "About MacMusicPlayer\0xC9", noIcon, noKey, noMark, plain;
+        "About MacMusic\0xC9", noIcon, noKey, noMark, plain;
         "-", noIcon, noKey, noMark, plain;
     }
 };
@@ -109,7 +109,7 @@ resource 'DITL' (128) {
         Button { enabled, "OK" };
 
         { 12, 16, 30, 284 },
-        StaticText { disabled, "MacMusicPlayer" };
+        StaticText { disabled, "MacMusic" };
 
         { 36, 16, 80, 284 },
         StaticText { disabled, "A music player for the Macintosh Plus.\rVersion 0.1" };

@@ -65,11 +65,6 @@ image). Stage 8 is planned.
   (6b-2) and responsiveness. The Scratch image is current, so no image
   rebuild is needed first.
 - Press-and-hold fast-forward and rewind (N8, deferred from Stage 7).
-- Rename the app from MacMusicPlayer to **MacMusic** (decided 2026-10-07):
-  the application file, window title, menus, About box, prefs file name
-  and documentation. Plan first (it touches the build, the resources and
-  the prefs file name, so existing prefs need carrying over). The Finder
-  creator and file types stay the same.
 - The software licence that the legal statement
   (`docs/legal/legal-statement.md`) refers to: to be written later, in
   the product documentation.
@@ -93,6 +88,10 @@ image). Stage 8 is planned.
 - Slow import / duplicate copies on disk: `eaaff53` (Stage 5b-2).
 - No way to use an existing library: `b1bf831` (Stage 5b-3).
 - `run-persistent.sh` could not launch Mini vMac (-10825): `8eccbce`.
+- App renamed from MacMusicPlayer to MacMusic (`docs/plans/rename-macmusic.md`):
+  the build, window, menus, About box and prefs file ("MacMusicPlayer
+  Prefs" is renamed to "MacMusic Prefs" on first launch). The project
+  folder keeps its old name for now (R2).
 - Hardware test image out of date (I7): the Scratch image was rebuilt
   with the `0692d4f` app and the old-format library removed (2026-10-07);
   the app runs correctly on the real Mac Plus.

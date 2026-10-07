@@ -1,7 +1,7 @@
 # Plan: rename MacMusicPlayer to MacMusic
 
-Status: approved (2026-10-07), decisions R1-R6 made. No code has been
-changed. Decided 2026-10-07 (8b, S-11): the app is renamed **MacMusic**.
+Status: **done (2026-10-07)**, decisions R1-R6. Tested with a
+migration diagnostic and manually on the MusicTest setup. Decided 2026-10-07 (8b, S-11): the app is renamed **MacMusic**.
 
 ## What doesn't change
 

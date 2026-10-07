@@ -170,7 +170,7 @@ static Boolean IsLibraryFolder(short vRefNum, long dirID)
 static void EnsureMarker(short vRefNum, long dirID)
 {
     static const char text[] =
-        "This folder is an iPod Library for MacMusicPlayer. To use it, "
+        "This folder is an iPod Library for MacMusic. To use it, "
         "choose File > Choose Library..., then Use Existing Library, and "
         "open this file.\r";
     HParamBlockRec pb;

@@ -8,14 +8,14 @@
 # Setup (done once): ~/minivmac/disk2.dsk is a symlink to
 # testdisks/MusicTest.dsk; disk1.dsk is the System 6.0.7 disk.
 #
-# In Mini vMac: open the MusicTest disk and double-click MacMusicPlayer.
+# In Mini vMac: open the MusicTest disk and double-click MacMusic.
 
 set -e
 
 PROJECT=$(cd "$(dirname "$0")/.." && pwd)
 TOOLS="$HOME/Retro68-build/toolchain/bin"
 DISK="$PROJECT/testdisks/MusicTest.dsk"
-APP_BIN="$PROJECT/build/MacMusicPlayer.bin"
+APP_BIN="$PROJECT/build/MacMusic.bin"
 MINIVMAC="$HOME/minivmac/minivmac.app"
 
 if pgrep -x minivmac >/dev/null; then
@@ -28,8 +28,9 @@ fi
 [ -f "$DISK" ]    || { echo "Test disk not found: $DISK" >&2; exit 1; }
 
 "$TOOLS/hmount" "$DISK" >/dev/null
-"$TOOLS/hdel" ":MacMusicPlayer" 2>/dev/null || true
-"$TOOLS/hcopy" -m "$APP_BIN" ":MacMusicPlayer"
+"$TOOLS/hdel" ":MacMusic" 2>/dev/null || true
+"$TOOLS/hdel" ":MacMusicPlayer" 2>/dev/null || true   # before the rename
+"$TOOLS/hcopy" -m "$APP_BIN" ":MacMusic"
 "$TOOLS/hls" -l
 "$TOOLS/humount" >/dev/null
 

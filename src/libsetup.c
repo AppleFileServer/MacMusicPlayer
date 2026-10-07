@@ -119,7 +119,7 @@ void LibSetup_Startup(void)
                         "may not be inserted, or it may have moved. Find it, "
                         "or create a new one."), P(""), P(""), P(""));
         else
-            ParamText(P("MacMusicPlayer keeps its songs in a folder called "
+            ParamText(P("MacMusic keeps its songs in a folder called "
                         "\xD2iPod Library.\xD3 Find an existing one, or "
                         "create a new one."), P(""), P(""), P(""));
 

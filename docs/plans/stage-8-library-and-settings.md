@@ -34,7 +34,7 @@ first.
     library's file is removed: the song still exists, as the exported
     WAV.
   - **Deleting a song** means removing the file itself from the disk.
-    **MacMusicPlayer never does this.** The user exports the song, then
+    **MacMusic never does this.** The user exports the song, then
     drags the exported, metadata-stripped WAV to the Wastebasket.
   - **Removing a song from a playlist** removes only that playlist's
     entry; the song stays in the library (8d).
@@ -131,7 +131,7 @@ never reuses IDs (M4).
    - whether it makes sense on a Mac Plus;
    - whether it's technically possible here;
    - the verdict: replicate faithfully, adapt, omit, or defer.
-3. Produce a definitive **MacMusicPlayer Settings specification**:
+3. Produce a definitive **MacMusic Settings specification**:
    - the items, their order and values;
    - where each value is stored: in the prefs, or with the library for
      library-specific ones (following 8a's decision);

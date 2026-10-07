@@ -3,9 +3,10 @@
 
 #include "libfolder.h"
 
-/* The prefs file, "MacMusicPlayer Prefs" in the System Folder (System 6
+/* The prefs file, "MacMusic Prefs" in the System Folder (System 6
    has no Preferences folder): the library location and (Stage 7b) the
-   volume level.
+   volume level. Before the app was renamed it was "MacMusicPlayer
+   Prefs"; that file is renamed on first use (rename plan, R6).
 
    Format, version 2, big-endian:
      0  4  magic 'MMPf'

@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.15)
 
-project(MacMusicPlayer)
+project(MacMusic)
 
-add_application(MacMusicPlayer
+add_application(MacMusic
     CREATOR "iPdM"
     src/main.c
     src/ipod_shell.c
@@ -27,5 +27,5 @@ add_application(MacMusicPlayer
     src/ui_menus.c
     src/ui_nav.c
     src/input.c
-    resources/MacMusicPlayer.r
+    resources/MacMusic.r
 )

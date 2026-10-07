@@ -6,7 +6,7 @@ L8). Decisions M1-M4 are at the end; the follow-up work is in 8d.
 
 ## The question
 
-Should MacMusicPlayer work with more than one iPod Library, and if so,
+Should MacMusic work with more than one iPod Library, and if so,
 how? The options are:
 - **A:** one active library at a time;
 - **B:** several libraries shown as one;

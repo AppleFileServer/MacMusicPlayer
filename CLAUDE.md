@@ -1,8 +1,8 @@
-# MacMusicPlayer
+# MacMusic
 
 ## Project
 
-MacMusicPlayer is a classic Macintosh 68K application targeting the Macintosh Plus.
+MacMusic (formerly MacMusicPlayer) is a classic Macintosh 68K application targeting the Macintosh Plus.
 
 It is built with the Retro68 toolchain and tested in Mini vMac.
 
@@ -26,14 +26,14 @@ From the project directory:
 
 The resulting application is:
 
-    build/MacMusicPlayer.APPL
+    build/MacMusic.APPL
 
 ## Run
 
 Launch with:
 
     ~/Retro68-build/toolchain/bin/LaunchAPPL \
-      ~/MacPlusProjects/MacMusicPlayer/build/MacMusicPlayer.APPL
+      ~/MacPlusProjects/MacMusicPlayer/build/MacMusic.APPL
 
 ## Current state
 

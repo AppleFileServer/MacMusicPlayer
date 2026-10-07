@@ -6,6 +6,7 @@
 #include "fileopen.h"
 #include "bytes.h"
 #include "song_format.h"
+#include "fileops.h"
 
 #define kPrefsMagic         'MMPf'
 #define kPrefsVersion1      1
@@ -14,7 +15,11 @@
 #define kNoVolume           0xFF
 #define kPrefsMaxSize       (8 + 1 + kMaxVolumeName + 4 + 4)
 
-static const unsigned char kPrefsName[] = "\pMacMusicPlayer Prefs";
+static const unsigned char kPrefsName[] = "\pMacMusic Prefs";
+static const unsigned char kOldPrefsName[] = "\pMacMusicPlayer Prefs";
+
+static Boolean gMigrated;               /* checked once per run */
+static Boolean gReadOld;                /* the rename failed: read the old */
 
 typedef struct
 {
@@ -31,6 +36,24 @@ static short SystemFolder(void)
     if (SysEnvirons(1, &env) != noErr)
         return 0;
     return env.sysVRefNum;
+}
+
+/* The app was renamed from MacMusicPlayer (R6): its prefs file is renamed
+   to the new name, so nothing is copied or lost. If both exist the new
+   one is used and the old one left alone; it is never deleted. If the
+   rename fails (a locked disk), the old file is read until the next save
+   writes the new one. */
+static ConstStringPtr NameToRead(short sysFolder)
+{
+    if (!gMigrated)
+    {
+        gMigrated = true;
+        if (!FileExists(sysFolder, 0, kPrefsName)
+            && FileExists(sysFolder, 0, kOldPrefsName)
+            && RenameFile(sysFolder, 0, kOldPrefsName, kPrefsName) != noErr)
+            gReadOld = true;
+    }
+    return gReadOld ? kOldPrefsName : kPrefsName;
 }
 
 /* Reads the library location stored at buf + at (count bytes in all). */
@@ -54,12 +77,14 @@ static Boolean ReadPrefs(Prefs *prefs)
 {
     unsigned char buf[kPrefsMaxSize];
     long count = sizeof(buf);
+    short sysFolder = SystemFolder();
     short refNum;
     OSErr err;
 
     prefs->hasLibrary = false;
     prefs->volume = -1;
-    if (OpenDataFork(SystemFolder(), 0, kPrefsName, fsRdPerm, &refNum) != noErr)
+    if (OpenDataFork(sysFolder, 0, NameToRead(sysFolder), fsRdPerm, &refNum)
+        != noErr)
         return false;
     err = FSRead(refNum, &count, buf);
     FSClose(refNum);
@@ -117,7 +142,10 @@ static OSErr WritePrefs(const Prefs *prefs)
         err = SetEOF(refNum, count);
     FSClose(refNum);
     if (err == noErr)
+    {
+        gReadOld = false;               /* the new file is written now */
         err = FlushVol(nil, sysFolder);
+    }
     return err;
 }
 

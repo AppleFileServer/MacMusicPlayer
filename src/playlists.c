@@ -194,7 +194,7 @@ static Boolean NewPlaylist(void)
 
         if (err == dirFulErr)
             Message_Show(P("There are already as many playlists as "
-                           "MacMusicPlayer can handle."), noErr);
+                           "MacMusic can handle."), noErr);
         else if (err == dupFNErr)
             Message_Show(P("There is already a file with that name in the "
                            "Playlists folder."), noErr);

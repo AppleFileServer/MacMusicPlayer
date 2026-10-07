@@ -38,7 +38,7 @@ guide's. The guide describes each setting in its own section but gives
 - **Possible:** yes:
   - Songs: the library's count;
   - Capacity and Available: the library disk's size and free space;
-  - Version: MacMusicPlayer's version.
+  - Version: MacMusic's version.
 
   No serial number.
 - **Verdict: adapt.** The rows are Songs, Capacity, Available and
@@ -173,7 +173,7 @@ guide's. The guide describes each setting in its own section but gives
   included.
 - Contacts' sort and display settings aren't in this guide.
 
-## Draft specification: the MacMusicPlayer Settings menu
+## Draft specification: the MacMusic Settings menu
 
 | Order | Item | Values (default first) | Stored | Notes |
 |---|---|---|---|---|
@@ -243,7 +243,6 @@ Each part gets diagnostics and a manual check.
   back. PROVISIONAL: it isn't remembered between launches.
 - **S-10:** no Backlight Timer.
 - **S-11:** the legal statement names the project **MacMusic**: the app
-  is being renamed from MacMusicPlayer (the rename itself is a later
-  change, in the issues log). The licence the statement refers to will
+  is being renamed from MacMusicPlayer (`rename-macmusic.md`). The licence the statement refers to will
   be written later, in the product documentation, so the wording stays
   as it is.

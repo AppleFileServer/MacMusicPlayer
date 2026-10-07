@@ -462,7 +462,7 @@ int main(void)
     qd.randSeed = TickCount();      /* for Shuffle Songs */
     Audio_Init();                   /* if it fails, playback is silent (A8) */
     Modal_SetService(Playback_ServiceAudio);   /* 6b-2: fed in modal loops */
-    {   /* 7b (N2): MacMusicPlayer opens at the volume chosen last time. */
+    {   /* 7b (N2): MacMusic opens at the volume chosen last time. */
         short level = Prefs_LoadVolume();
         if (level >= 0)
             Volume_Set(level);
@@ -482,7 +482,7 @@ int main(void)
     gMainWindow = NewWindow(
         nil,
         &windowRect,
-        (ConstStringPtr)"\pMacMusicPlayer",
+        (ConstStringPtr)"\pMacMusic",
         true,
         rDocProc,
         (WindowPtr)-1,
