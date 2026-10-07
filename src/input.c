@@ -3,6 +3,10 @@
 #include "modal.h"
 #include "input.h"
 
+/* Stage 10a (F1): how long Next or Previous must be held, without the
+   wheel turning, to be a hold. PROVISIONAL. */
+#define kHoldTicks          30
+
 /* Samples closer than this to the wheel centre are ignored: the angle
    there is unstable. Doubled units, as from IPodShell_WheelOffset. */
 #define kWheelDeadRadius    (2 * 8)
@@ -57,11 +61,26 @@ void Input_TrackWheel(ShellZone startZone, UIEventSink emit)
     short accumulated = 0;
     Boolean haveAngle = false;
     Boolean dragged = false;
+    Boolean holding = false;
+    Boolean holdable = (startZone == kZoneNext || startZone == kZonePrevious)
+                       && UI_HoldAllowed();
+    unsigned long pressed = TickCount();
 
     while (StillDown())
     {
         Modal_Service();                /* 6b-2: keep the audio fed */
         emit(kEvtNone);                 /* redraw the last sample's steps */
+
+        /* 10a: held still long enough: a hold, not a press. */
+        if (holdable && !dragged && !holding
+            && TickCount() - pressed >= kHoldTicks)
+        {
+            holding = true;
+            emit(startZone == kZoneNext ? kEvtHoldNext : kEvtHoldPrevious);
+        }
+        if (holding)
+            continue;                   /* turning is ignored now */
+
         GetMouse(&where);
         if (!WheelAngle(where, &angle))
             continue;
@@ -99,8 +118,11 @@ void Input_TrackWheel(ShellZone startZone, UIEventSink emit)
         }
     }
 
-    /* Under one step of movement: the gesture was a button press. */
-    if (!dragged)
+    /* Under one step of movement: the gesture was a button press, unless
+       it became a hold (10a: released, and no skip). */
+    if (holding)
+        emit(kEvtHoldEnd);
+    else if (!dragged)
         emit(Input_FromShellZone(startZone));
     emit(kEvtNone);
 }
@@ -115,8 +137,18 @@ void Input_TrackWheel(ShellZone startZone, UIEventSink emit)
 #define kKeyRightArrow  0x1D
 #define kKeySpace       ' '
 
-UIEvent Input_FromKey(char key, Boolean autoRepeat)
+UIEvent Input_FromKey(char key, Boolean autoRepeat, Boolean option)
 {
+    /* 10a (F2): Option-arrows are held Next and Previous, seen only as
+       auto-repeats (System 6 reports no key releases); a tap does
+       nothing. */
+    if (option && (key == kKeyRightArrow || key == kKeyLeftArrow))
+    {
+        if (!autoRepeat)
+            return kEvtNone;
+        return key == kKeyRightArrow ? kEvtKeyHoldNext : kEvtKeyHoldPrevious;
+    }
+
     switch (key)
     {
         case kKeyUpArrow:   return kEvtArrowUp;

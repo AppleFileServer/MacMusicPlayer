@@ -562,8 +562,73 @@ short UI_WheelStepDegrees(void)
     return kWheelStepDegrees;
 }
 
+/* ---- Stage 10a: holding Next or Previous on Now Playing ---------------
+
+   10a recognises a hold and shows it (the fast-forward or rewind icon);
+   10b gives it its effect. A hold from the wheel ends on release
+   (kEvtHoldEnd); from the keyboard, when its auto-repeats stop. */
+static short gHold;                     /* 1 Next, -1 Previous, 0 none */
+static Boolean gHoldByKey;
+static unsigned long gHoldKeyLast;      /* TickCount of the last repeat */
+
+#define kKeyRepThresh       0x0190      /* low memory: the repeat rate */
+
+Boolean UI_HoldAllowed(void)
+{
+    return CurrentScreen()->kind == kScreenNowPlaying && Playback_IsActive();
+}
+
+static short NowPlayingIcon(void)
+{
+    if (gHold > 0)
+        return kIconFastForward;
+    if (gHold < 0)
+        return kIconRewind;
+    return Playback_State() == kPlayPaused ? kIconPause : kIconPlay;
+}
+
+static Boolean StartHold(short direction, Boolean byKey)
+{
+    if (!UI_HoldAllowed())
+        return false;
+    if (byKey)
+        gHoldKeyLast = TickCount();
+    if (gHold != 0)
+        return false;                   /* already held: one at a time */
+    gHold = direction;
+    gHoldByKey = byKey;
+    return true;
+}
+
+static Boolean EndHold(void)
+{
+    if (gHold == 0)
+        return false;
+    gHold = 0;
+    return true;
+}
+
+/* A keyboard hold ends when its repeats stop: none for twice the
+   repeat rate. */
+static Boolean KeyHoldEnded(void)
+{
+    short rate = *(short *)kKeyRepThresh;
+
+    if (gHold == 0 || !gHoldByKey)
+        return false;
+    if (rate < 2)
+        rate = 2;
+    if (TickCount() - gHoldKeyLast <= (unsigned long)(2 * rate + 2))
+        return false;
+    return EndHold();
+}
+
 Boolean UI_Idle(void)
 {
+    if (KeyHoldEnded())
+        return true;
+    if (gHold != 0 && !UI_HoldAllowed())
+        return EndHold();               /* playback stopped meanwhile */
     if (!gScrubPending || TickCount() - gScrubMoved < kScrubSettle)
         return false;
     ApplyScrub();
@@ -887,6 +952,11 @@ Boolean UI_HandleEvent(UIEvent event)
         case kEvtPlayPause: return HandlePlayPause();
         case kEvtNext:      return HandleSkip(true);
         case kEvtPrevious:  return HandleSkip(false);
+        case kEvtHoldNext:      return StartHold(1, false);
+        case kEvtHoldPrevious:  return StartHold(-1, false);
+        case kEvtKeyHoldNext:   return StartHold(1, true);
+        case kEvtKeyHoldPrevious: return StartHold(-1, true);
+        case kEvtHoldEnd:       return EndHold();
         default:            return false;
     }
 }
@@ -938,7 +1008,7 @@ static void RenderNowPlaying(void)
                        Playback_QueueLength(),
                        gScrubPending ? gScrubTicks : Playback_ElapsedTicks(),
                        Playback_LengthTicks(),
-                       Playback_State() == kPlayPaused,
+                       NowPlayingIcon(),
                        gMode, ModeValue());
 }
 

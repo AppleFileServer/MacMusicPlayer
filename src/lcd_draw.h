@@ -38,7 +38,10 @@ void LCDDraw_Logo(void);
 short LCDDraw_SmallTextWidth(const char *text);
 void LCDDraw_SmallText(short left, short top, const char *text);
 
-void LCDDraw_PlayStateIcon(Boolean paused);
+/* The icon at the top left of Now Playing (Stage 10a adds fast-forward
+   and rewind, shown while Next or Previous is held). */
+enum { kIconPlay = 0, kIconPause, kIconFastForward, kIconRewind };
+void LCDDraw_PlayStateIcon(short icon);
 void LCDDraw_ProgressBar(long done, long total);
 
 /* Stage 7: what Now Playing shows in place of the progress bar. */
@@ -54,7 +57,7 @@ typedef enum
    volume level or rating. */
 void LCDDraw_NowPlaying(ConstStringPtr title, ConstStringPtr artist,
                         ConstStringPtr album, short position, short count,
-                        long elapsedTicks, long lengthTicks, Boolean paused,
+                        long elapsedTicks, long lengthTicks, short icon,
                         NowPlayingMode mode, short value);
 
 /* Scroll bar for a list of total items whose first visible item is top. */

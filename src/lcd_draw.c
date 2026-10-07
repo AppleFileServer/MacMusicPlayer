@@ -294,10 +294,31 @@ static const unsigned short kPauseIconBits[kPlayIconSize] = {
     0xE380, 0xE380, 0xE380, 0xE380, 0xE380, 0xE380, 0xE380, 0xE380, 0xE380
 };
 
-void LCDDraw_PlayStateIcon(Boolean paused)
+/* Stage 10a: fast-forward and rewind, two 5x9 triangles each, 10 px
+   wide in all. PROVISIONAL artwork (the 4G's isn't measured). */
+#define kSeekIconWidth      10
+static const unsigned short kFastForwardIconBits[kPlayIconSize] = {
+    0x8400, 0xC600, 0xE700, 0xF780, 0xFFC0, 0xF780, 0xE700, 0xC600, 0x8400
+};
+static const unsigned short kRewindIconBits[kPlayIconSize] = {
+    0x0840, 0x18C0, 0x39C0, 0x7BC0, 0xFFC0, 0x7BC0, 0x39C0, 0x18C0, 0x0840
+};
+
+void LCDDraw_PlayStateIcon(short icon)
 {
-    DrawIcon(paused ? kPauseIconBits : kPlayIconBits, 2,
-             kPlayIconSize, kPlayIconSize, kPlayIconLeft, kPlayIconTop, srcOr);
+    const unsigned short *bits = kPlayIconBits;
+    short width = kPlayIconSize;
+
+    switch (icon)
+    {
+        case kIconPause:        bits = kPauseIconBits;                  break;
+        case kIconFastForward:  bits = kFastForwardIconBits;
+                                width = kSeekIconWidth;                 break;
+        case kIconRewind:       bits = kRewindIconBits;
+                                width = kSeekIconWidth;                 break;
+    }
+    DrawIcon(bits, 2, width, kPlayIconSize, kPlayIconLeft, kPlayIconTop,
+             srcOr);
 }
 
 /* A rounded bar from x left to right - 1 at the progress bar's height:
@@ -550,7 +571,7 @@ static void DrawCentredLine(short line, short baseline, ConstStringPtr text)
 
 void LCDDraw_NowPlaying(ConstStringPtr title, ConstStringPtr artist,
                         ConstStringPtr album, short position, short count,
-                        long elapsedTicks, long lengthTicks, Boolean paused,
+                        long elapsedTicks, long lengthTicks, short icon,
                         NowPlayingMode mode, short value)
 {
     char text[32];
@@ -560,7 +581,7 @@ void LCDDraw_NowPlaying(ConstStringPtr title, ConstStringPtr artist,
 
     LCDDraw_Clear();
     LCDDraw_Header((ConstStringPtr)"\pNow Playing");
-    LCDDraw_PlayStateIcon(paused);
+    LCDDraw_PlayStateIcon(icon);
 
     /* "3 of 12": the song's place in the list it plays from. */
     {

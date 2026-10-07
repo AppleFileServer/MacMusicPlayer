@@ -545,7 +545,8 @@ static void HandleKey(EventRecord *event)
     }
 
     if (FrontWindow() == gMainWindow)
-        HandleUIEvent(Input_FromKey(key, event->what == autoKey));
+        HandleUIEvent(Input_FromKey(key, event->what == autoKey,
+                                    (event->modifiers & optionKey) != 0));
 }
 
 static void HandleUpdate(EventRecord *event)

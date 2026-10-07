@@ -13,6 +13,11 @@ typedef enum
     kEvtWheelDown,      /* clockwise: highlight moves down */
     kEvtArrowUp,        /* 8e-1: the keyboard's arrows, a whole step: */
     kEvtArrowDown,      /* a row, a volume level, 1/24 of a song */
+    kEvtHoldNext,       /* 10a: Next held on the wheel (once, at the start) */
+    kEvtHoldPrevious,   /* 10a: Previous held */
+    kEvtHoldEnd,        /* 10a: the held button released */
+    kEvtKeyHoldNext,    /* 10a: Option-right, each auto-repeat */
+    kEvtKeyHoldPrevious, /* 10a: Option-left, each auto-repeat */
     kEvtSelect,
     kEvtMenu,
     kEvtPlayPause,
@@ -31,6 +36,11 @@ NowPlayingMode UI_NowPlayingMode(void);
 /* Saves settings changed on the iPod that are still pending (the volume,
    7b; a rating, 7d); call before quitting. */
 void UI_SaveSettings(void);
+
+/* Stage 10a: whether a held Next or Previous is a hold (fast-forward,
+   rewind) rather than a press: only on Now Playing with a song playing
+   or paused (F6). */
+Boolean UI_HoldAllowed(void);
 
 /* Stage 7c: the wheel's step size now (finer in the scrubber). */
 short UI_WheelStepDegrees(void);

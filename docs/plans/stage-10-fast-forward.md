@@ -1,6 +1,6 @@
 # Stage 10 plan: fast-forward and rewind
 
-Status: approved (2026-10-07), decisions F1-F8 made.
+Status: approved (2026-10-07), decisions F1-F8 made. 10a done.
 No code has been changed. Decision N8 (deferred since 5c-1, W4, and
 Stage 7). Built as close to the Stage 7c scrubber as possible.
 
