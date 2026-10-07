@@ -3,9 +3,9 @@
 Known problems and deferred work, newest stage last. Update this file when
 an issue is fixed (move it to "Resolved" with the commit) or found.
 
-Status as of the end of Stage 6 (`206cffe`): complete in Mini vMac;
-the real Mac Plus checks are deferred until the BlueSCSI card is available
-(I7, I9).
+Status as of Stage 7 (`0692d4f`): complete in Mini vMac, and running
+correctly on the real Mac Plus (2026-10-07, from the rebuilt Scratch
+image). Stage 8 is planned.
 
 ## Open
 
@@ -19,12 +19,6 @@ the real Mac Plus checks are deferred until the BlueSCSI card is available
 - Double-clicking "iPod Library Info" could launch the app with that
   library selected (System 6 passes the document at launch).
 
-### I7. Hardware test image is out of date
-- `HD50_512 Scratch 30 MB.hda` on the BlueSCSI card has the app as of
-  `6e6fcde` and a version-1 library; versions from Stage 5b-2 on
-  (version-2 songs) won't read it. Rebuild the image (plan first) before
-  the next Mac Plus test. Needed to confirm I9 on real hardware.
-
 ### I8. Unexplained 600-tick stall, seen once (5b diagnostic)
 - One AudioTest run lost about 10 s at a song change; three later runs,
   with timestamps, did not. Not reproduced since. Watch for a long silence
@@ -36,8 +30,9 @@ the real Mac Plus checks are deferred until the BlueSCSI card is available
   startup (inside the ring, moving forward at the playback rate) and at
   every start; if it doesn't behave, sound is reported unavailable and
   the app plays silently (A8) rather than guessing.
-- **Not yet confirmed on the real Mac Plus** (same System 6.0.7 software
-  as in Mini vMac; see I7).
+- **Real Mac Plus, System 6.0.7: confirmed working** (2026-10-07,
+  `0692d4f`): songs imported and played correctly, so the startup check
+  passed. Kept open because the state is undocumented.
 - **Other systems:** on System 7's Sound Manager 3.0 the layout is likely
   different; the startup check would then fail and the app would play
   without sound. Untested.
@@ -65,9 +60,10 @@ the real Mac Plus checks are deferred until the BlueSCSI card is available
   longest line (an overflow there caused crashes in Stage 6a-2 testing).
 
 ## Roadmap items (not defects)
-- Stage 6 hardware checks (when the card is available): rebuild the
-  Scratch image (I7), then on the real Plus the read-pointer check (I9),
-  the Finder stress test, the modal-loop tests and responsiveness.
+- Further real Mac Plus checks, not yet done there: the Finder stress
+  test (Duplicate, Empty Wastebasket while playing), the modal-loop tests
+  (6b-2) and responsiveness. The Scratch image is current, so no image
+  rebuild is needed first.
 - Press-and-hold fast-forward and rewind (N8, deferred from Stage 7).
 - Ratings (7d) are recorded but not used for anything else yet. Ideas
   for later, not planned now: use them in Shuffle Songs, or to create
@@ -86,6 +82,9 @@ the real Mac Plus checks are deferred until the BlueSCSI card is available
 - Slow import / duplicate copies on disk: `eaaff53` (Stage 5b-2).
 - No way to use an existing library: `b1bf831` (Stage 5b-3).
 - `run-persistent.sh` could not launch Mini vMac (-10825): `8eccbce`.
+- Hardware test image out of date (I7): the Scratch image was rebuilt
+  with the `0692d4f` app and the old-format library removed (2026-10-07);
+  the app runs correctly on the real Mac Plus.
 - App starved while another program's window is in front (main part of
   I1): `82c7079` (6a-2): the app now runs in the background.
 - Main loop about once a second while playing (I2): the original reading
