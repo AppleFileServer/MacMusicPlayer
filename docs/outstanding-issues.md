@@ -72,8 +72,12 @@ the real Mac Plus checks are deferred until the BlueSCSI card is available
 - Ratings (7d) are recorded but not used for anything else yet. Ideas
   for later, not planned now: use them in Shuffle Songs, or to create
   playlists (e.g. songs rated 4 stars or more).
-- Stage 8: On-The-Go playlist (D17).
-- Settings menu.
+- Stage 8: library management and settings (song metadata editing,
+  library administration, a multiple-libraries investigation, and a
+  Settings menu audit): `docs/plans/stage-8-library-and-settings.md`.
+- On-The-Go playlist (D17): deferred until after Stage 8, possibly a
+  later stage. The 4G guide's description and a draft plan are in
+  `docs/plans/deferred-on-the-go.md`.
 
 ## Resolved
 - Ring ran dry after 20–25 s (stutter): `6e6fcde`.
