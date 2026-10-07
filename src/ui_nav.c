@@ -9,6 +9,8 @@
 #include "library.h"
 #include "playback.h"
 #include "pstr.h"
+#include "prefs.h"
+#include "volume.h"
 
 /* Deepest planned path is 7 screens (Main > Music > Genres > Genre >
    Artist > Album > Now Playing). */
@@ -176,10 +178,32 @@ static void RefreshMainMenus(void)
 static NowPlayingMode gMode;
 static unsigned long gModeInput;        /* TickCount of the last input */
 
+static Boolean gVolumeChanged;          /* to be saved in the prefs */
+
+/* 7b (N2): the level is saved when volume mode ends, not on every step:
+   a save is several disk accesses, which made the wheel lag. */
+void UI_SaveSettings(void)
+{
+    if (!gVolumeChanged)
+        return;
+    gVolumeChanged = false;
+    Prefs_SaveVolume(Volume_Get());
+}
+
 static void SetMode(NowPlayingMode mode)
 {
+    if (gMode == kNowVolume && mode != kNowVolume)
+        UI_SaveSettings();
     gMode = mode;
     gModeInput = TickCount();
+}
+
+/* Back to normal, from whatever mode, without a new input time. */
+static void NormalMode(void)
+{
+    if (gMode == kNowVolume)
+        UI_SaveSettings();
+    gMode = kNowNormal;
 }
 
 NowPlayingMode UI_NowPlayingMode(void)
@@ -187,11 +211,25 @@ NowPlayingMode UI_NowPlayingMode(void)
     return gMode;
 }
 
-/* The wheel on Now Playing: enters volume mode; in a mode, keeps it up. */
+/* The wheel on Now Playing. Normal or volume mode: changes the volume one
+   level per wheel step (N1: the Plus's 8 levels), the first step opening
+   volume mode, as on the 4G. Scrubber and rating: 7c, 7d. */
 static Boolean NowPlayingWheel(short delta)
 {
-    (void)delta;                        /* 7b-7d act on it */
-    SetMode(gMode == kNowNormal ? kNowVolume : gMode);
+    short level;
+
+    if (gMode == kNowNormal || gMode == kNowVolume)
+    {
+        level = Volume_Get() + delta;
+        if (level >= 0 && level <= kVolumeMax)
+        {
+            Volume_Set(level);
+            gVolumeChanged = true;
+        }
+        SetMode(kNowVolume);
+        return true;
+    }
+    SetMode(gMode);                     /* keeps the mode up */
     return true;
 }
 
@@ -213,7 +251,7 @@ static Boolean ModeTimedOut(void)
 
     if (gMode == kNowNormal || TickCount() - gModeInput < limit)
         return false;
-    gMode = kNowNormal;
+    NormalMode();
     return true;
 }
 
@@ -221,7 +259,7 @@ static void PushNowPlaying(void)
 {
     Screen np;
 
-    gMode = kNowNormal;
+    NormalMode();
     np.kind = kScreenNowPlaying;
     np.menuID = 0;
     LibFilter_Clear(&np.filter);
@@ -321,7 +359,7 @@ static Boolean HandleSkip(Boolean forward)
 {
     if (!Playback_IsActive())
         return false;
-    gMode = kNowNormal;
+    NormalMode();
     if (forward)
         Playback_Next();
     else
@@ -347,7 +385,7 @@ Boolean UI_HandleEvent(UIEvent event)
                                             : MoveSelection(1);
         case kEvtSelect:    return onNowPlaying ? NowPlayingSelect()
                                             : HandleSelect();
-        case kEvtMenu:      gMode = kNowNormal;
+        case kEvtMenu:      NormalMode();
                             return GoBack();
         case kEvtPlayPause: return HandlePlayPause();
         case kEvtNext:      return HandleSkip(true);
@@ -367,22 +405,17 @@ Boolean UI_Tick(void)
         return true;
     }
     if (result & kTickSongChanged)
-        gMode = kNowNormal;
+        NormalMode();
     if (onNowPlaying && ModeTimedOut())
         return true;
     return onNowPlaying && (result & (kTickTimeChanged | kTickSongChanged));
 }
 
-/* The level or rating a mode shows. 7a: the system volume as it is, read
-   from the low-memory SdVolume byte (0-7 in its low three bits, which is
-   what GetSoundVol returns; Retro68 has no glue for it); the rating
-   comes in 7d. */
-#define kSdVolume           0x0260
-
+/* The level or rating a mode shows (the rating comes in 7d). */
 static short ModeValue(void)
 {
     if (gMode == kNowVolume)
-        return *(unsigned char *)kSdVolume & 7;
+        return Volume_Get();
     return 0;
 }
 

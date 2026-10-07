@@ -9,6 +9,7 @@ add_application(MacMusicPlayer
     src/ipod_lcd.c
     src/lcd_draw.c
     src/prefs.c
+    src/volume.c
     src/libfolder.c
     src/libsetup.c
     src/library.c

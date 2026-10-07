@@ -24,6 +24,8 @@
 #include "lcd_draw.h"
 #include "ui_nav.h"
 #include "input.h"
+#include "prefs.h"
+#include "volume.h"
 
 /* Top of the window's content area: below the 20-pixel menu bar
    and the rDocProc title bar. */
@@ -435,6 +437,11 @@ int main(void)
     qd.randSeed = TickCount();      /* for Shuffle Songs */
     Audio_Init();                   /* if it fails, playback is silent (A8) */
     Modal_SetService(Playback_ServiceAudio);   /* 6b-2: fed in modal loops */
+    {   /* 7b (N2): MacMusicPlayer opens at the volume chosen last time. */
+        short level = Prefs_LoadVolume();
+        if (level >= 0)
+            Volume_Set(level);
+    }
 
     if (!LCD_Init())
     {
@@ -499,6 +506,7 @@ int main(void)
         ReportPlaybackProblems();
     }
 
+    UI_SaveSettings();
     Audio_Shutdown();
     DisposeWindow(gMainWindow);
     LCD_Dispose();

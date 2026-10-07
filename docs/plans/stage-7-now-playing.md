@@ -1,7 +1,7 @@
 # Stage 7 plan: Now Playing volume, scrubber and rating
 
-Status: approved (2026-10-07), not started. Decisions N1-N8 are recorded
-at the end. No code has been changed.
+Status: approved (2026-10-07). 7a (`cede6c4`) and 7b are done; 7c and 7d
+remain. Decisions N1-N8 are recorded at the end.
 
 ## What the 4G iPod does (sources)
 
@@ -76,6 +76,10 @@ an actual 4G screen photograph or reference is obtained.
 - (N2) It simply changes the system volume. The chosen level is saved in
   the prefs, and MacMusicPlayer sets it when it starts, so it opens at the
   same setting next time.
+- Done: the level is saved when volume mode ends (timeout, Select,
+  Next/Previous, Menu) or on quit, not on every step: saving on every
+  step was tried and made the wheel lag (each save is several disk
+  accesses). The prefs file is now version 2 (version 1 is still read).
 - Tests: the level steps 0-7 and back; the bar drawing; the level
   survives quit and relaunch; manual listening.
 

@@ -26,6 +26,10 @@ Boolean UI_HandleEvent(UIEvent event);
 /* Stage 7: the Now Playing screen's current mode (for tests). */
 NowPlayingMode UI_NowPlayingMode(void);
 
+/* Saves settings changed on the iPod (the volume, 7b) that are still
+   pending; call before quitting. */
+void UI_SaveSettings(void);
+
 /* Draws the current screen into the offscreen LCD. */
 void UI_Render(void);
 
