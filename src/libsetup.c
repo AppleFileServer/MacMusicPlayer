@@ -27,8 +27,21 @@ static Boolean gHaveLibrary;
 static void ReportSkipped(void)
 {
     short skipped = Library_SkippedCount();
+    short overLimit = Library_OverLimitCount();
     Str255 text;
     Str255 number;
+
+    /* Stage 8d (M3): songs left out because the library is full. */
+    if (overLimit > 0)
+    {
+        NumToString(overLimit, number);
+        text[0] = 0;
+        PStrAppend(text, number);
+        PStrAppend(text, overLimit == 1 ? P(" song wasn\xD5t") : P(" songs weren\xD5t"));
+        PStrAppend(text, P(" loaded: the iPod Library holds at most 500 "
+                           "songs. Export songs to make room."));
+        Message_Show(text, noErr);
+    }
 
     if (skipped == 0)
         return;

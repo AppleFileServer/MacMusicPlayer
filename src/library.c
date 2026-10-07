@@ -56,6 +56,7 @@ static long gPlaylistIDs[kMaxPlaylistEntries];
 
 static long gMaxSongID;
 static short gSkipped;
+static short gOverLimit;                /* song files beyond kMaxSongs */
 
 /* One song file as read; static to keep it off the small stack. */
 static SongInfo gInfo;
@@ -206,6 +207,7 @@ void Library_Clear(void)
     gHaveFolder = false;
     gMaxSongID = 0;
     gSkipped = 0;
+    gOverLimit = 0;
 }
 
 /* Appends a Pascal string to the pool; returns its offset or -1. */
@@ -297,8 +299,14 @@ static Boolean ScanSongs(const LibraryFolder *folder)
         if (pb.hFileInfo.ioFlFndrInfo.fdType == kLibraryMarkerType)
             continue;                   /* "iPod Library Info" (5b-3) */
 
-        if (gSongCount >= kMaxSongs
-            || !AddSongFile(folder, name, &outOfMemory))
+        if (gSongCount >= kMaxSongs)
+        {
+            if (pb.hFileInfo.ioFlFndrInfo.fdType == kSongFileType)
+                gOverLimit++;           /* M3: reported apart */
+            else
+                gSkipped++;
+        }
+        else if (!AddSongFile(folder, name, &outOfMemory))
             gSkipped++;
 
         if (outOfMemory)
@@ -434,8 +442,20 @@ short Library_SkippedCount(void)
     return gSkipped;
 }
 
-/* Song IDs are never reused: the next one is above the highest valid ID
-   found by the last scan, whatever songs are missing below it. */
+short Library_SongCount(void)
+{
+    return gSongCount;
+}
+
+short Library_OverLimitCount(void)
+{
+    return gOverLimit;
+}
+
+/* One more than the highest valid ID found by the last scan. Import also
+   takes the library's next-ID counter into account (M4), so an ID is
+   never given out twice, even after the highest-numbered song has been
+   exported. */
 long Library_NextSongID(void)
 {
     return gMaxSongID + 1;

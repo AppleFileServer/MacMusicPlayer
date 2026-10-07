@@ -2,7 +2,9 @@
 
 Status: approved (2026-10-07), decisions L1-L11 made. 8a decided:
 Option A (`stage-8a-multiple-libraries.md`, M1-M4). 8b decided
-(`stage-8b-settings.md`). 8c done. 8d remains.
+(`stage-8b-settings.md`). 8c done. 8d in progress, in four parts:
+8d-1 safeguards (done), 8d-2 Rescan and Library Info, 8d-3 Recent
+Libraries, 8d-4 Remove from Playlist.
 No code has been changed.
 
 Replaces the earlier Stage 8 (On-The-Go), now deferred
@@ -209,8 +211,8 @@ bytes unchanged) and each stay-on-screen case.
 ## 8d: library administration
 
 **The File menu (L5):** Import Song…, Export Song…, then a divider, then
-Choose Library…, Rescan Library, Library Info… and Reveal Library in
-Finder, then Quit.
+Choose Library…, Rescan Library and Library Info…, then Quit. (Reveal
+Library in Finder was left out, L6.)
 
 **Recent Libraries (M2):** a submenu or list beside Choose Library…,
 remembering the libraries used before. Each entry shows the library's
@@ -227,6 +229,11 @@ is decided in 8d.
 - The scan reports songs over the limit separately from unreadable files
   (they can be there if files were copied in from the Finder), so the
   message says which it is.
+
+**Done in 8d-1:** the 500-song check, the scan's over-limit report and
+the ID counter below. The counter is a last line, "Next song ID: n", in
+the library's "iPod Library Info" text; the rest of that text is kept as
+it is (R5).
 
 **Song IDs are never reused (M4):**
 - Each library keeps a "next song ID" counter, stored with the library
@@ -251,15 +258,18 @@ using 8c's rebuild.
 
 No path is shown (L6).
 
-**Reveal Library in Finder (L6), feasibility first:**
-- The System 6 Finder has no documented way for a program to make it
-  open a folder; Apple events arrived with System 7.
-- 8d starts with a short investigation of what System 6.0.7's Finder and
-  MultiFinder allow.
-- Nothing that relies on undocumented Finder behaviour is built without
-  your approval.
-- If it can't be done reliably, the item is left out and the plan comes
-  back to you.
+**Reveal Library in Finder (L6): left out (2026-10-07).** The
+feasibility check found no reliable way on System 6:
+- Apple events, how a program asks the Finder to open a folder, need
+  System 7.
+- The Finder's remembered open windows (`frOpenChain` in a folder's
+  Finder information) are undocumented for other programs, and are only
+  reopened when the Finder starts or a disk is mounted, so nothing would
+  open until a restart.
+- Simulated keystrokes to the Finder only work if the folder is showing
+  in its front window: fragile and undocumented.
+
+No path is shown instead.
 
 **Remove from Playlist (L7):** a Playlists menu item, enabled when the
 highlight is on a song inside a playlist. It removes that one entry from
@@ -303,7 +313,8 @@ Library Info. Under L1 the app never deletes or "repairs" them.
 - **L4:** after an edit, stay on the same screen if possible.
 - **L5:** the library items stay in the File menu.
 - **L6:** Reveal Library in Finder, not a path, subject to the
-  feasibility check in 8d.
+  feasibility check in 8d. Result: not reliably possible on System 6, so
+  left out, with no path shown instead.
 - **L7:** Remove from Playlist, in the Playlists menu.
 - **L8:** investigate options A, B and C before deciding (leaning
   towards A).

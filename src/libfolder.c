@@ -5,6 +5,7 @@
 
 #include "modal.h"
 #include "libfolder.h"
+#include "fileopen.h"
 #include "pstr.h"
 #include "song_format.h"
 
@@ -195,6 +196,90 @@ static void EnsureMarker(short vRefNum, long dirID)
         FSClose(refNum);
     }
     FlushVol(nil, vRefNum);
+}
+
+/* ---- The next song ID (Stage 8d, M4) --------------------------------- */
+
+#define kMarkerMaxText      1024
+static const char kNextIDLabel[] = "Next song ID: ";
+
+/* Reads the marker's text into buf (at most kMarkerMaxText bytes). */
+static OSErr ReadMarker(const LibraryFolder *folder, char *buf, long *count)
+{
+    short refNum;
+    OSErr err;
+
+    *count = 0;
+    err = OpenDataFork(folder->vRefNum, folder->folderID, kMarkerName,
+                       fsRdPerm, &refNum);
+    if (err != noErr)
+        return err;
+    *count = kMarkerMaxText;
+    err = FSRead(refNum, count, buf);
+    FSClose(refNum);
+    return err == eofErr ? noErr : err;
+}
+
+/* Where the "Next song ID" line starts in the text, or count if none. */
+static long FindNextIDLine(const char *buf, long count)
+{
+    long label = sizeof(kNextIDLabel) - 1, at;
+
+    for (at = 0; at + label <= count; at++)
+        if ((at == 0 || buf[at - 1] == '\r' || buf[at - 1] == '\n')
+            && memcmp(buf + at, kNextIDLabel, label) == 0)
+            return at;
+    return count;
+}
+
+long Folder_ReadNextID(const LibraryFolder *folder)
+{
+    static char buf[kMarkerMaxText];
+    long count, at, next = 0;
+
+    if (ReadMarker(folder, buf, &count) != noErr)
+        return 0;
+    at = FindNextIDLine(buf, count);
+    if (at >= count)
+        return 0;
+    for (at += sizeof(kNextIDLabel) - 1;
+         at < count && buf[at] >= '0' && buf[at] <= '9' && next < 100000000L;
+         at++)
+        next = next * 10 + (buf[at] - '0');
+    return next;
+}
+
+void Folder_WriteNextID(const LibraryFolder *folder, long next)
+{
+    static char buf[kMarkerMaxText + 32];
+    Str255 number;
+    long count, at;
+    short refNum;
+
+    EnsureMarker(folder->vRefNum, folder->folderID);
+    if (ReadMarker(folder, buf, &count) != noErr)
+        return;
+
+    /* The text before any old "Next song ID" line is kept as it is. */
+    at = FindNextIDLine(buf, count);
+    if (at > 0 && buf[at - 1] != '\r' && buf[at - 1] != '\n')
+        buf[at++] = '\r';
+    NumToString(next, number);
+    memcpy(buf + at, kNextIDLabel, sizeof(kNextIDLabel) - 1);
+    at += sizeof(kNextIDLabel) - 1;
+    memcpy(buf + at, number + 1, number[0]);
+    at += number[0];
+    buf[at++] = '\r';
+
+    if (OpenDataFork(folder->vRefNum, folder->folderID, kMarkerName,
+                     fsRdWrPerm, &refNum) != noErr)
+        return;
+    count = at;
+    if (SetFPos(refNum, fsFromStart, 0) == noErr
+        && FSWrite(refNum, &count, buf) == noErr)
+        SetEOF(refNum, at);
+    FSClose(refNum);
+    FlushVol(nil, folder->vRefNum);
 }
 
 Boolean Folder_Resolve(const LibraryLocation *location, LibraryFolder *folder)

@@ -178,7 +178,11 @@ static OSErr ChooseSongName(const LibraryFolder *folder, const Source *src,
 {
     short attempts;
 
+    /* M4: IDs are never reused, so the library's counter wins if it is
+       above every ID present. */
     *id = Library_NextSongID();
+    if (Folder_ReadNextID(folder) > *id)
+        *id = Folder_ReadNextID(folder);
     for (attempts = 0; attempts < 1000; attempts++, (*id)++)
     {
         MakeSongFileName(*id, name);
@@ -331,6 +335,14 @@ Boolean Import_Run(const LibraryFolder *folder)
     DialogPtr working;
     OSErr err;
 
+    /* Stage 8d (M3): a full library is refused before anything happens. */
+    if (Library_SongCount() >= kMaxSongs || Library_OverLimitCount() > 0)
+    {
+        Message_Show(P("The iPod Library is full (500 songs). Export a song "
+                       "to make room."), noErr);
+        return false;
+    }
+
     /* Any file can be chosen: WAVs are recognised by their contents. */
     where.h = 82;
     where.v = 50;
@@ -463,6 +475,7 @@ Boolean Import_Run(const LibraryFolder *folder)
         return false;
     }
     imported = true;
+    Folder_WriteNextID(folder, id + 1);
 
     /* From another disk, "move" = copy, then delete the original (E4: if
        that fails, the original is left where it was). */

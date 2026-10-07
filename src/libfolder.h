@@ -53,4 +53,13 @@ short Folder_Choose(LibraryLocation *location, LibraryFolder *folder,
 short Folder_FindExisting(LibraryLocation *location, LibraryFolder *folder,
                           short *error);
 
+/* Stage 8d (M4): song IDs are never reused. The library's "next song
+   ID" is kept as a last line, "Next song ID: <n>", in its marker's text
+   (the rest of the text is kept as it is). Read gives 0 if there is none
+   (a library from before 8d, or no marker); Write is best effort (a
+   locked disk leaves it as it was), the import then falling back to one
+   more than the highest ID present. */
+long Folder_ReadNextID(const LibraryFolder *folder);
+void Folder_WriteNextID(const LibraryFolder *folder, long next);
+
 #endif

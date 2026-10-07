@@ -38,6 +38,12 @@ Boolean Library_Scan(const LibraryFolder *folder);
 short Library_SkippedCount(void);   /* files skipped by the last scan */
 long Library_NextSongID(void);      /* one more than the largest ID */
 
+/* Stage 8d (M3): songs in the library now, at most kMaxSongs; and song
+   files the last scan left out because the library was already full
+   (copied in from the Finder, for example). */
+short Library_SongCount(void);
+short Library_OverLimitCount(void);
+
 /* A song whose audio has this length and fingerprint (D31), or kNone. */
 short Library_FindAudioMatch(long audioLength, unsigned long fingerprint);
 
