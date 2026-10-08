@@ -55,6 +55,16 @@ add_application(MacMusic
 )
 target_include_directories(MacMusic PRIVATE ${CMAKE_BINARY_DIR})
 
+# 1.0 Part B2: the emulator smoke test (tests/run-smoke.sh). With this on,
+# the build runs a scripted test instead of MacMusic; off, the default,
+# the build is the released app, unchanged.
+option(MACMUSIC_SMOKE_TEST "Build the emulator smoke test" OFF)
+if(MACMUSIC_SMOKE_TEST)
+    target_sources(MacMusic PRIVATE tests/smoke/smoke.c)
+    target_include_directories(MacMusic PRIVATE tests/smoke src)
+    target_compile_definitions(MacMusic PRIVATE MACMUSIC_SMOKE_TEST)
+endif()
+
 # Fix 1 (K2): the Finder uses MacMusic's icons only if the application's
 # "has bundle" flag is set; Retro68's Rez can't set it, so it is set in
 # the MacBinary file after each build.

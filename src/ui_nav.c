@@ -1143,3 +1143,11 @@ void UI_Render(void)
 
     LCD_EndDraw();
 }
+
+#ifdef MACMUSIC_SMOKE_TEST
+/* 1.0 Part B2: the screen shown, for the smoke test (tests/smoke). */
+const Screen *UI_TestScreen(void)
+{
+    return CurrentScreen();
+}
+#endif

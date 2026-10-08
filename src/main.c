@@ -22,6 +22,9 @@
 #include "message.h"
 #include "pstr.h"
 #include "version.h"
+#ifdef MACMUSIC_SMOKE_TEST
+#include "smoke.h"
+#endif
 #include "lcd_draw.h"
 #include "ui_nav.h"
 #include "input.h"
@@ -641,8 +644,14 @@ int main(void)
     /* Start-up is an iPod start: the logo is shown while the library is
        found (asking for one if needed) and scanned. */
     BeginRestart();
+#ifdef MACMUSIC_SMOKE_TEST
+    EndRestart();
+    Smoke_Run();                    /* 1.0 Part B2: the test, then quit */
+    gQuit = true;
+#else
     LibSetup_Startup();
     EndRestart();
+#endif
 
     while (!gQuit)
     {

@@ -103,3 +103,11 @@ void LCD_Present(WindowPtr window, const Rect *destRect)
     LCD_CopyToWindow(window, destRect);
     SetPort(savedPort);
 }
+
+#ifdef MACMUSIC_SMOKE_TEST
+/* 1.0 Part B2: the LCD's pixels, for the smoke test (tests/smoke). */
+const BitMap *LCD_TestBits(void)
+{
+    return &gLCDBits;
+}
+#endif

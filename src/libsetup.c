@@ -339,3 +339,13 @@ const LibraryFolder *LibSetup_Folder(void)
 {
     return &gFolder;
 }
+
+#ifdef MACMUSIC_SMOKE_TEST
+/* 1.0 Part B2: uses folder as the library without asking or saving it in
+   the prefs, for the smoke test (tests/smoke). */
+void LibSetup_TestUseFolder(const LibraryFolder *folder)
+{
+    gFolder = *folder;
+    gHaveLibrary = true;
+}
+#endif

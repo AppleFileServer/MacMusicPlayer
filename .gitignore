@@ -8,3 +8,4 @@ build-xcode/
 /testdisks/
 __pycache__/
 build-host/
+build-smoke/
