@@ -5,8 +5,9 @@ and which pictures are still needed. They are kept outside the
 repository:
 - **S01-S44:** the first set, in `~/MacPlus/Screenshots/`, numbered in
   time order (11:41:47 to 11:48:46, 2026-10-08);
-- **D01-D28:** a second set, on the desktop (12:14 to 13:04), named by
-  what they show (the table at the end of the next section).
+- **D01-D28:** a second set (12:14 to 13:04), named by what they show
+  (the table at the end of the next section); moved from the desktop to
+  `~/MacPlus/Screenshots/` on 2026-10-08.
 
 ## How the shots are used
 
@@ -140,7 +141,7 @@ dialog crops for the Mac side.
 
 ### The second set
 
-| Code | File (desktop) | Shows |
+| Code | File | Shows |
 |---|---|---|
 | D01 | MacMusic Library.png | the MusicTest window, with the library renamed "MacMusic Library" |
 | D02 | Apple Logo.png | MacMusic starting, the Apple logo on the LCD |

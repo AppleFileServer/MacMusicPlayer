@@ -15,7 +15,8 @@ CHROME=$TOOLS/chrome-headless-shell-mac-arm64/chrome-headless-shell
 SRC=$1
 OUT=$2
 B=build-manual
-rm -rf "$B"; mkdir -p "$B/fonts" "$B/figures"
+# Clear only what's copied in, so the other parts' PDFs are kept.
+rm -rf "$B/fonts" "$B/figures" "$B/page.html"; mkdir -p "$B/fonts" "$B/figures"
 cp "$SRC" "$B/page.html"
 cp docs/manual/manual.css "$TOOLS/paged.polyfill.js" "$B/"
 cp docs/manual/figures/png/*.png "$B/figures/"

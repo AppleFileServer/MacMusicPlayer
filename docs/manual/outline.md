@@ -11,11 +11,11 @@ code). Page counts are estimates, for a 7½ x 9 in page.
 
 | Page | Contents | Figures |
 |---|---|---|
-| Cover | "MacMusic" in Garamond; MacMusic's icon top left (in place of a logo); the screen picture with cable, mouse and hand (SG4) | S10, tinted |
+| Cover | "MacMusic User's Guide" in Garamond (MM9); MacMusic's icon top left (in place of a logo); the screen picture with cable, mouse and hand (SG4) | S10, tinted |
 | Inside front cover | Copyright page, two columns: © 2026 Jack McAteer; the trademark acknowledgements; "Written by ..." and "Program by ..." credits, and a playful extra line; the not-affiliated statement; the licence terms or a pointer to them (§14) | |
-| i | Title page: "MacMusic", the four-column rules, the icon top right | |
+| i | Title page: "MacMusic User's Guide", the four-column rules, the icon top right | |
 | ii | Contents (the whole book) | |
-| iii-iv | **About This Manual:** what MacMusic is for, in a paragraph; what you need (a Macintosh Plus with System 6.0.7, an Apple Hard Disk 20SC or other SCSI hard disk, 512K free under MultiFinder, and sound files prepared as *MacMusic Utilities* describes, MU2, MU4); **Other MacMusic manuals** (*MacMusic Utilities*, the companion book: preparing songs and getting them onto the Mac); what you should know already (the Mac basics, from *Macintosh*, the owner's guide); how to use the book (three ways in, as MD 4: the tour, the task pages, or just try it); **If You've Used a Pocket Music Player** (as MD's "A Word to MacPaint Users": what will feel familiar, and what's different: the mouse and keyboard, the library on your disk, the Mac's own sound); conventions | D05 (Get Info: the memory size) |
+| iii-iv | **About This Manual:** what MacMusic is for, in a paragraph; what you need (a Macintosh Plus with System 6.0.7, an Apple Hard Disk 20SC or other SCSI hard disk, 512K free under MultiFinder, and sound files prepared as *MacMusic Utilities* describes, MU2, MU4); **Other MacMusic manuals** (*MacMusic Utilities*, the companion book: preparing songs and getting them onto the Mac); what you should know already (the Mac basics, from the *Macintosh Owner's Guide*); how to use the book (three ways in, as MD 4: the tour, the task pages, or just try it); **If You've Used a Pocket Music Player** (as MD's "A Word to MacPaint Users": what will feel familiar, and what's different: the mouse and keyboard, the library on your disk, the Mac's own sound); conventions | D05 (Get Info: the memory size) |
 
 ## Chapter 1: Learning MacMusic (about 22 pages)
 
@@ -65,7 +65,7 @@ column foot.
 | **Playing Songs** | To Play a Song; To Play a Whole List; To Pause and Resume; To Skip to the Next Song; To Go Back a Song or Start It Again | S10, S14 (L) |
 | **Shuffling** | To Shuffle Every Song; To Shuffle a List; To Shuffle by Albums | 2-7, 2-12 |
 | **Moving Through a Song** | To Fast-Forward or Rewind; To Use the Scrubber | 2-8, 2-9 |
-| **The Volume and Ratings** | To Change the Volume; To Rate a Song | 2-12a, 2-10 |
+| **The Volume and Ratings** | To Change the Volume; To Listen Through Headphones or a Speaker; To Record Onto Tape (the sound output port: headphones, an amplified speaker or a tape recorder; mono only; turning the volumes down before connecting, then setting the levels, MU6a; details in the *Macintosh Owner's Guide*, MU6); To Rate a Song | 2-12a, 2-10 |
 | **Settings** | To Change Shuffle or Repeat; To See About; To Reset All Settings | 2-12, 2-12b, 2-12c |
 | **Backlight and the Clock** | To Turn the Backlight On or Off; To See the Clock | 2-11, 2-13, 2-13a |
 | **Adding Songs** | To Import a Song; To Import From a Floppy Disk or Another Hard Disk; To Keep the Original (Just Copy); If the Song Is Already There; If the File Isn't a WAV File (see *MacMusic Utilities*) | S31, S32, 2-25, 2-26 |
@@ -118,7 +118,7 @@ N1-N9, R3, H1; `src/library.h` (limits).
   - songs and playback (about 7: details couldn't be saved, rating
     couldn't be saved, a song's file couldn't be read, sound playback
     isn't available).
-- **Appendix B, About Sound Files:** the files MacMusic plays (WAV,
+- **Appendix B, About Sound Files:** mono only, as the Macintosh has one sound channel (MU6); the files MacMusic plays (WAV,
   22,050 samples a second, 8-bit, mono) and why it's the Macintosh
   Plus's own sound; how much room music takes (about 1.3 MB a minute,
   with examples: about 30 seconds on an 800K floppy, about 15 minutes
@@ -127,7 +127,7 @@ N1-N9, R3, H1; `src/library.h` (limits).
   getting them onto the Mac: see *MacMusic Utilities* (MU1, MU2).
 - **Appendix C, Keyboard and Click Wheel Summary:** one page, with
   keycap drawings: every control by mouse and by keyboard.
-- **Appendix D, Troubleshooting:** no sound; the library can't be
+- **Appendix D, Troubleshooting:** no sound (including something plugged into the sound output port, MU6); the library can't be
   found (the hard disk not switched on or connected, or a floppy not
   inserted); a file MacMusic won't import (see *MacMusic Utilities*); the music pauses while another program
   works hard; not enough memory under MultiFinder; scanning a large

@@ -1,5 +1,7 @@
 # Plan: the MacMusic manual, in the style of Apple's early Macintosh manuals
 
+The book's title is ***MacMusic User's Guide*** (MM9).
+
 Status: approved (2026-10-08), decisions MM1-MM8 as recommended.
 Phase 1 done: `docs/manual/style-guide.md` (SG1-SG8) and the figure plan
 `docs/manual/figures.md` (F1-F6), from the owner's screenshots, which
@@ -169,3 +171,56 @@ From general knowledge, not yet checked against the references:
 - **MU5, cross-references (provisional):** the companion book's title in
   italics, with a chapter name where useful: see "Converting Songs" in
   *MacMusic Utilities*.
+
+## The title, and the sound output (2026-10-08)
+
+- **MM9, the title:** the book is the *MacMusic User's Guide*, as
+  Apple named the Macintosh's own guides. It is named so on the cover,
+  the title page, the spine flap and the copyright page, and in
+  *MacMusic Utilities*' references to it.
+- **MU6, the sound output port:** the manual says that the
+  Macintosh's sound output port, on the back of the computer, takes
+  headphones, an external speaker (an amplified one) or a tape
+  recorder, so MacMusic can be heard through them or recorded. The
+  sound is mono only: the Macintosh has one sound channel, so MacMusic
+  plays in mono too (stereo songs are mixed to mono when they're
+  prepared, as *MacMusic Utilities* describes). Details of the port and
+  what to plug into it: the *Macintosh Owner's Guide*. Where it goes:
+  - Chapter 2, a task "To Listen Through Headphones or a Speaker" (and
+    to record onto tape) on the Volume page;
+  - Appendix B, "About Sound Files": mono, and why;
+  - Appendix D, "No sound": check whether something is plugged into
+    the sound output port;
+  - Chapter 3's specifications: "Sound output: mono, through the
+    built-in speaker or the sound output port".
+- **MU6a, setting the level safely (2026-10-08):** connecting
+  something to the port is explained as a short procedure, so that
+  nothing is overloaded and nobody's ears get a surprise. MacMusic's
+  volume *is* the Macintosh's own sound level (the Control Panel's
+  speaker volume: the code sets the same hardware setting, eight steps),
+  and MacMusic sets it again to the level it remembers each time it
+  starts, so the manual says to turn it down in MacMusic, not only in
+  the Control Panel.
+  - **Headphones:** turn MacMusic's volume all the way down, plug in,
+    put them on, start a song, then turn the click wheel up a step at a
+    time.
+  - **An amplified speaker or a stereo:** turn the speaker's (or
+    amplifier's) volume down, and MacMusic's down, before connecting;
+    connect to a line or auxiliary input; play a song; raise the
+    speaker's volume to a comfortable level first, then set MacMusic's
+    to suit. A higher MacMusic volume with a lower speaker volume
+    usually sounds cleanest.
+  - **A tape recorder:** connect to its line or auxiliary input, not
+    the microphone input (which expects a much smaller signal and would
+    distort); set the recorder to record-pause; play the song and set
+    MacMusic's volume, then the recorder's recording level, so the
+    level meters stay just short of the red at the loudest passages;
+    then go back to the start of the song (Previous), start the
+    recorder, and play. MacMusic's volume has only eight steps, so the
+    fine adjustment is made on the recorder.
+  - **Confirmed by the owner (2026-10-08):** plugging into the port
+    silences the built-in speaker; the cable needs a mono 3.5 mm
+    miniplug, with an adaptor for equipment with stereo inputs, so the
+    sound reaches both channels. The *Macintosh Owner's Guide* is named
+    for more about the port.
+

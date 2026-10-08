@@ -181,8 +181,18 @@ svg.callouts .leader {
 .task-page ul.boxes { list-style: none; padding: 0; margin: 6pt 0; }
 .task-page ul.boxes li { padding-left: 13pt; text-indent: -13pt; margin-bottom: 4pt; }
 .task-page ul.boxes li::before { content: "\2610"; margin-right: 4pt; font-size: 10pt; }
-.task-page .foot { margin-top: auto; }      /* figures at the column foot */
+.task-page .foot { margin-top: auto; padding-top: 8pt; }   /* figures at the column foot */
 .task-page .foot img { width: 100%; }
+.task-page .foot img + img { margin-top: 6pt; }
+.task-page > .column.double { grid-column: span 2; }
+.task-page > .column.double .foot img { width: auto; max-width: 100%; }
+/* A topic carried over to a second page. */
+.task-page h2.topic-more { font: bold 14pt/16pt var(--sans); color: var(--red); margin: 0 0 10pt 0; }
+.task-page p { margin-bottom: 5pt; }
+.task-page p.grey { color: var(--grey-text); }
+/* The task chapter's contents: every task under its topic (MW 48). */
+ul.toc li.topic { font: bold 10pt/12pt var(--sans); margin-top: 6pt; margin-bottom: 1pt; }
+ul.toc li.task { padding-left: 12pt; margin-bottom: 0; font-size: 11pt; line-height: 12.5pt; }
 
 .variant-label {
     font: 8pt var(--sans);
@@ -190,3 +200,122 @@ svg.callouts .leader {
     position: absolute;
     top: -30pt; right: 0;
 }
+
+/* ---- A chapter (Phase 6) ------------------------------------------------- */
+
+/* Running feet (§6.3, SG7): the page number at the outer edge; the
+   chapter's name on left-hand pages, the section or lesson on right-hand
+   ones, taken from the last head on the page. */
+.chapter { page: chapter; font-family: var(--serif); }
+.tasks { page: tasks; font-family: var(--serif); }
+h2.margin-head, .lesson-head .title, h2.topic { string-set: section content(text); }
+.opener-title { string-set: chapter attr(data-foot); }
+@page chapter:left {
+    @bottom-left { content: counter(page) "\2003\2003" string(chapter);
+                   font: 9.5pt "MM Garamond 100"; color: #6d6d6d; }
+}
+@page tasks:left {
+    @bottom-left { content: counter(page) "\2003\2003" string(chapter);
+                   font: 9.5pt "MM Garamond 100"; color: #6d6d6d; }
+}
+@page tasks:right {
+    @bottom-center { content: string(section); text-align: right;
+                     font: 9.5pt "MM Garamond 100"; color: #6d6d6d; }
+    @bottom-right { content: counter(page); width: 24pt;
+                    font: 9.5pt "MM Garamond 100"; color: #6d6d6d; }
+}
+/* Paged.js leaves a string() value unclosed, so nothing may follow it in
+   a margin box: the section's name and the page number are two boxes. */
+@page chapter:right {
+    @bottom-center { content: string(section); text-align: right;
+                     font: 9.5pt "MM Garamond 100"; color: #6d6d6d; }
+    @bottom-right { content: counter(page); width: 24pt;
+                    font: 9.5pt "MM Garamond 100"; color: #6d6d6d; }
+}
+.pagedjs_chapter_page .pagedjs_page_content { position: relative; }
+.pagedjs_chapter_page .pagedjs_page_content::before {
+    content: "";
+    position: absolute;
+    left: calc(var(--margin-col) + var(--gutter) / 2);
+    top: 0; bottom: 0;
+    border-left: 0.6pt solid var(--rule);
+}
+
+/* The draft's title page, before the opener. */
+.draft-title { page: draft; font-family: var(--serif); padding-top: 160pt; }
+@page draft { }
+.draft-book { font-size: 40pt; line-height: 44pt; margin-bottom: 12pt; }
+.draft-what { font: bold 14pt var(--sans); color: var(--red); margin-bottom: 30pt; }
+.draft-note { font-size: 11pt; line-height: 14pt; color: var(--grey-text); width: 300pt; }
+
+/* The opener spread (§8.6, SG5 b): MacMusic's own screen in grey,
+   bleeding off every edge, with the chapter's name in the right-hand
+   page's margin column at the top. */
+@page opener { margin: 0; }
+.opener { page: opener; break-before: page; position: relative;
+          width: 7.5in; height: 9in; overflow: hidden; }
+.opener-left { break-before: left; }
+.opener img { width: 100%; height: 100%; object-fit: cover; image-rendering: pixelated; }
+.opener-left img { object-position: right center; }
+.opener-right img { object-position: left center; }
+.opener-title {
+    position: absolute; left: 52pt; top: 40pt; width: var(--margin-col);
+    background: white; padding: 10pt 10pt 12pt 0; font-family: var(--serif);
+}
+.opener-title .ch { font-size: 15pt; margin: 0 0 4pt 0; }
+.opener-title .name { font-size: 22pt; line-height: 25pt; margin: 0; }
+
+/* The chapter's own contents page (MW 2, MJ 12). */
+.chapter-contents { break-before: page; }
+/* A margin head kept on the page with the text that follows it. */
+.keep { break-inside: avoid; }
+h2.contents-head { font: bold 18pt/20pt var(--sans); color: var(--red); margin: 0; }
+ul.toc { list-style: none; padding: 0; margin: 0; }
+ul.toc li { display: flex; align-items: baseline; margin: 0 0 6pt 0; }
+ul.toc li.part { font: bold 11pt/14pt var(--sans); margin-top: 12pt; }
+ul.toc li.lesson { padding-left: 22pt; }
+ul.toc .n { width: 22pt; margin-left: -22pt; color: var(--red); font: bold 9.5pt var(--sans); }
+ul.toc a { color: inherit; text-decoration: none; flex: 1; display: flex; }
+ul.toc a::after {
+    content: target-counter(attr(href), page);
+    margin-left: auto; padding-left: 12pt;
+}
+
+/* Smaller heads in the margin, for the parts of the introduction. */
+h3.margin-sub { font: bold 10.5pt/12.5pt var(--sans); margin: 2pt 0 0 0; }
+.lesson-head { margin-top: 14pt; }
+p.lessons-intro { margin-top: 0; }
+b.run-in { font-family: var(--sans); font-size: 10.5pt; }
+
+/* Lists with open squares (§7.5), in running text. */
+.flow ul.boxes { list-style: none; padding: 0; margin: 4pt 0 8pt 0; }
+.flow ul.boxes li { padding-left: 15pt; text-indent: -15pt; margin-bottom: 3pt; }
+.flow ul.boxes li::before {
+    content: ""; display: inline-block; width: 6pt; height: 6pt;
+    border: 0.8pt solid #111; margin-right: 7pt; vertical-align: 0.5pt;
+}
+
+/* Text to type (§7.7): Helvetica, indented, between dotted rules. */
+.type-this {
+    font: 11pt/14pt var(--sans);
+    padding: 3pt 0 3pt 24pt;
+    margin: 2pt 0 8pt 0;
+    border-top: 1pt dotted #777;
+    border-bottom: 1pt dotted #777;
+    width: 200pt;
+}
+
+/* Figures in the text column: dialog boxes on their own line, small
+   screens in a row. */
+figure.dialog { margin: 4pt 0 10pt 0; break-inside: avoid; }
+figure.row { display: flex; gap: 10pt; margin: 4pt 0 10pt 0; }
+figure.wide { break-inside: avoid; }
+/* A picture across both columns covers the column rule. */
+figure.wide img { position: relative; z-index: 1; }
+figure.beside { clear: right; }
+
+/* Important (§7.6): the word in the margin, the note in bold between
+   rules. */
+.important { border-top: 0.8pt solid #111; border-bottom: 0.8pt solid #111;
+             padding: 6pt 0 2pt 0; margin: 10pt 0; font-weight: bold; break-inside: avoid; }
+.important-head { font: bold 11pt var(--sans); margin-top: 0; }

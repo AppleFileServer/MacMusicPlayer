@@ -7,4 +7,85 @@ fig-1-5   ~/MacPlus/Screenshots/Screenshot%202026-10-08%20at%2011.45.22.png wind
 fig-1-6   ~/MacPlus/Screenshots/Screenshot%202026-10-08%20at%2011.43.49.png lcd
 fig-2-8   ~/MacPlus/Screenshots/Screenshot%202026-10-08%20at%2011.44.08.png lcd
 fig-2-9   ~/MacPlus/Screenshots/Screenshot%202026-10-08%20at%2011.44.15.png lcd
-fig-2-12a ~/Desktop/Volume.png lcd
+fig-2-12a ~/MacPlus/Screenshots/Volume.png lcd
+
+# Chapter 1: Learning MacMusic (figures.md 1-1 to 1-15). The tour's song is
+# "Chariots of Fire" (MU3); the S-shots show other songs until retaken.
+c1-start        ~/MacPlus/Screenshots/Apple%20Logo.png full
+c1-first-time   ~/MacPlus/Screenshots/First%20time%20message.png box
+c1-create       ~/MacPlus/Screenshots/Create%20New%20Library.png box
+c1-library      ~/MacPlus/Screenshots/Cleaned%20up.png box
+c1-hard-disk    ~/MacPlus/Screenshots/MacMusic%20Library.png box
+c1-window       ~/MacPlus/Screenshots/Screenshot%202026-10-08%20at%2011.43.08.png full
+c1-wheel-1      ~/MacPlus/Screenshots/Screenshot%202026-10-08%20at%2011.43.08.png lcd
+c1-wheel-2      ~/MacPlus/Screenshots/Screenshot%202026-10-08%20at%2011.43.15.png lcd
+c1-wheel-3      ~/MacPlus/Screenshots/Screenshot%202026-10-08%20at%2011.43.18.png lcd
+c1-music        ~/MacPlus/Screenshots/Screenshot%202026-10-08%20at%2011.44.45.png lcd
+c1-import-menu  ~/MacPlus/Screenshots/Screenshot%202026-10-08%20at%2011.46.41.png menu
+c1-import-open  ~/MacPlus/Screenshots/Screenshot%202026-10-08%20at%2011.46.56.png box
+c1-import-move  ~/MacPlus/Screenshots/Screenshot%202026-10-08%20at%2011.47.03.png box
+c1-import-info  ~/MacPlus/Screenshots/Screenshot%202026-10-08%20at%2011.47.07.png box
+c1-songs        ~/MacPlus/Screenshots/Screenshot%202026-10-08%20at%2011.45.22.png window
+c1-now-playing  ~/MacPlus/Screenshots/Screenshot%202026-10-08%20at%2011.43.49.png lcd
+c1-paused       ~/MacPlus/Screenshots/Screenshot%202026-10-08%20at%2011.44.36.png lcd
+c1-new-playlist ~/MacPlus/Screenshots/Screenshot%202026-10-08%20at%2011.47.45.png menu
+c1-name-it      ~/MacPlus/Screenshots/Screenshot%202026-10-08%20at%2011.47.49.png box
+c1-add-to       ~/MacPlus/Screenshots/Screenshot%202026-10-08%20at%2011.48.20.png menu
+c1-playlist     ~/MacPlus/Screenshots/Playlist%20Songs.png lcd
+c1-ten-limit    ~/MacPlus/Screenshots/10%20Playlists%20warning.png box
+c1-quit         ~/MacPlus/Screenshots/Screenshot%202026-10-08%20at%2011.48.46.png menu
+c1-parts        ~/MacPlus/Screenshots/Screenshot%202026-10-08%20at%2011.43.08.png window
+# The chapter opener: the whole screen in grey, split across the spread
+c1-opener-l     ~/MacPlus/Screenshots/Screenshot%202026-10-08%20at%2011.43.08.png 0,20,256,322 ink=c4c4c4
+c1-opener-r     ~/MacPlus/Screenshots/Screenshot%202026-10-08%20at%2011.43.08.png 256,20,256,322 ink=c4c4c4
+
+# Chapter 2: Using MacMusic (figures.md 2-1 to 2-29; codes S01-S44, D01-D28).
+c2-scroll          ~/MacPlus/Screenshots/Screenshot%202026-10-08%20at%2011.44.50.png lcd   # S16
+c2-artists         ~/MacPlus/Screenshots/Screenshot%202026-10-08%20at%2011.45.34.png lcd   # S25
+c2-albums          ~/MacPlus/Screenshots/Screenshot%202026-10-08%20at%2011.45.28.png lcd   # S24
+c2-genres          ~/MacPlus/Screenshots/Screenshot%202026-10-08%20at%2011.45.39.png lcd   # S26
+c2-composers       ~/MacPlus/Screenshots/Composers.png lcd   # D25
+c2-playlists       ~/MacPlus/Screenshots/Screenshot%202026-10-08%20at%2011.45.13.png lcd   # S22
+c2-playlist-songs  ~/MacPlus/Screenshots/Playlist%20Songs.png lcd   # D16
+c2-audiobooks      ~/MacPlus/Screenshots/AudioBooks.png lcd   # D15
+c2-songs           ~/MacPlus/Screenshots/Screenshot%202026-10-08%20at%2011.45.22.png lcd   # S23
+c2-now-playing     ~/MacPlus/Screenshots/Screenshot%202026-10-08%20at%2011.43.49.png lcd   # S10
+c2-paused          ~/MacPlus/Screenshots/Screenshot%202026-10-08%20at%2011.44.36.png lcd   # S14
+c2-shuffle-songs   ~/MacPlus/Screenshots/Screenshot%202026-10-08%20at%2011.43.23.png lcd   # S07
+c2-settings        ~/MacPlus/Screenshots/Screenshot%202026-10-08%20at%2011.45.56.png lcd   # S28
+c2-ff              ~/MacPlus/Screenshots/Screenshot%202026-10-08%20at%2011.44.08.png lcd   # S11
+c2-scrubber        ~/MacPlus/Screenshots/Screenshot%202026-10-08%20at%2011.44.15.png lcd   # S12
+c2-volume          ~/MacPlus/Screenshots/Volume.png lcd   # D09
+c2-rating          ~/MacPlus/Screenshots/Screenshot%202026-10-08%20at%2011.44.19.png lcd   # S13
+c2-about           ~/MacPlus/Screenshots/About.png lcd   nopointer # D10
+c2-reset           ~/MacPlus/Screenshots/Reset.png lcd   # D12
+c2-legal           ~/MacPlus/Screenshots/Legal.png lcd   # D11
+c2-backlight-off   ~/MacPlus/Screenshots/Screenshot%202026-10-08%20at%2011.43.27.png lcd   # S08
+c2-backlight-on    ~/MacPlus/Screenshots/Screenshot%202026-10-08%20at%2011.43.30.png lcd   # S09
+c2-extras          ~/MacPlus/Screenshots/Screenshot%202026-10-08%20at%2011.45.51.png lcd   # S27
+c2-clock           ~/MacPlus/Screenshots/Date%20and%20Time.png lcd   # D14
+c2-import-move     ~/MacPlus/Screenshots/Screenshot%202026-10-08%20at%2011.47.03.png box   # S31
+c2-duplicate       ~/MacPlus/Screenshots/Duplicate%20Audio.png box   # D23
+c2-not-wav         ~/MacPlus/Screenshots/This%20is%20not%20a%20WAV%20file.png box   # D24
+c2-edit-menu       ~/MacPlus/Screenshots/Screenshot%202026-10-08%20at%2011.48.07.png menu   # S38
+c2-edit-song       ~/MacPlus/Screenshots/Screenshot%202026-10-08%20at%2011.48.13.png box   # S39
+c2-export-menu     ~/MacPlus/Screenshots/Export%20Song.png menu   # D17
+c2-export-save     ~/MacPlus/Screenshots/Export%20Song%20As.png box   nopointer # D18
+c2-add-again       ~/MacPlus/Screenshots/Already%20in%20Playlist.png box   # D20
+c2-rename          ~/MacPlus/Screenshots/Screenshot%202026-10-08%20at%2011.48.32.png menu   # S41
+c2-delete          ~/MacPlus/Screenshots/Screenshot%202026-10-08%20at%2011.48.34.png menu   # S42
+c2-delete-alert    ~/MacPlus/Screenshots/Delete%20Playlists%20message.png box   # D21
+c2-choose          ~/MacPlus/Screenshots/Screenshot%202026-10-08%20at%2011.47.19.png menu   # S33
+c2-use-existing    ~/MacPlus/Screenshots/Screenshot%202026-10-08%20at%2011.47.31.png box   # S34
+c2-open-existing   ~/MacPlus/Screenshots/Screenshot%202026-10-08%20at%2011.47.38.png box   # S35
+c2-recent          ~/MacPlus/Screenshots/Screenshot%202026-10-08%20at%2011.48.43.png menu   # S43
+c2-library-info    ~/MacPlus/Screenshots/Library%20Info.png box   nopointer # D07
+c2-background      ~/MacPlus/Screenshots/Running%20another%20program.png full   # D27
+c2-da              ~/MacPlus/Screenshots/DA.png full   # D26
+c2-about-finder    ~/MacPlus/Screenshots/About%20the%20finder%20(RAM).png box   # D28
+c2-get-info        ~/MacPlus/Screenshots/Info.png box   nopointer # D05
+# Chapter 2's opener (SG10): Now Playing, the whole screen in grey (S10)
+c2-opener-l     ~/MacPlus/Screenshots/Screenshot%202026-10-08%20at%2011.43.49.png 0,20,256,322 ink=c4c4c4
+c2-opener-r     ~/MacPlus/Screenshots/Screenshot%202026-10-08%20at%2011.43.49.png 256,20,256,322 ink=c4c4c4
+# The Calculator beside MacMusic, cropped from D26
+c2-da-crop      ~/MacPlus/Screenshots/DA.png 36,30,214,250 nopointer

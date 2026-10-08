@@ -60,7 +60,7 @@ What the manuals sound like, with a MacMusic example of each.
 - **Short sentences, one idea each.** Explain why before how, especially
   at the start of a chapter (MJ 5: the barbecue as project management).
 - **Meet the reader where they are.** Say what they need to know already,
-  and send them to the owner's guide, *Macintosh*, for the basics (MW 5,
+  and send them to the *Macintosh Owner's Guide* for the basics (MW 5,
   MD 4, MP 4). Offer more than one way in, including "just try it" (MD 4).
   *If you'd rather start playing right away, turn to "A Tour of MacMusic."*
 - **Use everyday comparisons for new ideas** (MJ 5-7). *A playlist is like
@@ -123,7 +123,7 @@ Naming things in text:
   from the File menu". In step lines they're part of the bold step (§7.1).
 - **the Mac's own text** (button names, messages) in quotation marks
   where it's quoted in full.
-- **book titles** in italics (*Macintosh*).
+- **book titles** in italics (*Macintosh Owner's Guide*, *MacMusic User's Guide*).
 - **chapter cross-references** as Chapter 2, "Managing Your Music Library".
 
 ## 5. The book's structure
@@ -479,6 +479,17 @@ isn't part of the manual plan.
 
 **Decided 2026-10-08:** SG1-SG8 all as recommended (the owner will
 revise by hand later).
+
+**Added 2026-10-08, after the Chapter 1 draft:**
+- **SG9, spelling:** British throughout (centre, favourite, colour,
+  initialise, anticlockwise), except the Mac's own words, quoted as they
+  appear (the Finder's Initialize button).
+- **SG10, the openers:** each chapter's opener spread is MacMusic's own
+  screen in light grey, bleeding off both pages, with the chapter's name
+  in a white panel in the right-hand page's margin column (as Chapter 1).
+  Each chapter uses a different screen, to suit it: Chapter 1 the main
+  menu; Chapter 2 Now Playing, say; Chapter 3 a Settings or menu
+  screen.
 
 
 - **SG1, the base design:** B (Garamond and Helvetica, red-orange second
