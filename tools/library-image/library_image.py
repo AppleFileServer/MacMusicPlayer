@@ -293,9 +293,14 @@ def step_check(a):
     lib = os.path.join(a.work, 'check-library')
     exe = os.path.join(a.work, 'check-program')
     src = os.path.join(PROJECT, 'src')
-    r = subprocess.run(['cc', '-w', '-I', os.path.join(HERE, 'check', 'inc'), '-I', src,
+    host = os.path.join(PROJECT, 'tests', 'host')       # the stand-in Toolbox
+    r = subprocess.run(['cc', '-w', '-fpascal-strings',
+                        '-I', os.path.join(host, 'inc'), '-I', host, '-I', src,
                         '-o', exe, os.path.join(HERE, 'check', 'check.c'),
-                        os.path.join(src, 'library.c'), os.path.join(src, 'songfile.c')],
+                        os.path.join(host, 'macfs.c'),
+                        os.path.join(host, 'mactoolbox.c')]
+                       + [os.path.join(src, m) for m in
+                          ('library.c', 'songfile.c', 'fileops.c', 'libfolder.c')],
                        capture_output=True, text=True)
     if r.returncode:
         sys.exit('could not build the check:\n' + r.stderr)

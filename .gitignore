@@ -7,3 +7,4 @@ build-xcode/
 # Persistent Mini vMac test disks (see tools/run-persistent.sh)
 /testdisks/
 __pycache__/
+build-host/
