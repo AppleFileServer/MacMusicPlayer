@@ -173,3 +173,31 @@ launch), and `tools/install-test-library.sh` and
 2. Build, `tests/run-host.sh`, `tests/run-smoke.sh` (see `RESTART.md`).
 3. `tools/run-persistent.sh`, Mini vMac at 1x.
 4. Log what you found in `docs/issues-found.md`.
+
+## 10. For the manual (`docs/manual/`)
+
+Only for building the manual's PDF, not MacMusic. All in
+`~/MacPlusProjects/manual-tools/` (or `MANUAL_TOOLS`), outside the
+repository:
+
+| Piece | What | 2026-10-08 |
+|---|---|---|
+| `chrome-headless-shell-mac-arm64/` | Chrome for Testing's headless browser, prints the pages | 155.0.8059.39, from https://googlechromelabs.github.io/chrome-for-testing/ |
+| `paged.polyfill.js` | Paged.js (MIT): page layout, running feet, page numbers | 0.4.3, from https://unpkg.com/pagedjs@0.4.3/dist/paged.polyfill.js |
+| `fonts/EBGaramond*.ttf`, `OFL.txt` | EB Garamond (SIL Open Font License) | from github.com/google/fonts, `ofl/ebgaramond` |
+| `fonts/built/` | MacMusic Garamond 86 and 100, made by `tools/manual/condense-font.py` | |
+| `venv/` | Python with fontTools, Pillow and websocket-client | fontTools 4.66.1, Pillow 12.3.0 |
+
+To set it up again:
+
+    T=~/MacPlusProjects/manual-tools; mkdir -p $T/fonts; cd $T
+    # Chrome: the "chrome-headless-shell" mac-arm64 zip for the version above; unzip it here
+    curl -LO https://unpkg.com/pagedjs@0.4.3/dist/paged.polyfill.js
+    # EB Garamond: EBGaramond[wght].ttf, EBGaramond-Italic[wght].ttf, OFL.txt into fonts/
+    python3 -m venv venv && venv/bin/pip install fonttools pillow websocket-client
+    for s in 1.00 0.86; do venv/bin/python ~/MacPlusProjects/MacMusicPlayer/tools/manual/condense-font.py \
+        "fonts/EBGaramond[wght].ttf" "fonts/EBGaramond-Italic[wght].ttf" fonts/built $s; done
+
+Then, in the repository: `tools/manual/make-figures.py` (the figures,
+from the owner's screenshots) and `tools/manual/build-pdf.sh` (the PDF,
+into `build-manual/`). Helvetica comes with macOS.

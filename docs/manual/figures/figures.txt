@@ -1,0 +1,10 @@
+# The manual's figures (docs/manual/figures.md): name, screenshot, crop.
+# Screenshots are the owner's, outside the repository.
+screen 384 198 4
+
+# Sample spread (Phase 4). Codes from figures.md: S23, S10, S11, S12, D09.
+fig-1-5   ~/MacPlus/Screenshots/Screenshot%202026-10-08%20at%2011.45.22.png window
+fig-1-6   ~/MacPlus/Screenshots/Screenshot%202026-10-08%20at%2011.43.49.png lcd
+fig-2-8   ~/MacPlus/Screenshots/Screenshot%202026-10-08%20at%2011.44.08.png lcd
+fig-2-9   ~/MacPlus/Screenshots/Screenshot%202026-10-08%20at%2011.44.15.png lcd
+fig-2-12a ~/Desktop/Volume.png lcd

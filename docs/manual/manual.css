@@ -1,0 +1,192 @@
+/* The MacMusic manual's page design (docs/manual/style-guide.md), for
+   Paged.js in headless Chrome (tools/manual/build-pdf.sh).
+   Apple's 1984-85 house design: a condensed Garamond for text, bold
+   Helvetica for headings and steps, red-orange as the second colour, a
+   margin column always on the left with a thin rule beside it. */
+
+@font-face { font-family: "MM Garamond 86"; src: url("fonts/MacMusicGaramond86-Regular.ttf"); }
+@font-face { font-family: "MM Garamond 86"; font-style: italic; src: url("fonts/MacMusicGaramond86-Italic.ttf"); }
+@font-face { font-family: "MM Garamond 86"; font-weight: bold; src: url("fonts/MacMusicGaramond86-Bold.ttf"); }
+@font-face { font-family: "MM Garamond 100"; src: url("fonts/MacMusicGaramond100-Regular.ttf"); }
+@font-face { font-family: "MM Garamond 100"; font-style: italic; src: url("fonts/MacMusicGaramond100-Italic.ttf"); }
+@font-face { font-family: "MM Garamond 100"; font-weight: bold; src: url("fonts/MacMusicGaramond100-Bold.ttf"); }
+
+:root {
+    --red: #e0442b;             /* the second colour (§6.4) */
+    --grey-text: #8c8c8c;       /* supplementary notes (§7.6) */
+    --rule: #9a9a9a;            /* column rules */
+    --margin-col: 118pt;        /* the margin column (§6.2) */
+    --gutter: 22pt;             /* margin column to text, the rule midway */
+    --sans: "Helvetica", "Helvetica Neue", Arial, sans-serif;
+    --serif: "MM Garamond 100", Garamond, serif;   /* P3: normal width */
+}
+.w100 { --serif: "MM Garamond 100", Garamond, serif; }
+/* The face is set on each part, so a part's own --serif takes effect. */
+.lesson86, .lesson100, .task86, .task100 { font-family: var(--serif); }
+
+/* ---- Pages: 7½ x 9 in (SG2) -------------------------------------------- */
+
+@page {
+    size: 7.5in 9in;
+    margin: 40pt 40pt 50pt 52pt;
+}
+@page lesson86  { @bottom-left { content: "12\2003\2003 Chapter 1: Learning MacMusic"; font: 9.5pt "MM Garamond 86"; color: #6d6d6d; } }
+@page task86    { @bottom-right { content: "Moving Through a Song\2003\2003 37"; font: 9.5pt "MM Garamond 86"; color: #6d6d6d; } }
+@page lesson100 { @bottom-left { content: "12\2003\2003 Chapter 1: Learning MacMusic"; font: 9.5pt "MM Garamond 100"; color: #6d6d6d; } }
+@page task100   { @bottom-right { content: "Moving Through a Song\2003\2003 37"; font: 9.5pt "MM Garamond 100"; color: #6d6d6d; } }
+
+.lesson86  { page: lesson86; }
+.task86    { page: task86; }
+.lesson100 { page: lesson100; }
+.task100   { page: task100; }
+.page-break { break-before: page; }
+
+body {
+    margin: 0;
+    font-family: var(--serif);
+    font-size: 13pt;
+    line-height: 16pt;
+    color: #111;
+    hyphens: manual;
+}
+p { margin: 0 0 6pt 0; }
+
+/* ---- The margin column and the text column (§6.2) ---------------------- */
+
+/* Text flows in the text column; margin heads and labels sit in the
+   margin column to its left (always on the left, MW 5, MJ 5); the thin
+   rule between them is drawn once per page, the full text height. */
+.flow { padding-left: calc(var(--margin-col) + var(--gutter)); }
+.flow .margin {
+    float: left;
+    clear: left;
+    width: var(--margin-col);
+    margin-left: calc(-1 * (var(--margin-col) + var(--gutter)));
+}
+.flow .wide { margin-left: calc(-1 * (var(--margin-col) + var(--gutter))); }
+.pagedjs_lesson86_page .pagedjs_page_content,
+.pagedjs_lesson100_page .pagedjs_page_content { position: relative; }
+.pagedjs_lesson86_page .pagedjs_page_content::before,
+.pagedjs_lesson100_page .pagedjs_page_content::before {
+    content: "";
+    position: absolute;
+    left: calc(var(--margin-col) + var(--gutter) / 2);
+    top: 0; bottom: 0;
+    border-left: 0.6pt solid var(--rule);
+}
+
+/* Margin heads: red bold Helvetica (MW 5, MJ 5). */
+h2.margin-head {
+    font: bold 14pt/16pt var(--sans);
+    color: var(--red);
+    margin: 0;
+}
+/* A lesson head: a red square with the number in white, and the title
+   in bold Helvetica beside it (MW 13, MJ 14). */
+.lesson-head {
+    display: grid;
+    grid-template-columns: 17pt 1fr;
+    column-gap: 7pt;
+    font: bold 10.5pt/12.5pt var(--sans);
+    margin-top: 2pt;
+}
+.lesson-head .number {
+    background: var(--red);
+    color: white;
+    text-align: center;
+    font: bold 9.5pt/17pt var(--sans);
+    height: 17pt;
+}
+
+/* ---- Steps and notes (§7) ---------------------------------------------- */
+
+/* A step: a black square and a bold Helvetica instruction (MW 11). */
+p.step {
+    font: bold 10.5pt/13pt var(--sans);
+    padding-left: 15pt;
+    text-indent: -15pt;
+    margin: 9pt 0 4pt 0;
+}
+p.step::before {
+    content: "";
+    display: inline-block;
+    width: 7pt; height: 7pt;
+    background: #111;
+    margin-right: 8pt;
+    vertical-align: 0.5pt;
+}
+.grey { color: var(--grey-text); }
+/* A short remark in the margin column, beside its step (MW 166-172). */
+.margin-note { font: 9pt/11pt var(--sans); margin-top: 10pt; }
+b.term { font-weight: bold; }
+
+/* ---- Figures (§8) ------------------------------------------------------ */
+
+figure { margin: 4pt 0 8pt 0; }
+/* A small picture beside its text, on the right (MW 16). */
+figure.beside { float: right; margin: 2pt 0 6pt 14pt; }
+img.screen { image-rendering: pixelated; display: block; }
+svg.callouts text {
+    font-family: var(--sans);
+    font-size: 8.5pt;
+    fill: #111;
+}
+svg.callouts .leader {
+    fill: none;
+    stroke: var(--red);
+    stroke-width: 0.7pt;
+}
+
+/* ---- Task pages (§9): four columns with rules between -------------------- */
+
+.task-page {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    column-gap: 14pt;
+    height: 556pt;               /* the page's text area: 9 in less the margins */
+}
+.task-page > .column {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    font-size: 11pt;
+    line-height: 13.5pt;
+}
+.task-page > .column:not(:first-child) {   /* the rules between columns */
+    border-left: 0.6pt solid var(--rule);
+    padding-left: 7pt;
+    margin-left: -7pt;
+}
+.task-page h2.topic {
+    font: bold 14pt/16pt var(--sans);
+    color: var(--red);
+    margin: 0 0 10pt 0;
+}
+.task-page h3 {
+    font: bold 10.5pt/12.5pt var(--sans);
+    margin: 0 0 10pt 0;
+    min-height: 28pt;
+}
+/* Task steps: small grey squares (MW 56, MD 32). */
+.task-page p.tstep { padding-left: 11pt; text-indent: -11pt; margin-bottom: 6pt; }
+.task-page p.tstep::before {
+    content: "";
+    display: inline-block;
+    width: 5pt; height: 5pt;
+    background: #9b9b9b;
+    margin-right: 6pt;
+    vertical-align: 1pt;
+}
+.task-page p.or { font: bold 9pt var(--sans); margin: 4pt 0; }
+.task-page ul.boxes { list-style: none; padding: 0; margin: 6pt 0; }
+.task-page ul.boxes li { padding-left: 13pt; text-indent: -13pt; margin-bottom: 4pt; }
+.task-page ul.boxes li::before { content: "\2610"; margin-right: 4pt; font-size: 10pt; }
+.task-page .foot { margin-top: auto; }      /* figures at the column foot */
+.task-page .foot img { width: 100%; }
+
+.variant-label {
+    font: 8pt var(--sans);
+    color: #b0b0b0;
+    position: absolute;
+    top: -30pt; right: 0;
+}

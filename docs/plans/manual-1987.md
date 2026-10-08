@@ -106,9 +106,10 @@ From general knowledge, not yet checked against the references:
   (© 2026 Jack McAteer), with trademark acknowledgements and the legal
   statement; no Apple name as publisher, no Apple logo, no Apple
   copyright line. The manual imitates a style, not an Apple publication.
-- **MM2:** written in the period's voice, describing the real product:
-  its requirements (System 6.0.7, WAV files) stated plainly, even where
-  they post-date 1987.
+- **MM2 (narrowed 2026-10-08, MU1):** written in the period's voice,
+  describing the real product as it runs on the Macintosh Plus: its
+  requirements (System 6.0.7, its sound-file format) stated plainly,
+  even where they post-date 1987, but nothing outside the Plus.
 - **MM3:** HTML with print styles, built to PDF (a headless browser if
   available here, else LaTeX), at the references' page size; sources in
   `docs/manual/`, the PDF with the release files.
@@ -124,3 +125,29 @@ From general knowledge, not yet checked against the references:
   quick-reference card last, if wanted.
 - **MM8:** the owner approves the style guide, the sample spread, the
   outline, and each chapter.
+
+## The Macintosh Plus only, and *MacMusic Utilities* (2026-10-08)
+
+- **MU1, one world:** the manual covers only MacMusic and what runs on
+  the Macintosh Plus: System 6, the Finder, MultiFinder, desk
+  accessories, floppy disks and an original SCSI hard disk. Nothing
+  about modern computers, MP3s, converting songs, BlueSCSI or the
+  project's own tools. The one stretch allowed is the hard disk's
+  size: volumes up to System 6's 2 GB limit.
+- **MU2, the companion book:** *MacMusic Utilities*, a separate, later
+  manual, covers converting songs to MacMusic's sound files on a modern
+  machine, moving files to the Mac, BlueSCSI and the project's tools.
+  This manual names it wherever a reader would ask where songs come
+  from. Not planned here.
+- **MU3, the tutorial song:** "Song.wav" on the 800K MacMusic disk, a
+  clip (30 seconds at most, to fit beside MacMusic and the Read Me) of
+  "Chariots of Fire" by Vangelis; the manual may name it. *For the
+  release files:* `tools/make-release.sh` will need to put Song.wav on
+  the floppy, from the owner's clip. A commercial recording: such a
+  floppy is for the owner's own use and isn't to be shared (the legal
+  statement says MacMusic doesn't distribute copyrighted music).
+- **MU4, the hard disk:** named as Apple's: "an Apple Hard Disk 20SC or
+  other SCSI hard disk".
+- **MU5, cross-references (provisional):** the companion book's title in
+  italics, with a chapter name where useful: see "Converting Songs" in
+  *MacMusic Utilities*.

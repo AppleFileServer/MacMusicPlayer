@@ -116,6 +116,11 @@ done
     || warn "no BlueSCSI template (only Scratch images need it)" 8
 [ -f "$HOME/MacPlusProjects/library-work/pick.json" ] && ok "the song work folder" \
     || warn "no ~/MacPlusProjects/library-work (only Scratch images need it)" 8
+M=${MANUAL_TOOLS:-$HOME/MacPlusProjects/manual-tools}
+[ -x "$M/chrome-headless-shell-mac-arm64/chrome-headless-shell" ] && [ -f "$M/paged.polyfill.js" ] \
+    && [ -x "$M/venv/bin/python" ] && ls "$M"/fonts/built/*.ttf > /dev/null 2>&1 \
+    && ok "the manual's tools ($M)" \
+    || warn "the manual's tools aren't all in $M (only the manual's PDF needs them)" 10
 [ -d "$HOME/MacPlusProjects/environment-1.0" ] && ok "the environment archive" \
     || warn "no environment archive in ~/MacPlusProjects/environment-1.0" 1
 

@@ -9,3 +9,4 @@ build-xcode/
 __pycache__/
 build-host/
 build-smoke/
+build-manual/

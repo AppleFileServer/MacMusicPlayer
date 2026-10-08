@@ -179,9 +179,10 @@ The outline (Phase 3) will be set in this shape.
 
 ### 6.2 The grid
 
-- A **margin column** about a quarter of the text width, always on the
-  page's **outer** side (left on left-hand pages, right on right-hand
-  ones; MP 4-7, MW 12).
+- A **margin column** about a quarter of the text width, **always on the
+  left**, on left-hand and right-hand pages alike (MW 5, MJ 5, MJ 14,
+  MD 16). (MacPaint alone keeps its heading column on the page's outer
+  side, MP 4-7; corrected 2026-10-08, Phase 4.)
 - A **thin vertical rule** at its inner edge, running the height of the
   text area (MW 5, MJ 5).
 - **One wide text column** beside it.
@@ -193,7 +194,7 @@ The outline (Phase 3) will be set in this shape.
 
 | Element | Face | Notes |
 |---|---|---|
-| Body text | condensed Garamond, about 12/15 | ragged right (MW 5) |
+| Body text | condensed Garamond, about 12/15 | ragged right (MW 5). For MacMusic: EB Garamond at normal width, 13/16 (P3, chosen over a version narrowed to 86% as it reads better, 2026-10-08) |
 | Margin headings (sections) | bold Helvetica, about 14 pt, in the second colour | MW 5, MJ 5 |
 | Lesson headings | bold Helvetica, about 11 pt, beside a numbered red square | MW 13, MJ 14 |
 | Step lines | bold Helvetica, about 11 pt, after a black square ■ | MW 11 |
@@ -456,6 +457,13 @@ isn't part of the manual plan.
   - "Written by ..." and "Program by ..." credits as the owner wishes;
   - in place of a warranty, the legal statement's terms, or a pointer to
     the licence.
+- **The Macintosh Plus only** (MU1): nothing about modern computers,
+  converting songs, BlueSCSI or the project's tools; the companion book
+  *MacMusic Utilities* is named where a reader needs it (MU2), in
+  italics, with a chapter name where useful (MU5, provisional): see
+  "Converting Songs" in *MacMusic Utilities*. The hard disk is "an Apple
+  Hard Disk 20SC or other SCSI hard disk" (MU4); volumes up to 2 GB are
+  allowed.
 - **Requirements stated as they are** (MM2): a Mac Plus with
   System 6.0.7, WAV songs at 22,050 Hz, 8-bit and mono, in the period
   voice. *To use MacMusic, you need a Macintosh Plus with System 6.0.7.*
