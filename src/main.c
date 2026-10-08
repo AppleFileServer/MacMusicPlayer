@@ -21,6 +21,7 @@
 #include "audio.h"
 #include "message.h"
 #include "pstr.h"
+#include "version.h"
 #include "lcd_draw.h"
 #include "ui_nav.h"
 #include "input.h"
@@ -123,6 +124,7 @@ static short QuitItem(void)
 
 static void ShowAboutBox(void)
 {
+    ParamText(kMacMusicVersionP, P(""), P(""), P(""));
     Alert(kAboutAlert, Modal_DialogFilter);
 }
 

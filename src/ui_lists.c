@@ -7,9 +7,11 @@
 #include "fileops.h"
 #include "pstr.h"
 #include "message.h"
+#include "version.h"
 
-/* Stage 9b: the version About shows (also in the About box, DITL 128). */
-static const unsigned char kAppVersion[] = "\p0.1";
+/* Stage 9b: the version About shows (also in the About box, DITL 128);
+   1.0 Part A: set in CMakeLists.txt. */
+static const unsigned char kAppVersion[] = kMacMusicVersionP;
 
 /* Stage 9b: About's rows (S-6). */
 enum { kAboutSongs = 0, kAboutAvailable, kAboutVersion, kAboutRows };

@@ -108,9 +108,11 @@ resource 'MENU' (131) {
 };
 
 /* About box. System 6 ignores the position field, so the rect is
-   centred by hand for the 512x342 Macintosh Plus screen. */
+   centred by hand for the 512x342 Macintosh Plus screen. ^0 is the
+   version (version.h, from CMakeLists.txt); \0xA9 is the Mac Roman
+   copyright sign. */
 resource 'ALRT' (128) {
-    { 100, 106, 220, 406 },
+    { 98, 106, 222, 406 },
     128,
     {
         OK, visible, silent;
@@ -123,14 +125,16 @@ resource 'ALRT' (128) {
 
 resource 'DITL' (128) {
     {
-        { 88, 214, 108, 284 },
+        { 92, 214, 112, 284 },
         Button { enabled, "OK" };
 
         { 12, 16, 30, 284 },
         StaticText { disabled, "MacMusic" };
 
-        { 36, 16, 80, 284 },
-        StaticText { disabled, "A music player for the Macintosh Plus.\rVersion 0.1" };
+        { 36, 16, 86, 284 },
+        StaticText { disabled, "A music player for the Macintosh Plus.\r"
+                               "Version ^0\r"
+                               "\0xA9 2026 Jack McAteer" };
     }
 };
 

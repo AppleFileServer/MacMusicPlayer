@@ -1,6 +1,22 @@
 cmake_minimum_required(VERSION 3.15)
 
-project(MacMusic)
+project(MacMusic VERSION 1.0)
+
+# 1.0 Part A: the version is set only above. CMake writes it into
+# version.h (for the code: the About box and Settings > About) and
+# version.r (the vers resources and the signature resource), both in the
+# build folder. vers holds it in BCD: major, then minor and bug-fix.
+set(patch "${PROJECT_VERSION_PATCH}")
+if(patch STREQUAL "")
+    set(patch 0)
+endif()
+math(EXPR VERS_MAJOR
+     "(${PROJECT_VERSION_MAJOR} / 10) * 16 + ${PROJECT_VERSION_MAJOR} % 10"
+     OUTPUT_FORMAT HEXADECIMAL)
+math(EXPR VERS_MINOR "${PROJECT_VERSION_MINOR} * 16 + ${patch}"
+     OUTPUT_FORMAT HEXADECIMAL)
+configure_file(src/version.h.in ${CMAKE_BINARY_DIR}/version.h @ONLY)
+configure_file(resources/version.r.in ${CMAKE_BINARY_DIR}/version.r @ONLY)
 
 add_application(MacMusic
     CREATOR "iPdM"
@@ -35,7 +51,9 @@ add_application(MacMusic
     resources/MacMusic.r
     resources/legal.r
     resources/finder-icons.r
+    ${CMAKE_BINARY_DIR}/version.r
 )
+target_include_directories(MacMusic PRIVATE ${CMAKE_BINARY_DIR})
 
 # Fix 1 (K2): the Finder uses MacMusic's icons only if the application's
 # "has bundle" flag is set; Retro68's Rez can't set it, so it is set in

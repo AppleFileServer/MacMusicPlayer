@@ -8,10 +8,8 @@
 #include "Finder.r"
 #include "Icons.r"
 
-/* The signature resource: MacMusic's creator code. */
-data 'iPdM' (0, "Owner resource") {
-    $"0C" "MacMusic 0.1"
-};
+/* The signature resource, 'iPdM' 0, is in version.r (made from
+   version.r.in), as it carries the version. */
 
 resource 'BNDL' (128) {
     'iPdM', 0,
