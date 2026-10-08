@@ -400,7 +400,7 @@ resource 'DITL' (136) {
         Button { enabled, "Just Copy" };
 
         { 12, 16, 80, 326 },
-        StaticText { disabled, "The file will be moved into the iPod "
+        StaticText { disabled, "The file will be moved into the MacMusic "
                                "Library. Choose Just Copy to leave the "
                                "original where it is (copying takes "
                                "longer)." };
