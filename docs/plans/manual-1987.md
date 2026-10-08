@@ -3,7 +3,9 @@
 Status: approved (2026-10-08), decisions MM1-MM8 as recommended.
 Phase 1 done: `docs/manual/style-guide.md` (SG1-SG8) and the figure plan
 `docs/manual/figures.md` (F1-F6), from the owner's screenshots, which
-replace MM5's test-only build for all but one picture. Phase 3 next.
+replace MM5's test-only build for all but one picture. Phase 3 done:
+`docs/manual/outline.md` (O1-O6). Phase 4 next. The manual never calls
+MacMusic an "iPod" (style guide §4).
 
 ## Aim
 
@@ -65,7 +67,7 @@ From general knowledge, not yet checked against the references:
    messages it covers.
 4. **Production:** page size, fonts, source format and the PDF build
    (MM3, MM4); a two-page sample spread for approval before the writing.
-5. **Screen images** (MM5): every iPod screen, dialog, alert and menu the
+5. **Screen images** (MM5): every MacMusic screen, dialog, alert and menu the
    manual shows, as exact 1-bit images.
 6. **Writing,** chapter by chapter, each reviewed; every fact checked
    against the code and the user guide.

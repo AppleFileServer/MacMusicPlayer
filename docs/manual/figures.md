@@ -5,7 +5,7 @@ and which pictures are still needed. They are kept outside the
 repository:
 - **S01-S44:** the first set, in `~/MacPlus/Screenshots/`, numbered in
   time order (11:41:47 to 11:48:46, 2026-10-08);
-- **D01-D25:** a second set, on the desktop (12:14 to 12:56), named by
+- **D01-D28:** a second set, on the desktop (12:14 to 13:04), named by
   what they show (the table at the end of the next section).
 
 ## How the shots are used
@@ -17,9 +17,9 @@ figure is made from that exact screen, in one of five crops:
 
 | Crop | Size (Mac pixels) | Used for | Like the references' |
 |---|---|---|---|
-| **F, full screen** | 512 x 342 | where the context matters: the Finder, a menu over the window, a dialog box in front of the iPod | MacProject's labelled window (MJ 14), MacWrite's screen pictures (MW 11-16) |
-| **W, iPod window** | about 205 x 322 | an iPod screen together with its click wheel: learning the controls | the window crops (MW 16) |
-| **L, the LCD alone** | about 170 x 140 | one iPod screen, printed larger; a series of small ones side by side on task pages | the small crops at a task column's foot (MW 56, MD 32) |
+| **F, full screen** | 512 x 342 | where the context matters: the Finder, a menu over the window, a dialog box in front of the MacMusic window | MacProject's labelled window (MJ 14), MacWrite's screen pictures (MW 11-16) |
+| **W, the MacMusic window** | about 205 x 322 | MacMusic's screen together with its click wheel: learning the controls | the window crops (MW 16) |
+| **L, the LCD alone** | about 170 x 140 | one of MacMusic's screens, printed larger; a series of small ones side by side on task pages | the small crops at a task column's foot (MW 56, MD 32) |
 | **M, a menu** | the menu and its title | a pulled-down menu, for the reference chapter | MacWrite's menu pictures (MW 119) |
 | **D, a dialog or alert** | the box alone | dialog boxes and alerts in the reference chapter and Appendix A | MacProject's dialogs (MJ 118) |
 
@@ -42,11 +42,11 @@ new user sees where everything is.
 | Figure | Shot | Crop | Shows | Callouts |
 |---|---|---|---|---|
 | 1-1 | D01 | F | The MusicTest disk window in the Finder: MacMusic, the MacMusic Library folder and a WAV file | the MacMusic icon, the library folder, a sound file |
-| 1-1a | D02 | F | Starting MacMusic: its icon opening, the Apple logo on the iPod's LCD | the logo |
+| 1-1a | D02 | F | Starting MacMusic: its icon opening, the Apple logo on MacMusic's screen | the logo |
 | 1-1aa | D22 | D | The first time: "MacMusic keeps its songs in a folder called 'MacMusic Library'" (Not Now, Create New..., Find Existing...) | each button, in one line |
 | 1-1b | D03 | D | Creating a library: the Save dialog | the name, Save |
 | 1-1c | D04 | F | A library folder in the Finder: Playlists, MacMusic Library Info and the song files' note icons | each item, with a note not to rearrange them |
-| 1-2 | S04 | F | MacMusic opened: the window, the iPod's main menu, the Mac menu bar | in the MacProject style (MJ 14): menu bar, close box, title bar, the iPod screen, the click wheel, MENU, Previous, Next, Play/Pause, the centre button |
+| 1-2 | S04 | F | MacMusic opened: the window, MacMusic's main menu, the Mac menu bar | in the MacProject style (MJ 14): menu bar, close box, title bar, MacMusic's screen, the click wheel, MENU, Previous, Next, Play/Pause, the centre button |
 | 1-3 | S04, S05, S06 | L x 3 | Turning the wheel moves the highlight: Music, then Extras, then Settings | a red dashed arc on the wheel (§8.4) |
 | 1-4 | S15 | W | Music chosen: the Music menu | the scroll bar (more items below) |
 | 1-5 | S23 | W | A list of songs | |
@@ -104,6 +104,9 @@ dialog crops for the Mac side.
 | 2-24 | D18 | D | Saving the exported WAV file |
 | 2-25 | D23 | D | Importing audio that's already in the library: Import Anyway or Cancel |
 | 2-26 | D24 | D | A file that isn't a WAV file |
+| 2-27 | D27 | F | Playing on while you work: MacMusic in the background, TeachText in front (MultiFinder) |
+| 2-28 | D26 | F | A desk accessory (the Calculator) open while a song plays |
+| 2-29 | D28 | D | About the Finder under MultiFinder: MacMusic's 640K among the other programs |
 
 ### Chapter 3: Reference
 
@@ -118,6 +121,7 @@ dialog crops for the Mac side.
 | 3-7 | S10, D09, S12, S13, S14, S11 | L x 6 | Now Playing's states and modes, in a row: playing, volume, scrubber, rating, paused, fast-forward |
 | 3-8 | S44 | M | Quit |
 | 3-9 | D06 | D | Apple > About MacMusic... |
+| 3-9a | D26 | F | Desk accessories with MacMusic (the Calculator), in the Apple Menu section |
 | 3-10 | D11 | L | Settings > Legal |
 | 3-11 | D05 | F | Get Info on MacMusic: the version and memory size (with "What you need") |
 
@@ -163,6 +167,9 @@ dialog crops for the Mac side.
 | D23 | Duplicate Audio.png | the duplicate-audio alert |
 | D24 | This is not a WAV file.png | the not-a-WAV alert |
 | D25 | Composers.png | the Composers list |
+| D26 | DA.png | the Calculator open while a song plays |
+| D27 | Running another program.png | MacMusic playing behind TeachText |
+| D28 | About the finder (RAM).png | About the Finder: memory under MultiFinder |
 
 ### Not used
 
@@ -192,7 +199,13 @@ dialog crops for the Mac side.
    set, keeps "Good Luck Babe" throughout, and the text quotes whichever
    a figure shows. A retake of the tour's few shots would make the whole
    manual agree.
-4. **The pointer** shows in most shots, sometimes over the iPod (S11,
+4. **Personal details in D27.** The TeachText letter in D27 shows what
+   looks like a real postal address. For a manual kept privately it's
+   harmless; for anything shared, it should go. A retake with neutral
+   text (an everyday note, in the spirit of MacProject's kitchen-counter
+   note, MJ 3) is better than blanking the lines, which would look
+   edited (F7).
+5. **The pointer** shows in most shots, sometimes over MacMusic's screen (S11,
    S12, S13). Of these, the references show it in tutorials (MJ 14) but
    rarely in small crops. Small crops will be made without it where it
    sits over the LCD. As it's a pixel picture, the pointer can be
@@ -237,8 +250,11 @@ consistent). The owner will revise by hand later.
 - **F6, the changed title** (problem 3): keep both, each chapter
   consistent, or retake the tour's shots with "Good Luck, Babe". *Your
   call; keeping both is fine for a manual for your own use.*
+- **F7, the address in D27** (problem 4): retake with neutral text
+  before the manual is shared, or blank the address lines. **Decided
+  2026-10-08: left as it is** (the manual is for the owner's own use).
 - **F4, the pointer:** kept in full screens, painted out of small crops
-  where it covers the LCD (problem 4). *Recommended.*
+  where it covers the LCD (problem 5). *Recommended.*
 - **F5, where the figures live:** the exact screens and crops as PNG in
   `docs/manual/figures/`, made from your shots by a small tool kept in
   `tools/manual/`. Your original shots stay outside the repository.

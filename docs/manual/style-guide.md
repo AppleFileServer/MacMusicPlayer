@@ -103,6 +103,16 @@ in bold:
   Command key, the Option key.
 - **Commands with "..."** keep the ellipsis when named as headings (MJ 118,
   "Calendar..."), but not in running text.
+- **Never "iPod" (owner's rule, 2026-10-08).** The program is
+  **MacMusic** throughout: the **MacMusic window**, **MacMusic's screen**
+  (the small display in the window), the **click wheel**, the **main
+  menu**, **Now Playing**. Comparisons speak of "a pocket music player",
+  never a brand. Two things can't follow the rule, and the text doesn't
+  draw attention to them:
+  - the pictures, where MacMusic's own screen shows "iPod" as the main
+    menu's title, and some older shots show the library's earlier name;
+    the text simply calls it the main menu;
+  - the legal statement, quoted as it is.
 - **MacMusic's own terms,** defined in the glossary, with bold at first
   use: **MacMusic Library**, **song**, **playlist**, **click wheel**,
   **Now Playing**, **audiobook**, **library marker** ("MacMusic Library
@@ -438,7 +448,7 @@ isn't part of the manual plan.
   - "Macintosh" never as a brand box on the cover (it would read as
     Apple's).
 - **MacMusic's own mark:** where the logo stood (cover, title page, back
-  cover), MacMusic's own icon from Fix 1, the 32 × 32 iPod.
+  cover), MacMusic's own 32 × 32 icon from Fix 1.
 - **The copyright page** carries:
   - © 2026 Jack McAteer;
   - the trademark acknowledgements (Apple, Macintosh, Mac and iPod belong
