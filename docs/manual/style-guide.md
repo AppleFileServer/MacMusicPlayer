@@ -443,6 +443,11 @@ isn't part of the manual plan.
 
 ## 14. Adapting it for MacMusic (MM1, MM2)
 
+- **The own-use edition (MM1a, 2026-10-08)** makes two exceptions,
+  kept outside the repository: the cover's hand, mouse and cable, from
+  MacDraw's cover, and the rainbow logo (cover, title page, back
+  cover). The points below hold for everything else, and for the plain
+  edition.
 - **No Apple identity:**
   - no Apple logo anywhere;
   - no "Apple Computer, Inc." as publisher, and no Apple part numbers;

@@ -126,6 +126,24 @@ From general knowledge, not yet checked against the references:
 - **MM8:** the owner approves the style guide, the sample spread, the
   outline, and each chapter.
 
+## The own-use edition (2026-10-08)
+
+- **MM1a, small Apple assets, for the owner's own copy only:** the
+  manual stays our own work, but a few small assets from Apple's
+  manuals give it the period polish: the cover's hand, mouse and cable
+  (from MacDraw's cover, the sharpest scan of the four), and the rainbow
+  logo. They are kept outside the repository, in
+  `~/MacPlusProjects/manual-assets-private/` (with a README), and the
+  build uses them only when that folder is there, so a plain edition
+  (MacMusic's own icon, a drawn cover) can always be made. MM1's rule
+  otherwise stands: no Apple name as publisher, no Apple copyright
+  line; the copyright page is MacMusic's.
+- **The cover (front matter, last to be made, O6):** MacDraw's
+  composition, which fits the Mac Plus screen almost exactly: the
+  rainbow logo top left, "MacMusic" in Garamond, MacMusic's Now Playing
+  screen (S10) tinted pale blue where MacDraw's screen is, and the
+  cable curving down to the hand on the mouse.
+
 ## The Macintosh Plus only, and *MacMusic Utilities* (2026-10-08)
 
 - **MU1, one world:** the manual covers only MacMusic and what runs on
