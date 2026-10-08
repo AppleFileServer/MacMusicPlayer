@@ -1,0 +1,35 @@
+Retro68 LaunchAPPL: start Mini vMac's executable directly (MacMusic, 2026-10-01)
+
+Apply to Retro68 commit f3b44a4 (2026-09-26), then rebuild Retro68:
+    cd ~/Retro68 && git apply ~/MacPlusProjects/MacMusicPlayer/tools/patches/retro68-launchappl.patch
+
+What it does: when minivmac-path names an app bundle, LaunchAPPL ran
+"open -nWa <bundle>"; with this change it runs the bundle's executable
+(Contents/MacOS/minivmac) itself, as its child process.
+
+Why: the change was made on 2026-10-01 while setting up the toolchain,
+before the project's recorded sessions, and its reason wasn't written
+down. What is known: with it, LaunchAPPL waits for Mini vMac and stops it
+at --timeout (shown by the 1.0 smoke-test hang check), which
+tests/run-smoke.sh and tools/make-release.sh rely on. LaunchAPPL hasn't
+been tried without it since. An earlier LaunchAPPL build from the same
+day, probably from before the change, is kept as
+~/Retro68-build/toolchain/bin/LaunchAPPL.old.
+
+diff --git a/LaunchAPPL/Client/MiniVMac.cc b/LaunchAPPL/Client/MiniVMac.cc
+index 5750110c2d..6ed4001baf 100644
+--- a/LaunchAPPL/Client/MiniVMac.cc
++++ b/LaunchAPPL/Client/MiniVMac.cc
+@@ -556,7 +556,11 @@ bool MiniVMacLauncher::Go(int timeout)
+     fs::current_path(tempDir);
+ #ifdef __APPLE__
+     if(vmacIsAppBundle)
+-        return ChildProcess("open", {"-nWa", vmacPath.string()}, timeout) == 0;
++    {
++        fs::path executable =
++            vmacPath / "Contents" / "MacOS" / "minivmac";
++        return ChildProcess(executable.string(), {}, timeout) == 0;
++    }
+ #endif
+     return ChildProcess(vmacPath.string(), {}, timeout) == 0;
+ }
