@@ -1,6 +1,17 @@
 # Plan: Part F, preserving the build and test environment
 
-Status: approved (2026-10-08), decisions X1-X8 as recommended.
+Status: complete (2026-10-08). Decisions X1-X11 as recommended.
+
+| Step | Commit |
+|---|---|
+| The plan, `RESTART.md`, F2 (the LaunchAPPL patch) | `619e1c1` |
+| F1 `docs/environment.md`, F3 `tools/check-environment.sh`; X9 Homebrew pins | `d2c87ab` |
+| F4 the archive and `restore.sh`, F5 the proof, F6 the pointers | `b8ffe8c` |
+
+F5's result: restored into an empty folder, the archive rebuilt the
+released 1.0 app byte for byte and passed the host and smoke tests. The
+archive was then remade from `b8ffe8c`, so its bundle holds all of
+Part F.
 
 ## Aim
 
