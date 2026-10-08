@@ -1,7 +1,9 @@
 # Plan: the MacMusic manual, in the style of Apple's early Macintosh manuals
 
-Status: approved (2026-10-08), decisions MM1-MM8 as recommended. Phase 1
-not started.
+Status: approved (2026-10-08), decisions MM1-MM8 as recommended.
+Phase 1 done: `docs/manual/style-guide.md` (SG1-SG8) and the figure plan
+`docs/manual/figures.md` (F1-F6), from the owner's screenshots, which
+replace MM5's test-only build for all but one picture. Phase 3 next.
 
 ## Aim
 
