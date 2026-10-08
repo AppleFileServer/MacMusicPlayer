@@ -12,8 +12,9 @@
 #                    ones (only if the toolchain no longer starts after a
 #                    Homebrew upgrade; the replaced files are kept as
 #                    *.before-restore)
-#   RETRO68, MINIVMAC, LAUNCHAPPL_CFG   where to restore to (defaults
-#                    ~/Retro68-build, ~/minivmac, ~/.LaunchAPPL.cfg)
+#   RETRO68, MINIVMAC, LAUNCHAPPL_CFG, MANUAL_TOOLS   where to restore
+#                    to (defaults ~/Retro68-build, ~/minivmac,
+#                    ~/.LaunchAPPL.cfg, ~/MacPlusProjects/manual-tools)
 
 set -eu
 HERE=$(cd "$(dirname "$0")" && pwd)
@@ -29,6 +30,7 @@ done
 RETRO68=${RETRO68:-$HOME/Retro68-build}
 MINIVMAC=${MINIVMAC:-$HOME/minivmac}
 CFG=${LAUNCHAPPL_CFG:-$HOME/.LaunchAPPL.cfg}
+MANUAL_TOOLS=${MANUAL_TOOLS:-$HOME/MacPlusProjects/manual-tools}
 ORIGINAL_RETRO68=/Users/jack/Retro68-build      # where it was archived from
 ORIGINAL_PROJECT=/Users/jack/MacPlusProjects/MacMusicPlayer
 TMP=$(mktemp -d)
@@ -107,6 +109,21 @@ else
         -e "s|^system-image = .*|system-image = $MINIVMAC/System607-hfs.img|" \
         "$HERE/LaunchAPPL.cfg" > "$CFG"
     done_ "LaunchAPPL's settings, $CFG"
+fi
+
+if [ -e "$MANUAL_TOOLS" ]; then kept "the manual's tools ($MANUAL_TOOLS)"
+elif [ -e "$HERE/manual-tools.tar.gz" ]; then
+    tar -xzf "$HERE/manual-tools.tar.gz" -C "$TMP"
+    mkdir -p "$(dirname "$MANUAL_TOOLS")"
+    mv "$TMP/manual-tools" "$MANUAL_TOOLS"
+    done_ "the manual's tools, into $MANUAL_TOOLS"
+    # E1: the venv points at the Python it was made with; if that has
+    # changed, say how to make it again.
+    if ! "$MANUAL_TOOLS/venv/bin/python" -c 'import fontTools, PIL, websocket' 2> /dev/null; then
+        echo "  ! the manual's Python venv doesn't run here (Python has changed). Remake it:"
+        echo "      rm -rf $MANUAL_TOOLS/venv && python3 -m venv $MANUAL_TOOLS/venv \\"
+        echo "        && $MANUAL_TOOLS/venv/bin/pip install fonttools pillow websocket-client"
+    fi
 fi
 
 echo

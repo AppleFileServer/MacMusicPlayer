@@ -20,6 +20,7 @@ your own use; don't share or publish it.
 | `minivmac.tar.gz` | Mini vMac (app, configuration, source), the Plus ROM, the System 6.0.7 disks, the autoquit disk, the disk links | `~/minivmac` |
 | `testdisks.tar.gz` | the persistent test disks | the repository's `testdisks/` |
 | `LaunchAPPL.cfg` | LaunchAPPL's settings | `~/.LaunchAPPL.cfg` |
+| `manual-tools.tar.gz` | the *MacMusic User's Guide*'s tools: headless Chrome, Paged.js, the EB Garamond fonts and their built copies, the Python venv | `~/MacPlusProjects/manual-tools` |
 | `bluescsi-template.hda` | a working BlueSCSI image's first 96 blocks (partition map and driver), for Scratch images | stays here; `tools/make-release.sh` finds it |
 | `restore.sh` | puts it all back | |
 | `MANIFEST.txt`, `SHA256SUMS` | what was saved, and checksums | |
@@ -42,6 +43,20 @@ Elsewhere than the defaults: set `RETRO68`, `MINIVMAC` or
 `LAUNCHAPPL_CFG`, and `--project DIR` for the repository; `restore.sh`
 adjusts the paths the toolchain file, the disk links and LaunchAPPL's
 settings record.
+
+## The manual
+
+After restoring, `tools/manual/make-book.py` (run with
+`~/MacPlusProjects/manual-tools/venv/bin/python`) builds the *MacMusic
+User's Guide* from the repository: its figures are committed, so your
+original screenshots are only needed for retakes. If `restore.sh` says
+the venv doesn't run, remake it with the command it prints.
+
+Not in this archive, on purpose: your screenshots
+(`~/MacPlus/Screenshots/`) and the own-use edition's private assets
+(`~/MacPlusProjects/manual-assets-private/`: the MacDraw cover scan and
+the rainbow logo). Back those up yourself. Without the private assets,
+`make-book.py` builds the plain edition.
 
 ## If the toolchain doesn't start
 

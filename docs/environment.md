@@ -214,6 +214,11 @@ Then, in the repository (each with `$T/venv/bin/python`):
 
 Helvetica comes with macOS.
 
+The environment archive (`tools/make-environment-archive.sh`) holds this folder (`manual-tools.tar.gz`),
+and `restore.sh` puts it back, checking that the venv still runs (if
+Python has changed, it prints how to remake it). The screenshots and the
+private assets below are not archived: back them up yourself.
+
 The own-use edition (decision MM1a) also needs
 `~/MacPlusProjects/manual-assets-private/` (or `MANUAL_ASSETS`), outside
 the repository and never shared: the MacDraw cover scan and the rainbow
