@@ -9,6 +9,7 @@ enum
     kMenuMusic,
     kMenuSettings,      /* Stage 9a */
     kMenuReset,         /* Stage 9a: Reset All Settings' Cancel / Reset */
+    kMenuExtras,        /* Extras: the Clock only (D3 decided, E1-E5) */
     kMenuCount
 };
 

@@ -1,4 +1,7 @@
 #include <Events.h>
+#include <OSUtils.h>
+#include <TextUtils.h>      /* IUTimeString, IUDateString */
+#include <Memory.h>
 
 #include "ui_nav.h"
 #include "ui_lists.h"
@@ -1032,6 +1035,8 @@ Boolean UI_HandleEvent(UIEvent event)
     }
 }
 
+static Boolean ClockMinuteChanged(void);
+
 Boolean UI_Tick(void)
 {
     short result = Playback_Tick();
@@ -1050,6 +1055,8 @@ Boolean UI_Tick(void)
             BeginHoldTarget();          /* 10b: on from the new song */
     }
     if (UI_Idle() && onNowPlaying)
+        return true;
+    if (ClockMinuteChanged())
         return true;
     if (onNowPlaying && ModeTimedOut())
         return true;
@@ -1087,6 +1094,38 @@ static void RenderNowPlaying(void)
                        gMode, ModeValue());
 }
 
+/* ---- Extras > Clock (E1-E5) ------------------------------------------ */
+
+/* The minute last drawn, so the Clock is redrawn when it changes. */
+static unsigned long gClockMinute;
+static Str255 gClockTime, gClockDate;
+
+/* E1: in the Mac's own format (12- or 24-hour, as the control panel
+   sets); E2: the abbreviated date, or the short one if that doesn't fit;
+   E3: hours and minutes only. */
+static void RenderClock(const Screen *s)
+{
+    unsigned long now;
+
+    GetDateTime(&now);
+    gClockMinute = now / 60;
+    IUTimeString((long)now, false, gClockTime);
+    IUDateString((long)now, abbrevDate, gClockDate);
+    if (StringWidth(gClockDate) > kClockMaxWidth)
+        IUDateString((long)now, shortDate, gClockDate);
+    LCDDraw_Clock(s->title, gClockTime, gClockDate);
+}
+
+static Boolean ClockMinuteChanged(void)
+{
+    unsigned long now;
+
+    if (CurrentScreen()->kind != kScreenClock)
+        return false;
+    GetDateTime(&now);
+    return now / 60 != gClockMinute;
+}
+
 void UI_Render(void)
 {
     Screen *s = CurrentScreen();
@@ -1095,6 +1134,13 @@ void UI_Render(void)
     {
         LCD_BeginDraw();
         RenderNowPlaying();
+        LCD_EndDraw();
+        return;
+    }
+    if (s->kind == kScreenClock)
+    {
+        LCD_BeginDraw();
+        RenderClock(s);
         LCD_EndDraw();
         return;
     }
@@ -1149,5 +1195,12 @@ void UI_Render(void)
 const Screen *UI_TestScreen(void)
 {
     return CurrentScreen();
+}
+
+/* The Clock's time and date as last drawn. */
+void UI_TestClockText(StringPtr time, StringPtr date)
+{
+    BlockMove(gClockTime, time, gClockTime[0] + 1);
+    BlockMove(gClockDate, date, gClockDate[0] + 1);
 }
 #endif

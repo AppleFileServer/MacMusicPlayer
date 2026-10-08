@@ -19,6 +19,7 @@ typedef enum
     kScreenAudiobooks,
     kScreenAbout,           /* Stage 9b: Settings > About, read-only rows */
     kScreenLegal,           /* Stage 9b: Settings > Legal, scrolling text */
+    kScreenClock,           /* Extras > Clock: the date and time (E1-E5) */
     kScreenNowPlaying       /* not a list: drawn by LCDDraw_NowPlaying */
 } ScreenKind;
 

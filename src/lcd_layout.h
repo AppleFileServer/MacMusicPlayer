@@ -88,6 +88,12 @@
 #define kStatusIconHeight       9
 #define kStatusIconGap          2
 
+/* Extras > Clock (E4, PROVISIONAL: no confirmed picture of the 4G's
+   Clock): the time and the date, each centred, in the LCD's font. */
+#define kClockTimeBaseline      66
+#define kClockDateBaseline      92
+#define kClockMaxWidth          (kLCDWidth - 2 * kTextLeft)
+
 /* Small font (counter, times): 7 px tall glyphs. */
 #define kSmallFontHeight        7
 

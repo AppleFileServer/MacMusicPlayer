@@ -7,7 +7,7 @@
    song is playing or paused (PROVISIONAL N1; see UIList_Build). */
 static const MenuItemDef kMainItems[] = {
     { "\pMusic",            kActMenu, kMenuMusic },
-    { "\pExtras",           kActStub, 0 },  /* PROVISIONAL (D3): contents unknown */
+    { "\pExtras",           kActMenu, kMenuExtras },
     { "\pSettings",         kActMenu, kMenuSettings },  /* Stage 9a */
     { "\pShuffle Songs",    kActShuffle, 0 },  /* manual p. 32 */
     { "\pBacklight",        kActBacklight, 0 },  /* S-9: a novelty */
@@ -38,6 +38,12 @@ static const MenuItemDef kSettingsItems[] = {
     { "\pReset All Settings", kActMenu, kMenuReset }
 };
 
+/* Extras (D3, decided 2026-10-08): only the Clock. The 4G's Extras also
+   held Contacts, Calendar, Notes and Games; MacMusic leaves them out. */
+static const MenuItemDef kExtrasItems[] = {
+    { "\pClock",              kActScreen, kScreenClock }
+};
+
 /* Reset All Settings: Cancel first, so a stray Select doesn't reset
    (guide p. 52: "Settings > Reset All Settings > Reset"). */
 static const MenuItemDef kResetItems[] = {
@@ -51,7 +57,9 @@ static const MenuDef kMenus[kMenuCount] = {
     { "\pSettings", sizeof(kSettingsItems) / sizeof(kSettingsItems[0]),
       kSettingsItems },
     { "\pReset All", sizeof(kResetItems) / sizeof(kResetItems[0]),
-      kResetItems }
+      kResetItems },
+    { "\pExtras", sizeof(kExtrasItems) / sizeof(kExtrasItems[0]),
+      kExtrasItems }
 };
 
 const MenuDef *UIMenus_Get(short menuID)

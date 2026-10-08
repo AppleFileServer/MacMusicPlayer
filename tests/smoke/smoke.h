@@ -15,6 +15,7 @@ void Smoke_Run(void);
 
 /* Test-only hooks, compiled into their modules only in the smoke build. */
 const Screen *UI_TestScreen(void);                          /* ui_nav.c */
+void UI_TestClockText(StringPtr time, StringPtr date);      /* ui_nav.c */
 void LibSetup_TestUseFolder(const LibraryFolder *folder);   /* libsetup.c */
 const BitMap *LCD_TestBits(void);                           /* ipod_lcd.c */
 

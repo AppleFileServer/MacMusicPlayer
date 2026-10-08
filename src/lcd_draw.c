@@ -105,6 +105,17 @@ void LCDDraw_Header(ConstStringPtr title)
     LineTo(kLCDWidth - 1, kHeaderRuleY);
 }
 
+void LCDDraw_Clock(ConstStringPtr title, ConstStringPtr time,
+                   ConstStringPtr date)
+{
+    LCDDraw_Clear();
+    LCDDraw_Header(title);
+    MoveTo((kLCDWidth - StringWidth(time)) / 2, kClockTimeBaseline);
+    DrawString(time);
+    MoveTo((kLCDWidth - StringWidth(date)) / 2, kClockDateBaseline);
+    DrawString(date);
+}
+
 short LCDDraw_RowTextWidth(Boolean hasScrollBar)
 {
     return (hasScrollBar ? kSelRightWithBar : kSelRight) - kTextRightGap

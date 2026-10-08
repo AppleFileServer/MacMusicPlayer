@@ -130,6 +130,10 @@ unless a check says otherwise.
 - [ ] 6.6 Backlight: the screen inverts and back.
 - [ ] 6.7 Apple > About MacMusic...: "Version 1.0" and "© 2026 Jack
       McAteer", nothing cut off.
+- [ ] 6.8 Extras > Clock: the time and date match the menu-bar clock
+      (or the Alarm Clock desk accessory), centred and readable; the time
+      changes on the minute while the screen is left open; 24-hour time
+      when the control panel is set to it.
 
 ## 7. Living with other programs (MultiFinder)
 

@@ -5,6 +5,7 @@
    "FAILURES: n" and "DONE"; a log without them was cut short. */
 
 #include <Files.h>
+#include <OSUtils.h>
 #include <Quickdraw.h>
 #include <TextUtils.h>
 #include <string.h>
@@ -464,6 +465,47 @@ void Smoke_Run(void)
     Check(LCD_IsInverted(), "Backlight inverts the screen");
     Send(kEvtSelect);
     Check(!LCD_IsInverted(), "and back");
+
+    Log("Extras > Clock");
+    Home();
+    Check(Choose("Extras") && Same(Here()->title, "Extras") && Here()->count == 1,
+          "Extras holds one item");
+    Check(Choose("Clock") && Here()->kind == kScreenClock && Same(Here()->title, "Clock"),
+          "the Clock opens");
+    {
+        Str255 time, date, expectTime, expectDate;
+        unsigned long now;
+        short tries;
+
+        for (tries = 0; tries < 2; tries++)     /* again if a minute turned */
+        {
+            UI_Render();
+            GetDateTime(&now);
+            IUTimeString((long)now, false, expectTime);
+            IUDateString((long)now, abbrevDate, expectDate);
+            UI_TestClockText(time, date);
+            if (EqualString(time, expectTime, true, true))
+                break;
+        }
+        Check(EqualString(time, expectTime, true, true), "the system's time shown");
+        Check(EqualString(date, expectDate, true, true), "and its date");
+        strcpy(line, "  (");
+        strncat(line, (const char *)time + 1, time[0]);
+        strcat(line, ", ");
+        strncat(line, (const char *)date + 1, date[0]);
+        strcat(line, ")");
+        Log(line);
+    }
+    CheckNum(BlackPixels(0, kClockTimeBaseline - 12, 160, kClockTimeBaseline + 3) > 30,
+             "the time is drawn", BlackPixels(0, kClockTimeBaseline - 12, 160, kClockTimeBaseline + 3));
+    CheckNum(BlackPixels(0, kClockDateBaseline - 12, 160, kClockDateBaseline + 3) > 30,
+             "the date is drawn", BlackPixels(0, kClockDateBaseline - 12, 160, kClockDateBaseline + 3));
+    Send(kEvtSelect);
+    Send(kEvtWheelDown);
+    Check(Here()->kind == kScreenClock, "Select and the wheel do nothing there");
+    Check(Playback_State() == kPlayPlaying, "the music plays on");
+    Send(kEvtMenu);
+    Check(Same(Here()->title, "Extras"), "Menu goes back to Extras");
 
     Log("stopping");
     Playback_Stop();

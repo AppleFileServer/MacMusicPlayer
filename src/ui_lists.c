@@ -151,6 +151,7 @@ Boolean UIList_ItemHasArrow(const Screen *s, short index)
         case kScreenAudiobooks:
         case kScreenAbout:
         case kScreenLegal:
+        case kScreenClock:
             return false;       /* songs are leaves (Observed) */
 
         default:

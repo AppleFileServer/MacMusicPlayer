@@ -63,6 +63,10 @@ void LCDDraw_NowPlaying(ConstStringPtr title, ConstStringPtr artist,
                         Boolean shuffled, short repeat,
                         NowPlayingMode mode, short value);
 
+/* Extras > Clock: the header, then the time and the date centred. */
+void LCDDraw_Clock(ConstStringPtr title, ConstStringPtr time,
+                   ConstStringPtr date);
+
 /* Scroll bar for a list of total items whose first visible item is top. */
 void LCDDraw_ScrollBar(short total, short top);
 
