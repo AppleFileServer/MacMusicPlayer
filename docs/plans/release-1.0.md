@@ -1,6 +1,6 @@
 # Plan: MacMusic 1.0, and changes after it
 
-Status: approved (2026-10-08); decisions at the end (V5 still open).
+Status: approved (2026-10-08); decisions at the end.
 No code has been changed.
 
 ## Aim
@@ -213,8 +213,8 @@ So that any later change can be checked against 1.0 in minutes:
    - a `SHA256SUMS` file.
 
    Optionally, a Scratch image (V8) built with `tools/library-image`.
-4. **A backup off this Mac (V5):** an off-site copy of the repository and
-   the release folder, by a remote repository or a copy elsewhere.
+4. **Backup (V5):** covered by this Mac's periodic backups to an external
+   drive; no separate step.
 
 ### Part E: after 1.0, how changes are made
 
@@ -259,12 +259,12 @@ in Part C and applies from then on.
   manual checklist.
 - **V4:** `main` plus a tag per release; branches only for larger
   features.
-- **V5, an off-site copy: open.** No option was recommended; to be decided
-  before Part D: a private GitHub repository, another copy (for example
-  an external disk), or none for now.
+- **V5:** no separate off-site step: this Mac is backed up to an external
+  drive periodically, which covers the repository and the release folder.
 - **V6:** tag 1.0 now; add the licence when it is written.
 - **V7:** the manual checklist must pass on the real Plus before tagging.
 - **V8:** the release files are the app, the 800K floppy image, the source
-  and checksums; a Scratch image only when asked for.
+  and checksums, and a BlueSCSI Scratch image (made with
+  `tools/library-image`).
 - **V9:** the user guide in both forms: Markdown, and a TeachText Read Me.
 - **H1-H6:** Part A0 does H1-H5, and H6 only if H1 shows memory is short.
