@@ -11,8 +11,8 @@ Status: approved (2026-10-08); decisions at the end.
 | Part A, the version | "1.0" in one place, `vers`, About copyright | `91189cd` |
 | Part B, the tests | B1 host tests, B2 smoke test, B3 manual checklist | `8107863`, `e032a5c`, `e50e8e0` |
 | Additions approved on the way | Fix 2 follow-up (Import alert text); Extras > Clock (E1-E5) | `81b7907`, `1c888f9` |
-| Part C, documentation | README, user guide and Read Me tool, CHANGELOG, decisions index, CLAUDE.md, issues logs | (this commit) |
-| Part D, the release | to do | |
+| Part C, documentation | README, user guide and Read Me tool, CHANGELOG, decisions index, CLAUDE.md, issues logs | `55259fe` |
+| Part D, the release | `tools/make-release.sh`; candidate `fcaaaff` passed the checklist (`docs/testing/runs/1.0.md`); `v1.0` tags the commit recording that run, which changes documents only (the app is the candidate's) | `fcaaaff`; the run record and tag |
 
 ## Aim
 
