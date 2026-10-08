@@ -89,3 +89,9 @@ c2-opener-l     ~/MacPlus/Screenshots/Screenshot%202026-10-08%20at%2011.43.49.pn
 c2-opener-r     ~/MacPlus/Screenshots/Screenshot%202026-10-08%20at%2011.43.49.png 256,20,256,322 ink=c4c4c4
 # The Calculator beside MacMusic, cropped from D26
 c2-da-crop      ~/MacPlus/Screenshots/DA.png 36,30,214,250 nopointer
+
+# Chapter 3: MacMusic Reference (figures.md 3-1 to 3-11)
+c3-about        ~/MacPlus/Screenshots/About%20MacMusic.png box   nopointer # D06
+# Chapter 3's opener (SG10): the Settings screen, the whole screen in grey (S28)
+c3-opener-l     ~/MacPlus/Screenshots/Screenshot%202026-10-08%20at%2011.45.56.png 0,20,256,322 ink=c4c4c4
+c3-opener-r     ~/MacPlus/Screenshots/Screenshot%202026-10-08%20at%2011.45.56.png 256,20,256,322 ink=c4c4c4

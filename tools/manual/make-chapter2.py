@@ -591,8 +591,9 @@ TOPICS = [
                "application stops the music."), "c2-background", double=True),
            T("To Use Desk Accessories", steps(
                "> Choose a desk accessory from the Apple menu.",
-               "The music plays on while you use it. The Edit menu&rsquo;s "
-               "commands work in desk accessories as usual."), "c2-da-crop"),
+               "The music plays on while you use it.",
+               "~ Click in the MacMusic window to bring it to the front "
+               "again."), "c2-da-crop"),
            T("To See How Much Memory MacMusic Uses", steps(
                "> Under MultiFinder, click the desktop to make the Finder "
                "active, and choose About the Finder from the Apple menu.",

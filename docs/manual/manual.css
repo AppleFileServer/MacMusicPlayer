@@ -319,3 +319,31 @@ figure.beside { clear: right; }
 .important { border-top: 0.8pt solid #111; border-bottom: 0.8pt solid #111;
              padding: 6pt 0 2pt 0; margin: 10pt 0; font-weight: bold; break-inside: avoid; }
 .important-head { font: bold 11pt var(--sans); margin-top: 0; }
+
+/* ---- Reference pages (§10, Chapter 3) ------------------------------------ */
+
+/* A subheading: a small red square and bold Helvetica (MW 111). */
+h3.ref-head { font: bold 11pt/13pt var(--sans); margin: 14pt 0 5pt 0; clear: both; }
+h3.ref-head::before {
+    content: ""; display: inline-block; width: 8pt; height: 8pt;
+    background: var(--red); margin-right: 7pt; vertical-align: 0;
+}
+/* A command's name in the margin column, beside what it does (MW 119). */
+h4.cmd { font: bold 10pt/12pt var(--sans); margin: 1pt 0 0 0; }
+.flow .margin + p { margin-top: 0; }
+/* Tables: Helvetica heads, Garamond rows, thin rules (MW 172). */
+table.ref { border-collapse: collapse; margin: 6pt 0 10pt 0; width: 100%; font-size: 11pt; line-height: 13.5pt; break-inside: avoid; }
+table.ref th { font: bold 9.5pt var(--sans); text-align: left; padding: 0 8pt 3pt 0; border-bottom: 0.8pt solid #111; }
+table.ref td { padding: 3pt 8pt 3pt 0; border-bottom: 0.4pt solid var(--rule); vertical-align: top; }
+table.ref td:first-child { white-space: nowrap; }
+table.ref.narrow td:first-child { font-family: var(--sans); font-size: 9.5pt; }
+table.ref.spec { break-inside: auto; }
+table.ref.spec thead { display: none; }
+table.ref.spec td:first-child { white-space: normal; width: 42%; font-family: var(--sans); font-size: 9.5pt; }
+/* Small screens in a grid, captioned. */
+figure.states { display: grid; grid-template-columns: repeat(3, 100pt); gap: 8pt 4pt; margin: 6pt 0 10pt 0; break-inside: avoid; }
+figure.states span { display: block; font: 8.5pt var(--sans); margin-top: 2pt; }
+.flow .entry { clear: left; break-inside: avoid; }
+h3.ref-head { break-after: avoid; }
+table.ref.controls td:first-child { white-space: normal; width: 36%; }
+table.ref.controls td:nth-child(2) { width: 34%; }

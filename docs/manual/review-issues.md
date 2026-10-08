@@ -38,8 +38,27 @@ music; these are the ones that still jar:
 | c2-background (D27) | Other Applications | the TeachText letter with a postal address (F7: left as is) | neutral text, if the book is ever shared |
 | c2-da-crop (D26) | Other Applications | small at a column's width | a shot with the Calculator nearer the MacMusic window would crop tighter |
 
+### Chapter 3
+
+| Figure | Where | Shows | Better |
+|---|---|---|---|
+| c2-export-menu (D17), c1-add-to (S40) | File Menu, Playlists Menu | the library as "MacMusic Library (MusicTest)" (good); the Playlists menu with "Pop" highlighted | fine as they are; a retake with every item enabled would show the menu at its fullest |
+| the six Now Playing states | MacMusic's Screens | "2 of 3" in five, "1 of 3" in the volume shot | one place in the list throughout |
+
 ## The program
 
+- **The Edit menu and desk accessories:** Undo, Cut, Copy, Paste and
+  Clear are always dimmed (the menu resource starts them disabled and
+  nothing enables them when a desk accessory is in front), so a desk
+  accessory can't use them, from the menu or with Command-key
+  equivalents. Seen in S38; found in `src/main.c`. The manual says only
+  that they're dimmed. A candidate for 1.0.1: enable them while a desk
+  accessory's window is in front. (Worth logging in
+  `docs/issues-found.md`.)
+- **Song file names:** MacMusic names song files "IPOD" and a number
+  (IPOD0001). The manual describes them only as "named by number", to
+  keep "iPod" out of the text; renaming would need a library
+  conversion's care, so it's for a later version, if at all.
 - **The arrow keys on Now Playing:** the Up Arrow makes the music
   softer and the Down Arrow louder (they follow the click wheel's
   direction for lists). The manual describes it as it is; it may feel
