@@ -2,9 +2,13 @@
 
 ## Project
 
-MacMusic (formerly MacMusicPlayer) is a classic Macintosh 68K application targeting the Macintosh Plus.
+MacMusic (formerly MacMusicPlayer; the folder keeps the old name) is a
+classic Macintosh 68K application for the Macintosh Plus under System
+6.0.7: a faithful 4th-generation monochrome iPod, with its own music
+library and sound. Version 1.0 was released on 2026-10-08.
 
-It is built with the Retro68 toolchain and tested in Mini vMac.
+It is built with the Retro68 toolchain and tested in Mini vMac (at 1x)
+and on a real Mac Plus. See `README.md` for the layout and tools.
 
 ## Important constraints
 
@@ -24,29 +28,69 @@ From the project directory:
       -DCMAKE_TOOLCHAIN_FILE="$HOME/Retro68-build/build-target/cmake/retro68.toolchain.cmake"
     cmake --build build
 
-The resulting application is:
-
-    build/MacMusic.APPL
+The results are `build/MacMusic.APPL` (for LaunchAPPL) and
+`build/MacMusic.bin` (MacBinary, with the "has bundle" flag set). The
+version is set only by `project(MacMusic VERSION ...)` in
+`CMakeLists.txt`. Builds are reproducible apart from the MacBinary dates
+and header CRC.
 
 ## Run
 
-Launch with:
+- A fresh emulator each time:
 
-    ~/Retro68-build/toolchain/bin/LaunchAPPL \
-      ~/MacPlusProjects/MacMusicPlayer/build/MacMusic.APPL
+      ~/Retro68-build/toolchain/bin/LaunchAPPL build/MacMusic.APPL
 
-## Current state
+- The persistent test disk, which keeps the library and prefs:
+  `tools/run-persistent.sh`. This is what the user checks with.
 
-The application successfully:
+## Test
 
-- Builds with Retro68.
-- Produces a valid APPL.
-- Launches in Mini vMac.
-- Creates a Macintosh window.
-- Runs a classic Macintosh event loop.
+- `tests/run-host.sh`: the portable modules on this Mac (seconds).
+- `tests/run-smoke.sh`: the scripted iPod tour in Mini vMac (about 20 s;
+  Mini vMac must be closed).
+- `docs/testing/manual-checklist.md`: before each release.
 
-## Development approach
+Run both scripts after any change; they must pass before a commit. Add
+host or smoke tests for new behaviour where they can check it.
 
-Make small changes and keep the application runnable after each change.
+## Working rules
 
-When changing the UI or event handling, preserve the existing working event loop unless there is a specific reason to replace it.
+- **Plan before coding.** Lay out a plan with numbered decisions; wait
+  for the user's approval. Mark undocumented iPod behaviour PROVISIONAL
+  or DECISION in the code, and add new decision codes to
+  `docs/decisions.md`.
+- **Small, testable steps.** Keep the app runnable after each one.
+  Preserve the working event loop unless there is a specific reason.
+- **Throwaway diagnostics** go in the scratchpad, never in the project.
+  Configure each copy fresh (`cmake -S . -B build`); never copy a build
+  folder, as its cache points at the original source.
+- **Never commit until the user approves.** The user checks each change
+  in Mini vMac and says "check done ... commit".
+- **Mini vMac:** ask the user to quit it rather than quitting it or
+  killing the process yourself.
+- **No screenshots and no Accessibility control** of the screen,
+  mouse or keyboard unless the user explicitly asks.
+- **The BlueSCSI SD card:** tell the user the plan before changing
+  anything on it.
+- **Timing:** LaunchAPPL's Mini vMac runs at about 1x, slower when this
+  Mac is busy. Keep test runs short, seek rather than play through, and
+  use `--timeout` (see the testing notes in `docs/outstanding-issues.md`).
+
+## After 1.0
+
+Changes follow `docs/plans/release-1.0.md`, Part E:
+- the user logs problems in `docs/issues-found.md`;
+- 1.0.x for fixes, 1.x for features that keep reading 1.0's libraries,
+  2.0 for a change needing a library conversion;
+- every change runs the tests, updates `CHANGELOG.md`, and updates the
+  issues log if it closes an issue;
+- each release is tagged (`v1.0`, ...).
+
+## Documents
+
+- `docs/decisions.md`: the decision codes and where they are decided.
+- `docs/outstanding-issues.md`: open issues, known issues in 1.0,
+  limitations, testing notes and the roadmap.
+- `docs/plans/`: the plans from Stage 6 on, and for 1.0.
+- `docs/user-guide.md`: the user guide (`tools/make-readme.py` makes the
+  TeachText Read Me from it).

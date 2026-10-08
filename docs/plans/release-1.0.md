@@ -1,7 +1,18 @@
 # Plan: MacMusic 1.0, and changes after it
 
 Status: approved (2026-10-08); decisions at the end.
-No code has been changed.
+
+## Progress
+
+| Step | Done | Commit |
+|---|---|---|
+| The slow 9d/9e test runs explained | LaunchAPPL runs at about 1x; 9d was songs playing through, 9e the Clicker's hang | (testing notes, issues log) |
+| Part A0, housekeeping | H1-H5; H6 not needed | `d7e18fc` |
+| Part A, the version | "1.0" in one place, `vers`, About copyright | `91189cd` |
+| Part B, the tests | B1 host tests, B2 smoke test, B3 manual checklist | `8107863`, `e032a5c`, `e50e8e0` |
+| Additions approved on the way | Fix 2 follow-up (Import alert text); Extras > Clock (E1-E5) | `81b7907`, `1c888f9` |
+| Part C, documentation | README, user guide and Read Me tool, CHANGELOG, decisions index, CLAUDE.md, issues logs | (this commit) |
+| Part D, the release | to do | |
 
 ## Aim
 

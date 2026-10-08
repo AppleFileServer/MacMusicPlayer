@@ -1,0 +1,207 @@
+# MacMusic decisions index
+
+The decision codes used in MacMusic's code comments and plans, one line
+each, grouped by the stage that made them. Codes were numbered within
+each stage or plan, so the same code can mean different things in
+different stages (G1 is gapless playback in Stage 5c, and the icons'
+place in Stage 10c). A comment's surrounding text, or the "Stage" it
+names, says which is meant.
+
+- **DECISION:** a project choice, not known iPod behaviour.
+- **PROVISIONAL:** a best guess at iPod behaviour or appearance that
+  isn't documented. It may change if better information turns up.
+- **Where** gives the main file. For Stages 6 onwards the plan in
+  `docs/plans/` has the reasoning. Stages 1-5 had no plan documents in
+  the repository, so their decisions are recorded only here and in the
+  code.
+
+## Stages 1-5: the iPod screens, library, playlists and sound
+
+The interface (D: Stages 1-4)
+
+| Code | Decision | Where |
+|---|---|---|
+| D1 | PROVISIONAL: the highlight stops at the first and last items, no wrapping | `ui_nav.c` |
+| D2 | PROVISIONAL: Menu on the main menu does nothing | `ui_nav.c` |
+| D3 | Extras: decided 2026-10-08, the Clock only (E1-E5 below) | `ui_menus.c` |
+| D4 | PROVISIONAL: Music includes Audiobooks (inferred from the 4G's scroll bar) | `ui_menus.c` |
+| D5 | PROVISIONAL: the scroll bar's thumb size | `lcd_draw.c` |
+| D6 | PROVISIONAL: going back keeps the previous screen's highlight and scroll | `ui_nav.c` |
+| D7 | PROVISIONAL: entering a menu highlights its first item | `ui_nav.c` |
+| D8 | PROVISIONAL: the Mac keyboard mapping (an emulator convenience) | `input.h` |
+| D9 | Genres, Artists and Albums start with an "All" row | `ui_lists.c` |
+| D10, D16 | PROVISIONAL: text that doesn't fit ends with an ellipsis, 5 px from the edge | `lcd_draw.c`, `lcd_layout.h` |
+| D11, D14 | Names sort case-insensitively (the ROM's RelString), ignoring a leading "The " | `library.c` |
+| D12 | PROVISIONAL: a screen's title is the item chosen to reach it | `ui_lists.c` |
+| D13 | An album's songs are in track order (also when shuffling by album) | `library.c`, `shuffle.c` |
+| D17 | The On-The-Go playlist is deferred (`docs/plans/deferred-on-the-go.md`) | |
+| D18 | PROVISIONAL: audiobooks appear only under Audiobooks | `library.c` |
+| D19 | PROVISIONAL: albums are grouped by name alone | `library.c` |
+| D20 | An empty artist, album, genre or composer makes no group | `library.c` |
+| D21 | Create New uses the name typed in the Save dialog ("MacMusic Library" offered) | `libfolder.c` |
+| D22 | Not Now continues with an empty library | `libsetup.c` |
+| D23 | One alert reports files the scan skipped | `libsetup.c` |
+| D25 | A song's title may not be blank | `songdialog.c` |
+| D26 | Every restart (library change, rescan) returns to the main menu | `main.c` |
+| D27 | WAV chunks may come in any order; unknown ones are skipped; WAVE_FORMAT_EXTENSIBLE is refused | `wav.c` |
+| D28 | Import's defaults come from the WAV's INFO tags, else the file name | `import.c` |
+| D31 | Duplicate audio is found by length plus a fingerprint of three 8 KB samples | `song_format.h`, `import.c` |
+| D32 | PROVISIONAL: the Apple logo's shape; it shows for at least 1 s at start-up | `main.c`, `lcd_draw.c` |
+
+Playback (N: Stage 4)
+
+| Code | Decision | Where |
+|---|---|---|
+| N1 | PROVISIONAL: the main menu lists Now Playing only while something plays | `ui_lists.c`, `ui_nav.c` |
+| N2 | A song row plays its list, from that song | `ui_lists.h`, `ui_nav.c` |
+| N3 | A list row plays every song it leads to, from the first | `ui_lists.c` |
+| N4 | At the natural end of the last song, playback stops (unless Repeat says otherwise) | `playback.c` |
+| N5 | PROVISIONAL: Previous restarts the song after 3 s, else goes to the song before | `playback.c` |
+| N6 | Next on the last song wraps to the first | `playback.c` |
+| N7 | Play/Pause plays the highlighted row, or pauses and resumes | `ui_nav.c` |
+| N8 | An empty artist or album leaves its Now Playing line blank | `lcd_draw.c` |
+| N9 | PROVISIONAL: the pause icon's shape | `lcd_draw.c` |
+
+Playlists (P: Stage 3C)
+
+| Code | Decision | Where |
+|---|---|---|
+| P1 | A playlist lists songs by ID only (the title beside it is for reading) | `library.c` |
+| P2 | Playlists are listed by name | `library.c` |
+| P4 | A playlist is a TEXT file, readable in TeachText | `song_format.h` |
+| P5 | Adding a song already in the playlist asks first | `playlists.c` |
+| P6 | The Playlists menu has one "Add to <name>" item per playlist | `playlists.h` |
+| P7 | Only song rows can be added to playlists | `ui_nav.h` |
+| P8 | IDs not in the library are skipped, but kept in the file | `library.c` |
+| P9 | New playlists are "Untitled Playlist" (2, 3...); names 1-31 characters, no colon | `playlists.c` |
+| P10 | Any file in the Playlists folder is a playlist | `library.c` |
+| P11 | Playlist changes rebuild the screens without an iPod restart (no logo) | `main.c` |
+
+Sound (R and A: Stage 5b; G: Stage 5c)
+
+| Code | Decision | Where |
+|---|---|---|
+| R1-R9 | The audio design chosen by the Stage 5a tests: one looping sampled sound over a ring filled from the main loop; R2 sizes the ring at 148,000 bytes (about 6.6 s) | `audio.c` |
+| R3 | The Plus plays 22,254.5 samples/s, about 0.9% fast for 22,050 Hz songs; accepted (issue I4) | `audio.h` |
+| R4 | No tiny disk reads: at least 8 KB per refill | `audio.c` |
+| R7 | The main loop wakes every tick while playing, to keep the ring filled | `main.c` |
+| R8 | A song whose file can't be read is skipped, with one message | `playback.c`, `audio.c` |
+| A5 | Import, Export and Rescan pause the audio and resume it after | `main.c` |
+| A6 | With sound, the audio position is the clock | `playback.c` |
+| A8 | Without working sound, one alert, then silent playback on the clock | `main.c` |
+| G1 | Gapless playback: the next song follows in the same ring | `audio.c` |
+| G2 | Sound starts after about 4 s of audio is buffered | `audio.c` |
+| G3 | The next song is queued as soon as the audio can take it | `playback.c` |
+
+Import, export and libraries (E, L: Stages 5b-2, 5b-3)
+
+| Code | Decision | Where |
+|---|---|---|
+| E1 | Export restores the original WAV, named as it was (or with "-n") | `export.c` |
+| E4 | A file that can't be moved (locked, open elsewhere) is offered as a copy instead | `import.c`, `fileops.c` |
+| E5 | A chunk left by an earlier import is replaced, not doubled | `import.c`, `wav.c` |
+| E7 | A song that goes from the library while playing: playback moves on | `main.c` |
+| L1 | Choose Library: Find Existing (the default) or Create New | `libsetup.c` |
+| L3 | Create New inside a library asks whether to use that library | `libfolder.c` |
+
+The click wheel (W: Stage 5c-1)
+
+| Code | Decision | Where |
+|---|---|---|
+| W1-W3 | The wheel's markings: black on a white patch, 7 px tall, MENU in hand-drawn capitals | `ipod_shell.c` |
+
+## Stage 6: responsiveness and the background (`stage-6-responsiveness-and-background.md`)
+
+| Code | Decision |
+|---|---|
+| S2 | Keep playing in the background; starvation behaves as a pause |
+| S4 | Interrupt-time refill dropped (the remaining starvation case is an accepted limitation) |
+| S5 | After starvation, pause rather than skip |
+| S6 | Keep the ring fed inside the app's own modal loops (menus, dialogs, drags) |
+| S7 | A 24 KB stack (issue I10) |
+
+## Stage 7: Now Playing (`stage-7-now-playing.md`)
+
+| Code | Decision |
+|---|---|
+| N1 | Volume uses the Plus hardware's 8 levels (Stage 8e-1: one wheel turn from the quietest to full) |
+| N2 | It changes the system volume; the level is remembered and saved when volume mode ends |
+| N3 | One wheel turn is the whole song in the scrubber; the audio jumps once turning stops |
+| N4 | The rating is kept in the song file's flags (bits 1-3), written when rating mode ends |
+| N5 | PROVISIONAL: the modes time out after 2 s (volume) and 5 s (scrubber, rating) |
+| N7 | The modes' look follows the 4G; exact pixels PROVISIONAL |
+
+## Stage 8: library management (`stage-8-library-and-settings.md`, `stage-8a-multiple-libraries.md`)
+
+| Code | Decision |
+|---|---|
+| L1 | Removing a song from the library means exporting it; removing from a playlist only removes the entry |
+| L2 | Edit Song works from Now Playing too |
+| L3 | The Import window is reused for editing; every field can be changed |
+| L4 | After an edit, stay on the same screens where possible |
+| L7 | Remove from Playlist, in the Playlists menu |
+| L11 | Editing a title rewrites it in the playlist files too |
+| M1 | One active library at a time |
+| M2 | A Recent Libraries list in the File menu |
+| M3 | At most 500 songs; Import refuses the 501st with a message |
+| M4 | Song IDs are never reused: each library keeps a "next song ID" in its marker |
+
+## Stage 8b and Stage 9: Settings (`stage-8b-settings.md`, `stage-9-settings.md`)
+
+| Code | Decision |
+|---|---|
+| S-2 | Audiobooks are never shuffled |
+| S-3 | With Repeat One, Next and Previous still move to another song |
+| S-5 | Reset All Settings leaves the volume alone |
+| S-6 | About shows Songs as "n of 500" and Available as the library disk's free space |
+| S-7 | Extras to be audited later (done: D3, E1-E5) |
+| S-9 | The main menu's Backlight inverts the screen, a novelty; not saved |
+| S-10 | No Backlight timer |
+| S-11 | The legal statement names the project MacMusic |
+| T1 | Defaults: Shuffle Off, Repeat Off (Clicker On, kept in the prefs but unused) |
+| T2 | Select steps a setting's value in place, saved at once |
+| T3 | With Shuffle on, the chosen song plays first |
+| T4 | A change to Shuffle applies to the next list played |
+| T5 | Repeat All with Shuffle reshuffles each time round |
+| T6 | Legal is the statement as plain text in Geneva 9 |
+| T7 | A change to Repeat during playback may take effect one song later (the next song is already queued) |
+| (9e) | The Clicker was dropped (2026-10-07) |
+
+## The rename (`rename-macmusic.md`)
+
+| Code | Decision |
+|---|---|
+| R2 | The project folder and repository keep the name MacMusicPlayer |
+| R5 | Existing library markers keep their text |
+| R6 | The old "MacMusicPlayer Prefs" is renamed, never copied or deleted |
+
+## Stage 10: fast-forward, rewind and the status icons (`stage-10-fast-forward.md`)
+
+| Code | Decision |
+|---|---|
+| F1 | PROVISIONAL: a hold is half a second (30 ticks) |
+| F2 | Option-right and Option-left are held Next and Previous |
+| F3 | The song plays on while held; one jump on release |
+| F4 | 4x for the first 2 s held, then 16x, worked out from the time held |
+| F5 | Fast-forward stops at the song's end (the next plays on); rewind at 0:00 |
+| F6 | Holds work on Now Playing only |
+| F7 | Paused stays paused, at the new position |
+| G1 | PROVISIONAL: the shuffle and repeat icons at the top right, below the battery |
+| G2 | The shuffle icon shows whenever the playing songs are shuffled |
+| G3 | Shuffle by Albums shows the same icon |
+| G4 | Repeat One and Repeat All show the same loop icon (reversed in review) |
+
+## Fixes and 1.0
+
+| Code | Decision | Where |
+|---|---|---|
+| K1 | Fix 1: the library marker and prefs keep the Finder's generic icons | `finder-icons.r` |
+| K2 | Fix 1: the "has bundle" flag is set after each build by `tools/set-bundle-bit.py` | `CMakeLists.txt` |
+| N1 (Fix 2) | An old "iPod Library Info" marker is renamed "MacMusic Library Info" | `libfolder.c` |
+| V1-V9 | 1.0: the version, numbering, tests, branches, backup, licence, real-Plus check, release files, user guide | `release-1.0.md` |
+| H1 | 1.0: the partition is 640 KB preferred, 512 KB minimum (measured) | `MacMusic.r` |
+| H5 | 1.0: accessors only the tests use are marked as such | `audio.h`, `library.h`, `ui_nav.h` |
+| E1 | The Clock shows the time and date in the Mac's own format | `ui_nav.c` |
+| E2 | The abbreviated date, or the short one if it doesn't fit | `ui_nav.c` |
+| E3 | Hours and minutes only, redrawn on the minute | `ui_nav.c` |
+| E4 | PROVISIONAL: the Clock's layout, in the LCD's font | `lcd_layout.h` |

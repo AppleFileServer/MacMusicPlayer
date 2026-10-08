@@ -3,9 +3,27 @@
 Known problems and deferred work, newest stage last. Update this file when
 an issue is fixed (move it to "Resolved" with the commit) or found.
 
-Status as of Stage 7 (`0692d4f`): complete in Mini vMac, and running
-correctly on the real Mac Plus (2026-10-07, from the rebuilt Scratch
-image). Stage 8 is planned.
+Status at 1.0 (2026-10-08): Stages 1-10, Fixes 1-2 and the 1.0 work
+complete; host tests, smoke test and manual checklist in place. Problems
+found while using MacMusic go in `docs/issues-found.md` first, and are
+moved here when they are looked into.
+
+## Known issues in 1.0
+
+What a user may notice, in short (details below; also in the user
+guide):
+- Songs play about 0.9% fast (I4).
+- The quietest volume level isn't silent (accepted in Stage 9d: the
+  Plus's lowest hardware level, 0, still sounds).
+- A large library is slow to scan: about 1.5-2 minutes for 500 songs at
+  Plus speed (H1; "Fast scanning" below).
+- A program that keeps the Mac completely busy for over 6 s can make the
+  sound repeat a moment and pause (accepted limitation below).
+- Sound relies on undocumented System 6 Sound Manager state, checked at
+  start-up; untested on Macs other than the Plus (I9).
+- Opening a library from the Finder (double-clicking its marker) isn't
+  supported (I6).
+- Extras holds only the Clock; ratings are recorded but not used.
 
 ## Open
 
@@ -92,20 +110,16 @@ image). Stage 8 is planned.
     keep a run to 1-2 minutes; pass LaunchAPPL `--timeout` so a hang fails;
     end the log with a "DONE" line so a cut-off log is caught.
 
-## Roadmap items (not defects)
+## After 1.0 (roadmap, not defects)
 - **Fast scanning:** a library scan opens and reads every song file, so
   500 songs take about 1.5-2 minutes at Plus speed (H1). A cache of the
   song details, checked against each file's modification date, would
   make later scans quicker. Not for 1.0.
-- Real Mac Plus test with a large library (2026-10-07): a 1980 MB
-  BlueSCSI image, `HD50_512 Scratch 1980 MB.hda`, holding MacMusic
-  (`6436450`) and 307 real songs, built with `tools/library-image/`.
-  Results to record here: does the 1980 MB disk mount, how long is the
-  first scan, does playback stay smooth.
-- Further real Mac Plus checks, not yet done there: the Finder stress
-  test (Duplicate, Empty Wastebasket while playing), the modal-loop tests
-  (6b-2) and responsiveness. The Scratch image is current, so no image
-  rebuild is needed first.
+- Real Mac Plus results for the 1980 MB Scratch image (2026-10-07: 307
+  real songs, the `6436450` app, from before Fixes 1-2): to record here,
+  whether the disk mounts, how long the first scan takes and whether
+  playback stays smooth. For 1.0 these checks are section 9 of the
+  manual checklist, on a new Scratch image with the 1.0 app (V7, V8).
 - The software licence that the legal statement
   (`docs/legal/legal-statement.md`) refers to: to be written later, in
   the product documentation.
