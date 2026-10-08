@@ -34,4 +34,12 @@ add_application(MacMusic
     src/input.c
     resources/MacMusic.r
     resources/legal.r
+    resources/finder-icons.r
 )
+
+# Fix 1 (K2): the Finder uses MacMusic's icons only if the application's
+# "has bundle" flag is set; Retro68's Rez can't set it, so it is set in
+# the MacBinary file after each build.
+add_custom_command(TARGET MacMusic_APPL POST_BUILD
+    COMMAND python3 ${CMAKE_SOURCE_DIR}/tools/set-bundle-bit.py
+            ${CMAKE_BINARY_DIR}/MacMusic.bin)
