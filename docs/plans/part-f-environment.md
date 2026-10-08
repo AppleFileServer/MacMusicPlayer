@@ -80,6 +80,16 @@ Mini vMac was configured with:
 - **X8:** documents and scripts only, so no new app version; committed in
   steps after the owner's check: F2 first, then F1 and F3, then F4-F6.
 
+- **X9 (added after F1/F3):** the Homebrew libraries the toolchain loads
+  (boost, gmp, mpfr, libmpc, gettext, zstd) are pinned with `brew pin`.
+- **X10:** the archive keeps those 14 libraries (4.9 MB), with how to put
+  them back.
+- **X11:** the BlueSCSI template (the first 96 blocks of a working image,
+  48 KB) is kept in the archive as `bluescsi-template.hda`; the release
+  script looks there first, then in the 1.0 release image. (The original
+  template file was removed from `BlueSCSI-backups` on 2026-10-08; the
+  1.0 release image holds the same partition map and driver.)
+
 ## Tests
 
 - `check-environment.sh` passes here, and fails clearly when pointed at
