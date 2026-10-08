@@ -1,6 +1,6 @@
 #!/bin/sh
 # Copies the built app onto the persistent test disk and starts Mini vMac
-# directly, so the prefs file and iPod Library survive between runs.
+# directly, so the prefs file and MacMusic Library survive between runs.
 #
 # LaunchAPPL cannot be used for this: it boots a fresh temporary disk on
 # every launch and discards it afterwards.

@@ -1,9 +1,10 @@
 #!/bin/sh
 # Copies a test library made by make_test_library.py into an existing
-# "iPod Library" folder at the top of the test disk.
+# library folder at the top of the test disk: "MacMusic Library", or
+# "iPod Library" (its name before Fix 2, 2026-10-08).
 #
 # First let the app create the folder: run tools/run-persistent.sh,
-# choose the MusicTest disk and Save "iPod Library", then quit.
+# choose the MusicTest disk and Save "MacMusic Library", then quit.
 #
 #     tools/install-test-library.sh HOSTDIR
 #
@@ -31,12 +32,17 @@ trap '"$TOOLS/humount" >/dev/null 2>&1 || true' EXIT
 
 # hmount leaves the current folder at the volume root, e.g. "MusicTest:".
 ROOT=$("$TOOLS/hpwd")
-LIB="${ROOT}iPod Library"
-
 # hls exits 0 even for a missing path, so look for the names instead.
-if ! "$TOOLS/hls" "$ROOT" | grep -qx "iPod Library" \
+if "$TOOLS/hls" "$ROOT" | grep -qx "MacMusic Library"; then
+    NAME="MacMusic Library"
+else
+    NAME="iPod Library"
+fi
+LIB="${ROOT}${NAME}"
+
+if ! "$TOOLS/hls" "$ROOT" | grep -qx "$NAME" \
    || ! "$TOOLS/hls" "$LIB" | grep -qx "Playlists"; then
-    echo "No \"iPod Library\" folder (with Playlists) at the top of the test disk." >&2
+    echo "No \"MacMusic Library\" folder (with Playlists) at the top of the test disk." >&2
     echo "Create it with the app first (File > Choose Library...)." >&2
     exit 1
 fi
@@ -64,4 +70,4 @@ done
 
 "$TOOLS/hls" -l "$LIB"
 
-echo "Installed $songs files into iPod Library and $playlists into Playlists."
+echo "Installed $songs files into $NAME and $playlists into Playlists."

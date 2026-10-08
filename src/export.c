@@ -226,7 +226,7 @@ Boolean Export_Run(const LibraryFolder *folder, short song)
     if (destVRefNum == folder->vRefNum
         && (destDirID == folder->folderID || destDirID == folder->playlistsID))
     {
-        Message_Show(P("Choose a folder outside the iPod Library."), noErr);
+        Message_Show(P("Choose a folder outside the MacMusic Library."), noErr);
         return false;
     }
 
@@ -259,10 +259,10 @@ Boolean Export_Run(const LibraryFolder *folder, short song)
     }
     if (!removed)
         Message_Show(P("The song was exported, but its file couldn\xD5t be "
-                       "removed from the iPod Library."), noErr);
+                       "removed from the MacMusic Library."), noErr);
     if (!renamed)
         Message_Show(P("The song was exported, but it couldn\xD5t be given "
-                       "the name you chose, so it kept its iPod Library "
+                       "the name you chose, so it kept its MacMusic Library "
                        "name."), noErr);
     return removed;
 }

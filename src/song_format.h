@@ -154,6 +154,6 @@ static inline UInt32 SongChecksum_Value(const SongChecksum *c)
 #define kSongFileType           'iPdS'
 #define kPrefsFileType          'pref'
 #define kPlaylistFileType       'TEXT'  /* P4: readable in TeachText */
-#define kLibraryMarkerType      'iPdL'  /* "iPod Library Info" (5b-3) */
+#define kLibraryMarkerType      'iPdL'  /* "MacMusic Library Info" (5b-3) */
 
 #endif

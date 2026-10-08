@@ -6,7 +6,7 @@
 #include "libfolder.h"
 #include "songfile.h"
 
-/* The music library: built by scanning the iPod Library folder's song
+/* The music library: built by scanning the MacMusic Library folder's song
    files (song_format.h) and its Playlists folder. Only metadata is held
    in memory; audio stays on disk. Artists, albums, genres and composers
    are indexed by number; kNone in a filter field means "any". */

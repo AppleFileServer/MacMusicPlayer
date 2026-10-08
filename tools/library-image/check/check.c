@@ -80,7 +80,8 @@ OSErr PBGetCatInfoSync(CInfoPBRec *pb)
     stat(p, &st);
     pb->hFileInfo.ioFlAttrib = S_ISDIR(st.st_mode) ? 0x10 : 0;
     pb->hFileInfo.ioFlFndrInfo.fdType =
-        strcmp(n, "iPod Library Info") == 0 ? 'iPdL' : 'iPdS';
+        strcmp(n, "MacMusic Library Info") == 0
+        || strcmp(n, "iPod Library Info") == 0 ? 'iPdL' : 'iPdS';
     return noErr;
 }
 

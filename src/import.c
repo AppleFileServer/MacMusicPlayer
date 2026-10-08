@@ -338,7 +338,7 @@ Boolean Import_Run(const LibraryFolder *folder)
     /* Stage 8d (M3): a full library is refused before anything happens. */
     if (Library_SongCount() >= kMaxSongs || Library_OverLimitCount() > 0)
     {
-        Message_Show(P("The iPod Library is full (500 songs). Export a song "
+        Message_Show(P("The MacMusic Library is full (500 songs). Export a song "
                        "to make room."), noErr);
         return false;
     }
@@ -361,7 +361,7 @@ Boolean Import_Run(const LibraryFolder *folder)
     if (src.vRefNum == folder->vRefNum
         && (src.dirID == folder->folderID || src.dirID == folder->playlistsID))
     {
-        Message_Show(P("This file is already inside the iPod Library folder."),
+        Message_Show(P("This file is already inside the MacMusic Library folder."),
                      noErr);
         return false;
     }
@@ -465,7 +465,7 @@ Boolean Import_Run(const LibraryFolder *folder)
     DisposePtr(buffer);
     if (err == dskFulErr)
     {
-        Message_Show(P("There is not enough space on the iPod Library\xD5s "
+        Message_Show(P("There is not enough space on the MacMusic Library\xD5s "
                        "disk for this song."), noErr);
         return false;
     }

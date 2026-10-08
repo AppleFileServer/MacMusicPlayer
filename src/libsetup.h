@@ -5,7 +5,7 @@
 
 #include "libfolder.h"
 
-/* Startup: finds the remembered iPod Library (asking for one if there is
+/* Startup: finds the remembered MacMusic Library (asking for one if there is
    none, or it cannot be found) and scans it. Never fails: without a
    library the iPod shows empty lists. */
 void LibSetup_Startup(void);

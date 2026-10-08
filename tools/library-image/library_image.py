@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Builds a MacMusic iPod Library from a folder of music on this Mac, and a
+"""Builds a MacMusic Library from a folder of music on this Mac, and a
 BlueSCSI hard disk image holding MacMusic and that library, for testing on
 a real Macintosh Plus. See README.md.
 
@@ -312,7 +312,9 @@ def step_check(a):
 
 # ---- image ----------------------------------------------------------------
 
-MARKER_TEXT = ('This folder is an iPod Library for MacMusic. To use it, choose '
+LIBRARY_NAME = 'MacMusic Library'      # Fix 2: was "iPod Library"
+MARKER_NAME = 'MacMusic Library Info'
+MARKER_TEXT = ('This folder is a MacMusic Library. To use it, choose '
                'File > Choose Library..., then Use Existing Library, and open '
                'this file.\r')
 
@@ -359,15 +361,15 @@ def step_image(a):
     hfs(a, 'hmount', volume)
     try:
         hfs(a, 'hmkdir', ':MacMusic')
-        hfs(a, 'hmkdir', ':MacMusic:iPod Library')
-        hfs(a, 'hmkdir', ':MacMusic:iPod Library:Playlists')
+        lib = ':MacMusic:%s:' % LIBRARY_NAME
+        hfs(a, 'hmkdir', lib[:-1])
+        hfs(a, 'hmkdir', lib + 'Playlists')
         hfs(a, 'hcopy', '-m', a.app, ':MacMusic:MacMusic')
         marker = os.path.join(a.work, 'marker.txt')
         open(marker, 'w', newline='').write(
             MARKER_TEXT + 'Next song ID: %d\r' % (len(songs) + 1))
-        lib = ':MacMusic:iPod Library:'
-        hfs(a, 'hcopy', '-r', marker, lib + 'iPod Library Info')
-        hfs(a, 'hattrib', '-t', 'iPdL', '-c', 'iPdM', lib + 'iPod Library Info')
+        hfs(a, 'hcopy', '-r', marker, lib + MARKER_NAME)
+        hfs(a, 'hattrib', '-t', 'iPdL', '-c', 'iPdM', lib + MARKER_NAME)
         for i in range(len(songs)):
             n = 'IPOD%04d' % (i + 1)
             hfs(a, 'hcopy', '-r', os.path.join(a.work, 'songs', n), lib + n)

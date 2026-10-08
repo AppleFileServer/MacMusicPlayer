@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Writes a test iPod Library (song file format version 2, see
+"""Writes a test MacMusic Library (song file format version 2, see
 src/song_format.h) to a host folder, including deliberately invalid
 files, so the scanner can be tested on the host and on the Mac.
 

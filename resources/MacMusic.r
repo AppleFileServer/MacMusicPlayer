@@ -281,7 +281,7 @@ resource 'DITL' (132) {
 
         { 12, 16, 78, 326 },
         StaticText { disabled, "This WAV file\0xD5s audio is already in the "
-                               "iPod Library as \0xD2^0\0xD3. Import it again?" };
+                               "MacMusic Library as \0xD2^0\0xD3. Import it again?" };
     }
 };
 
@@ -345,7 +345,7 @@ resource 'DITL' (134) {
 };
 
 /* Stage 5b-2 import. The chosen file is on a different disk from the
-   iPod Library, so it must be copied. Import is the default. */
+   MacMusic Library, so it must be copied. Import is the default. */
 resource 'ALRT' (135) {
     { 110, 86, 216, 426 },
     135,
@@ -443,7 +443,7 @@ resource 'DITL' (138) {
         Button { enabled, "Cancel" };
 
         { 12, 16, 78, 326 },
-        StaticText { disabled, "^0 Copy it into the iPod Library "
+        StaticText { disabled, "^0 Copy it into the MacMusic Library "
                                "instead?" };
     }
 };
@@ -474,9 +474,9 @@ resource 'DITL' (139) {
         Button { enabled, "Cancel" };
 
         { 12, 16, 76, 414 },
-        StaticText { disabled, "Use an existing iPod Library, or create a "
+        StaticText { disabled, "Use an existing MacMusic Library, or create a "
                                "new one? To use an existing library, open "
-                               "its \0xD2iPod Library Info\0xD3 file or one "
+                               "its \0xD2MacMusic Library Info\0xD3 file or one "
                                "of its songs." };
     }
 };
@@ -504,7 +504,7 @@ resource 'DITL' (140) {
         Button { enabled, "Cancel" };
 
         { 12, 16, 64, 310 },
-        StaticText { disabled, "This folder is already an iPod Library. "
+        StaticText { disabled, "This folder is already a MacMusic Library. "
                                "Use it, instead of creating a new library "
                                "inside it?" };
     }

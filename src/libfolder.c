@@ -8,11 +8,15 @@
 #include "fileopen.h"
 #include "pstr.h"
 #include "song_format.h"
+#include "fileops.h"
 
 #define kDirectoryAttribute     0x10    /* ioFlAttrib bit 4 */
 
 static const unsigned char kPlaylistsName[] = "\pPlaylists";
-static const unsigned char kMarkerName[] = "\piPod Library Info";
+static const unsigned char kMarkerName[] = "\pMacMusic Library Info";
+/* Fix 2 (N1): the marker's name before 2026-10-08; such a marker is
+   renamed when its library is opened, and read meanwhile. */
+static const unsigned char kOldMarkerName[] = "\piPod Library Info";
 
 /* "Use it?" when Create New is used inside a library (ALRT 140). */
 enum
@@ -152,26 +156,41 @@ static Boolean HasSongFile(short vRefNum, long dirID)
     }
 }
 
-/* A folder is an iPod Library if it holds the marker, or song files and
-   a Playlists folder (a library made before 5b-3). */
+/* The library's marker, by the name it has: the new one, else the old
+   one (a library from before Fix 2 whose marker couldn't be renamed);
+   the new name if there is neither. */
+static ConstStringPtr MarkerName(short vRefNum, long dirID)
+{
+    if (!FileExists(vRefNum, dirID, kMarkerName)
+        && FileExists(vRefNum, dirID, kOldMarkerName))
+        return kOldMarkerName;
+    return kMarkerName;
+}
+
+/* A folder is a MacMusic Library if it holds the marker (either name),
+   or song files and a Playlists folder (a library made before 5b-3). */
 static Boolean IsLibraryFolder(short vRefNum, long dirID)
 {
     OSType type;
     long playlistsID;
 
-    if (FindFile(vRefNum, dirID, kMarkerName, &type)
+    if ((FindFile(vRefNum, dirID, kMarkerName, &type)
+         || FindFile(vRefNum, dirID, kOldMarkerName, &type))
         && type == kLibraryMarkerType)
         return true;
     return LookUpFolder(vRefNum, dirID, kPlaylistsName, &playlistsID) == noErr
         && HasSongFile(vRefNum, dirID);
 }
 
-/* Adds the marker if it is missing. Failure (a locked disk) is harmless:
-   the library still works, it just can't be picked by its marker. */
+/* Adds the marker if it is missing. Fix 2 (N1): a library with only the
+   old "iPod Library Info" has it renamed, its text (and next song ID)
+   kept; if both exist the new one is used, the old left alone. Failure
+   (a locked disk) is harmless: the library still works, by the old
+   marker or none. */
 static void EnsureMarker(short vRefNum, long dirID)
 {
     static const char text[] =
-        "This folder is an iPod Library for MacMusic. To use it, "
+        "This folder is a MacMusic Library. To use it, "
         "choose File > Choose Library..., then Use Existing Library, and "
         "open this file.\r";
     HParamBlockRec pb;
@@ -179,6 +198,13 @@ static void EnsureMarker(short vRefNum, long dirID)
     long count = sizeof(text) - 1;
     short refNum;
 
+    if (!FileExists(vRefNum, dirID, kMarkerName)
+        && FileExists(vRefNum, dirID, kOldMarkerName))
+    {
+        RenameFile(vRefNum, dirID, kOldMarkerName, kMarkerName);
+        FlushVol(nil, vRefNum);
+        return;
+    }
     if (HCreate(vRefNum, dirID, kMarkerName, kAppCreator, kLibraryMarkerType)
         != noErr)
         return;
@@ -210,7 +236,8 @@ static OSErr ReadMarker(const LibraryFolder *folder, char *buf, long *count)
     OSErr err;
 
     *count = 0;
-    err = OpenDataFork(folder->vRefNum, folder->folderID, kMarkerName,
+    err = OpenDataFork(folder->vRefNum, folder->folderID,
+                       MarkerName(folder->vRefNum, folder->folderID),
                        fsRdPerm, &refNum);
     if (err != noErr)
         return err;
@@ -271,7 +298,8 @@ void Folder_WriteNextID(const LibraryFolder *folder, long next)
     at += number[0];
     buf[at++] = '\r';
 
-    if (OpenDataFork(folder->vRefNum, folder->folderID, kMarkerName,
+    if (OpenDataFork(folder->vRefNum, folder->folderID,
+                     MarkerName(folder->vRefNum, folder->folderID),
                      fsRdWrPerm, &refNum) != noErr)
         return;
     count = at;
@@ -428,13 +456,13 @@ short Folder_Choose(LibraryLocation *location, LibraryFolder *folder,
 
     /* System 6 Standard File cannot select folders, so the Save dialog
        picks the location and the name (DECISION D21: the typed name is
-       used; "iPod Library" is the default). An existing folder of that
+       used; "MacMusic Library" is the default). An existing folder of that
        name is reused. */
     where.h = 104;
     where.v = 60;
     gPickedExisting = false;
     gInLibrary = false;
-    SFPPutFile(where, P("Create new iPod Library in:"), P("iPod Library"),
+    SFPPutFile(where, P("Create new MacMusic Library in:"), P("MacMusic Library"),
                ExistingFolderHook, &reply, putDlgID, Modal_FileFilter);
 
     if (gInLibrary)

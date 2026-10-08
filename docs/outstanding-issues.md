@@ -16,7 +16,7 @@ image). Stage 8 is planned.
   ring. Accepted as-is for now.
 
 ### I6. Open a library from the Finder (L4, deferred from 5b-3)
-- Double-clicking "iPod Library Info" could launch the app with that
+- Double-clicking "MacMusic Library Info" could launch the app with that
   library selected (System 6 passes the document at launch).
 
 ### I8. Unexplained 600-tick stall, seen once (5b diagnostic)

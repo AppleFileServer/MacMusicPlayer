@@ -3,7 +3,7 @@
 
 #include <MacTypes.h>
 
-/* Where the iPod Library folder lives, in a form that survives restarts
+/* Where the MacMusic Library folder lives, in a form that survives restarts
    on System 6: volume reference numbers change between boots and the
    Alias Manager needs System 7, so the volume is remembered by name and
    creation date, and the folder by its HFS directory ID. */
@@ -31,16 +31,16 @@ enum
     kFolderChosen,
     kFolderCancelled,
     kFolderNameIsFile,  /* a file, not a folder, has that name */
-    kFolderNotLibrary,  /* the folder found is not an iPod Library */
+    kFolderNotLibrary,  /* the folder found is not a MacMusic Library */
     kFolderError        /* see *error */
 };
 
-/* Stage 5b-3: every library holds a marker file, "iPod Library Info"
+/* Stage 5b-3: every library holds a marker file, "MacMusic Library Info"
    (type kLibraryMarkerType), so that even an empty library can be
    picked in the Open dialog. Created with a new library and added to
    any library found without one. */
 
-/* Create New: asks where to create a new iPod Library folder, with
+/* Create New: asks where to create a new MacMusic Library folder, with
    SFPutFile, then creates it and its Playlists folder. A typed name that
    is an existing folder is reused; Save inside a folder that is already
    a library asks whether to use that one (DECISION L3). */

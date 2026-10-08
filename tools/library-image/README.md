@@ -1,9 +1,10 @@
 # library-image: a MacMusic library and BlueSCSI disk image from a music folder
 
-Builds an iPod Library of real songs on this Mac, and a BlueSCSI hard disk
+Builds a MacMusic Library of real songs on this Mac, and a BlueSCSI hard disk
 image holding MacMusic and that library, for testing on a real Macintosh
 Plus. First used on 2026-10-07 to make the 307-song
-`HD50_512 Scratch 1980 MB.hda`.
+`HD50_512 Scratch 1980 MB.hda` (whose library, made before Fix 2, is
+still called "iPod Library").
 
 ## What it does
 
@@ -18,7 +19,7 @@ step can be re-run on its own (for example `songs` after editing
 | `convert` | `wav/NNN.wav` | `afconvert` to 8-bit unsigned, mono (both channels mixed), 22,050 Hz WAV: what MacMusic plays. |
 | `songs` | `songs/IPODnnnn` | MacMusic song files: each WAV with the "iPod" chunk added at its end, exactly as Import writes it (`src/song_format.h`, `SongFile_AddChunk`). Text is converted to Mac Roman and cut to 63 characters. |
 | `check` | (a report) | Builds `check/check.c` with MacMusic's own `library.c` and `songfile.c` for this Mac and runs the library scan over the song files. All must load, none be skipped, and each read back with its ID. |
-| `image` | `volume.dsk`, `--out` | An HFS volume (`hfsutils`) with `MacMusic:MacMusic` and `MacMusic:iPod Library`: the songs (type `iPdS`, creator `iPdM`), the "iPod Library Info" marker (with the next song ID) and an empty Playlists folder. Then the `.hda`: the partition map and SCSI driver from `--template`, resized, followed by the volume. |
+| `image` | `volume.dsk`, `--out` | An HFS volume (`hfsutils`) with `MacMusic:MacMusic` and `MacMusic:MacMusic Library`: the songs (type `iPdS`, creator `iPdM`), the "MacMusic Library Info" marker (with the next song ID) and an empty Playlists folder. Then the `.hda`: the partition map and SCSI driver from `--template`, resized, followed by the volume. |
 
 **Tag tidying** (`pick`; the music files themselves are never changed):
 - **Artist:** drop " - Topic" (YouTube's Topic channels) and a "VEVO"
@@ -71,7 +72,7 @@ such as a backup of the original Scratch image.
   beyond that.
 - **On the Plus:** the first time MacMusic runs it may not find the new
   library. Its prefs remember the old volume by name and creation date.
-  Choose Library… → Find Existing, and open "iPod Library Info".
+  Choose Library… → Find Existing, and open "MacMusic Library Info".
 - **Copying to the card:** a BlueSCSI image's name gives its SCSI ID
   (`HD50`: ID 5). Remove any other image with the same ID before copying
   the new one to the card.

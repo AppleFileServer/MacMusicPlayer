@@ -84,7 +84,7 @@ static void ReportSkipped(void)
         text[0] = 0;
         PStrAppend(text, number);
         PStrAppend(text, overLimit == 1 ? P(" song wasn\xD5t") : P(" songs weren\xD5t"));
-        PStrAppend(text, P(" loaded: the iPod Library holds at most 500 "
+        PStrAppend(text, P(" loaded: the MacMusic Library holds at most 500 "
                            "songs. Export songs to make room."));
         Message_Show(text, noErr);
     }
@@ -95,8 +95,8 @@ static void ReportSkipped(void)
     NumToString(skipped, number);
     text[0] = 0;
     PStrAppend(text, number);
-    PStrAppend(text, skipped == 1 ? P(" file in the iPod Library was")
-                                  : P(" files in the iPod Library were"));
+    PStrAppend(text, skipped == 1 ? P(" file in the MacMusic Library was")
+                                  : P(" files in the MacMusic Library were"));
     PStrAppend(text, P(" not recognised and "));
     PStrAppend(text, skipped == 1 ? P("was skipped.") : P("were skipped."));
     Message_Show(text, noErr);
@@ -171,7 +171,7 @@ void LibSetup_Rescan(void)
     }
 
     if (!Library_Scan(&gFolder))
-        Message_Show(P("There is not enough memory to read the iPod Library."), noErr);
+        Message_Show(P("There is not enough memory to read the MacMusic Library."), noErr);
     else
         ReportSkipped();
 }
@@ -202,15 +202,15 @@ static Boolean ChooseAndRemember(Boolean findExisting)
         }
         if (result == kFolderNotLibrary)
         {
-            Message_Show(P("That file isn\xD5t inside an iPod Library. Open "
-                           "the \xD2iPod Library Info\xD3 file, or a song, "
+            Message_Show(P("That file isn\xD5t inside a MacMusic Library. Open "
+                           "the \xD2MacMusic Library Info\xD3 file, or a song, "
                            "in the library\xD5s folder."), noErr);
             continue;
         }
 
         Message_Show(findExisting
-                     ? P("The iPod Library could not be opened.")
-                     : P("The iPod Library folder could not be created."), err);
+                     ? P("The MacMusic Library could not be opened.")
+                     : P("The MacMusic Library folder could not be created."), err);
         return false;
     }
 
@@ -242,12 +242,12 @@ void LibSetup_Startup(void)
     if (!gHaveLibrary)
     {
         if (remembered)
-            ParamText(P("The iPod Library folder could not be found. Its disk "
+            ParamText(P("The MacMusic Library folder could not be found. Its disk "
                         "may not be inserted, or it may have moved. Find it, "
                         "or create a new one."), P(""), P(""), P(""));
         else
             ParamText(P("MacMusic keeps its songs in a folder called "
-                        "\xD2iPod Library.\xD3 Find an existing one, or "
+                        "\xD2MacMusic Library.\xD3 Find an existing one, or "
                         "create a new one."), P(""), P(""), P(""));
 
         /* DECISION (D22): Not Now continues with an empty library;
@@ -296,7 +296,7 @@ void LibSetup_RecentItem(short i, Str255 text, Boolean *available,
     *current = gHaveLibrary && Folder_SameLocation(&r->location, &gLocation);
 
     text[0] = 0;
-    PStrAppend(text, r->folderName[0] > 0 ? r->folderName : P("iPod Library"));
+    PStrAppend(text, r->folderName[0] > 0 ? r->folderName : P("MacMusic Library"));
     PStrAppend(text, P(" ("));
     PStrAppend(text, r->location.volumeName);
     PStrAppend(text, P(")"));
@@ -315,7 +315,7 @@ Boolean LibSetup_UseRecent(short i)
         return false;
     if (!Folder_Resolve(&location, &folder))
     {
-        Message_Show(P("That iPod Library can\xD5t be found. Its disk may "
+        Message_Show(P("That MacMusic Library can\xD5t be found. Its disk may "
                        "not be inserted, or it may have moved."), noErr);
         return false;
     }
