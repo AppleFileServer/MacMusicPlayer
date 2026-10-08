@@ -7,9 +7,12 @@ here (by section number) for anything missing. `RESTART.md` is the
 short version.
 
 There are two ways back:
-- **Restore** from the environment archive, `~/MacPlusProjects/environment-1.0/`
-  (made by `tools/make-environment-archive.sh`; its README says how). Quick,
-  and gives back exactly what 1.0 was built and tested with.
+- **Restore** from the environment archive, `~/MacPlusProjects/environment-1.0/`,
+  with its `restore.sh` (the archive is made by
+  `tools/make-environment-archive.sh`; its README says more). Quick, and
+  gives back exactly what 1.0 was built and tested with: restored into an
+  empty folder on 2026-10-08, it rebuilt the released 1.0 app byte for
+  byte and passed both test suites.
 - **Rebuild** from nothing (sections 2-8). Slow, and the newest macOS,
   Xcode or Homebrew may need changes to the steps.
 
@@ -57,7 +60,7 @@ of these with an incompatible version can stop Rez, LaunchAPPL or gcc
 starting ("Library not loaded" or a crash), with nothing in the project
 changed. boost is the likeliest, as its library names carry no version.
 
-To keep them as they are:
+They were pinned on 2026-10-08 (X9), which keeps them as they are:
 
     brew pin boost gmp mpfr libmpc gettext zstd
 
@@ -158,7 +161,8 @@ launch), and `tools/install-test-library.sh` and
   `Apple_Driver43` SCSI driver (Apple's, so private). Every Scratch image
   made since 1.0 starts with them, so any of those serves, for example
   `~/MacPlusProjects/releases/MacMusic-1.0/HD50_512 Scratch 1980 MB.hda`.
-  The archive keeps a small copy (see its README).
+  The archive keeps a 48 KB copy, `bluescsi-template.hda`, which
+  `tools/make-release.sh` uses first.
 - **The songs:** `~/MacPlusProjects/library-work`, made from the Music
   folder by `tools/library-image/library_image.py all` (its README). It
   isn't archived; making it again takes a while but needs nothing else.

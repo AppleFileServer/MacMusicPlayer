@@ -14,11 +14,16 @@ about it is in this folder; `README.md` is the overview.
 
     tools/check-environment.sh
 
-Every line should show ✓. If anything shows ✗, follow the pointer it
-prints into `docs/environment.md`. The quick fix for most things is to
-restore them from the archive in `~/MacPlusProjects/environment-1.0/`
-(its README says how). Rebuilding Retro68 from source is the slow last
-resort.
+Every line should show ✓. If anything shows ✗, the quick fix is the
+environment archive:
+
+    cd ~/MacPlusProjects/environment-1.0 && ./restore.sh
+
+It puts back whatever is missing (and leaves the rest alone), then runs
+the check again. Its README covers the one awkward case, Homebrew having
+upgraded the libraries the toolchain needs. Otherwise follow the pointer
+the check prints into `docs/environment.md`; rebuilding Retro68 from
+source is the slow last resort.
 
 ## 2. Build and test what you had
 

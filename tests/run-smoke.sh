@@ -5,6 +5,8 @@
 # the log ends with "FAILURES: 0" and "DONE". About 1-2 minutes.
 #
 # Usage: tests/run-smoke.sh [build folder]   (default: build-smoke)
+#   RETRO68         the Retro68 build folder (default ~/Retro68-build)
+#   LAUNCHAPPL_CFG  a LaunchAPPL settings file (default ~/.LaunchAPPL.cfg)
 
 set -u
 cd "$(dirname "$0")/.." || exit 2
@@ -24,6 +26,7 @@ cmake --build "$OUT" > "$OUT/build.log" 2>&1 \
 grep -E "warning:" "$OUT/build.log"
 
 "$RETRO68/toolchain/bin/LaunchAPPL" --timeout "$TIMEOUT" \
+    ${LAUNCHAPPL_CFG:+--config-file "$LAUNCHAPPL_CFG"} \
     "$OUT/MacMusic.APPL" > "$OUT/smoke.log" 2>&1
 status=$?
 grep -v '^[.#]*$' "$OUT/smoke.log"

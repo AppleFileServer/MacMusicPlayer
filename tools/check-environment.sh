@@ -7,11 +7,13 @@
 # Usage: tools/check-environment.sh
 #   RETRO68   the Retro68 build folder   (default ~/Retro68-build)
 #   MINIVMAC  the Mini vMac folder       (default ~/minivmac)
+#   LAUNCHAPPL_CFG  LaunchAPPL's settings (default ~/.LaunchAPPL.cfg)
 # Exit status 0 if nothing is missing (warnings allowed).
 
 cd "$(dirname "$0")/.." || exit 2
 RETRO68=${RETRO68:-$HOME/Retro68-build}
 MINIVMAC=${MINIVMAC:-$HOME/minivmac}
+CFG=${LAUNCHAPPL_CFG:-$HOME/.LaunchAPPL.cfg}
 BIN=$RETRO68/toolchain/bin
 TMP=$(mktemp -d)
 trap 'rm -rf "$TMP"' EXIT
@@ -94,11 +96,11 @@ for n in 1 2 3; do
 done
 [ -e "$MINIVMAC/disk1.dsk" ] && [ -e "$MINIVMAC/disk2.dsk" ] && [ -e "$MINIVMAC/disk3.dsk" ] \
     && ok "the disk links"
-if [ -f "$HOME/.LaunchAPPL.cfg" ]; then
-    if grep -q "minivmac-dir = $MINIVMAC\$" "$HOME/.LaunchAPPL.cfg"; then
-        ok "~/.LaunchAPPL.cfg"
-    else warn "~/.LaunchAPPL.cfg names another Mini vMac folder" 6; fi
-else bad "~/.LaunchAPPL.cfg" 6; fi
+if [ -f "$CFG" ]; then
+    if grep -q "minivmac-dir = $MINIVMAC\$" "$CFG"; then
+        ok "LaunchAPPL's settings ($CFG)"
+    else warn "$CFG names another Mini vMac folder" 6; fi
+else bad "LaunchAPPL's settings ($CFG)" 6; fi
 
 echo "Test disks and release inputs"
 for d in MusicTest Transfer; do

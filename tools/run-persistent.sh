@@ -13,10 +13,10 @@
 set -e
 
 PROJECT=$(cd "$(dirname "$0")/.." && pwd)
-TOOLS="$HOME/Retro68-build/toolchain/bin"
+TOOLS="${RETRO68:-$HOME/Retro68-build}/toolchain/bin"
 DISK="$PROJECT/testdisks/MusicTest.dsk"
 APP_BIN="$PROJECT/build/MacMusic.bin"
-MINIVMAC="$HOME/minivmac/minivmac.app"
+MINIVMAC="${MINIVMAC:-$HOME/minivmac}/minivmac.app"
 
 if pgrep -x minivmac >/dev/null; then
     echo "Mini vMac is running. Quit it first: the disk image must not be" >&2

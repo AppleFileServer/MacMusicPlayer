@@ -416,7 +416,8 @@ def main():
     ap.add_argument('--volume-name', default='Scratch')
     ap.add_argument('--app', default=os.path.join(PROJECT, 'build', 'MacMusic.bin'),
                     help='MacMusic, as MacBinary (default: the project build)')
-    ap.add_argument('--hfsutils', default=os.path.expanduser('~/Retro68-build/toolchain/bin'))
+    ap.add_argument('--hfsutils', default=os.path.join(
+        os.environ.get('RETRO68', os.path.expanduser('~/Retro68-build')), 'toolchain', 'bin'))
     a = ap.parse_args()
     steps = ['pick', 'convert', 'songs', 'check', 'image'] if a.step == 'all' else [a.step]
     if 'pick' in steps and not a.music:

@@ -17,8 +17,8 @@
 #   --scratch WORK   make the Scratch image from WORK, a tools/library-image
 #                    work folder with its songs made (the "songs" step done)
 #   --template HDA   the BlueSCSI image whose partition map and driver it
-#                    uses (default ~/MacPlusProjects/BlueSCSI-backups/
-#                    Scratch.before-0692d4f.hda)
+#                    uses (default: the environment archive's
+#                    bluescsi-template.hda, else the 1.0 release's image)
 #   --out DIR        where to write (default as above)
 # Mini vMac must be closed (for the smoke test). The working tree must be
 # clean: the release is exactly a commit.
@@ -29,7 +29,10 @@ PROJECT=$(pwd)
 RETRO68=${RETRO68:-$HOME/Retro68-build}
 HFS=$RETRO68/toolchain/bin
 SCRATCH=
-TEMPLATE=$HOME/MacPlusProjects/BlueSCSI-backups/Scratch.before-0692d4f.hda
+# X11: only a template's first 96 blocks (partition map, driver) are used.
+TEMPLATE=$HOME/MacPlusProjects/environment-1.0/bluescsi-template.hda
+[ -f "$TEMPLATE" ] || \
+    TEMPLATE="$HOME/MacPlusProjects/releases/MacMusic-1.0/HD50_512 Scratch 1980 MB.hda"
 OUT=
 
 while [ $# -gt 0 ]; do

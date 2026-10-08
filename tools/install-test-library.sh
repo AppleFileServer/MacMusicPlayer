@@ -15,7 +15,7 @@
 set -e
 
 PROJECT=$(cd "$(dirname "$0")/.." && pwd)
-TOOLS="$HOME/Retro68-build/toolchain/bin"
+TOOLS="${RETRO68:-$HOME/Retro68-build}/toolchain/bin"
 DISK="$PROJECT/testdisks/MusicTest.dsk"
 SRC="$1"
 

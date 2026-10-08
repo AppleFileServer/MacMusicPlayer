@@ -94,6 +94,11 @@ separate, and the normal build contains none of it.
 
 ## Documents
 
+- [`RESTART.md`](RESTART.md): coming back to the project after a long gap.
+- [`docs/environment.md`](docs/environment.md): the tools outside this
+  repository, how to check them (`tools/check-environment.sh`) and how to
+  restore them from the environment archive.
+
 - [`docs/user-guide.md`](docs/user-guide.md): how to use MacMusic.
 - [`docs/decisions.md`](docs/decisions.md): every decision code in the
   code (D9, N4, G1...), what it decided and where.

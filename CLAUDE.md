@@ -88,6 +88,11 @@ Changes follow `docs/plans/release-1.0.md`, Part E:
 
 ## Documents
 
+- `RESTART.md`: coming back after a long gap (start here).
+- `docs/environment.md`: everything outside the repository the build and
+  tests need; `tools/check-environment.sh` checks it, and the archive in
+  `~/MacPlusProjects/environment-1.0/` (`tools/make-environment-archive.sh`)
+  restores it. Remake the archive after changing the environment.
 - `docs/decisions.md`: the decision codes and where they are decided.
 - `docs/outstanding-issues.md`: open issues, known issues in 1.0,
   limitations, testing notes and the roadmap.

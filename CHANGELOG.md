@@ -8,7 +8,13 @@ library conversion. The decision codes in brackets are explained in
 
 ## After 1.0
 
-Nothing yet.
+No changes to MacMusic itself yet.
+
+- **Developer tools (Part F, 2026-10-08):** `RESTART.md`;
+  `docs/environment.md`; `tools/check-environment.sh`;
+  `tools/make-environment-archive.sh` and the archive's `restore.sh`; the
+  Retro68 LaunchAPPL patch kept in `tools/patches/`; the scripts honour
+  `RETRO68`, `MINIVMAC` and `LAUNCHAPPL_CFG`.
 
 ## 1.0 (2026-10-08)
 
