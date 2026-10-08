@@ -8,7 +8,33 @@
 #define kReturnKey      0x0D
 #define kEnterKey       0x03
 
+#define kDefaultItem    1
+
 static void (*gService)(void);
+
+pascal void Modal_DrawDefaultOutline(DialogPtr dialog, short item)
+{
+    short type;
+    Handle handle;
+    Rect r;
+
+    (void)item;
+    GetDialogItem(dialog, kDefaultItem, &type, &handle, &r);
+    InsetRect(&r, -4, -4);
+    PenSize(3, 3);
+    FrameRoundRect(&r, 16, 16);
+    PenNormal();
+}
+
+Handle Modal_ItemHandle(DialogPtr dialog, short item)
+{
+    short type;
+    Handle handle;
+    Rect r;
+
+    GetDialogItem(dialog, item, &type, &handle, &r);
+    return handle;
+}
 
 void Modal_SetService(void (*service)(void))
 {

@@ -50,6 +50,27 @@ image). Stage 8 is planned.
   Interrupt-time refill (former 6c) would remove it; dropped from Stage 6
   (S4), possible later.
 
+- **Memory (H1, measured 2026-10-08):** the `SIZE` resource asks for
+  640 KB and accepts 512 KB (was 512 and 384). It only matters under
+  MultiFinder; under the Finder alone MacMusic gets all free memory.
+  About 262 KB is in use before a library is read (code, the 148 KB
+  audio ring, the LCD and window). The peak below is: playing, the 32 KB
+  import buffer, the Edit Song window and Legal loaded, a rescan done,
+  plus a further 32 KB block.
+
+  | Partition | Free, no library | 500 songs, typical names | 500 songs, all tags 63 characters |
+  |---|---|---|---|
+  | 384 KB | 46 KB | out of memory | out of memory |
+  | 512 KB | 174 KB | fits, 54 KB spare at the peak | out of memory |
+  | 640 KB | 302 KB | fits | fits, 53 KB spare at the peak |
+
+  Running out shows "There is not enough memory to read the MacMusic
+  Library" and doesn't crash. Typical names are the 307-song library's
+  averages (title 16, artist 13, album 15, genre 6 characters).
+- **Scanning is slow at Plus speed:** 500 small song files took 94 s
+  to scan in Mini vMac at 1x (137 s with every tag 63 characters).
+  See "Fast scanning" in the roadmap.
+
 ## Testing notes
 - Test timing-sensitive changes in Mini vMac at **1x** (Control-S): at
   faster speeds problems such as the slow redraw (I2) and the Sound
@@ -58,8 +79,24 @@ image). Stage 8 is planned.
   Finder refresh that window, slowing the app (this produced the original
   I2 reading). Log to a closed folder, and size log buffers for the
   longest line (an overflow there caused crashes in Stage 6a-2 testing).
+- **LaunchAPPL timing (measured 2026-10-08, for the 1.0 plan):** about
+  4 s to start and stop Mini vMac, then emulated time runs at about 1x,
+  never faster. macOS runs Mini vMac at low background priority (its
+  window isn't in front); it needs about 18% CPU to keep up, but fell to
+  0.68x in one 10-minute run while this Mac was busy. Playing audio
+  didn't slow it, and gave no underruns.
+  - The slow 9d run (over 10 minutes) was its songs playing through at
+    1x, not a fault. The 9e runs' empty or partial logs were the Clicker's
+    `bufferCmd` hang (sent with `SndDoImmediate`), gone with the Clicker.
+  - **For tests:** use short songs and seek rather than play through;
+    keep a run to 1-2 minutes; pass LaunchAPPL `--timeout` so a hang fails;
+    end the log with a "DONE" line so a cut-off log is caught.
 
 ## Roadmap items (not defects)
+- **Fast scanning:** a library scan opens and reads every song file, so
+  500 songs take about 1.5-2 minutes at Plus speed (H1). A cache of the
+  song details, checked against each file's modification date, would
+  make later scans quicker. Not for 1.0.
 - Real Mac Plus test with a large library (2026-10-07): a 1980 MB
   BlueSCSI image, `HD50_512 Scratch 1980 MB.hda`, holding MacMusic
   (`6436450`) and 307 real songs, built with `tools/library-image/`.

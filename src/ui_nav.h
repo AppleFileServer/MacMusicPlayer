@@ -5,7 +5,7 @@
 
 #include "lcd_draw.h"
 
-/* Abstract iPod input events (Stage 1 subset). */
+/* Abstract iPod input events. */
 typedef enum
 {
     kEvtNone = 0,
@@ -30,7 +30,8 @@ void UI_Init(void);
 /* Returns true if the LCD needs redrawing. */
 Boolean UI_HandleEvent(UIEvent event);
 
-/* Stage 7: the Now Playing screen's current mode (for tests). */
+/* Stage 7: the Now Playing screen's current mode. For tests: the app
+   itself doesn't use it (H5). */
 NowPlayingMode UI_NowPlayingMode(void);
 
 /* Saves settings changed on the iPod that are still pending (the volume,

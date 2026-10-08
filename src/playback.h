@@ -3,8 +3,9 @@
 
 #include <MacTypes.h>
 
-/* Simulated playback (Stage 4): a queue of songs and a clock driven by
-   TickCount. No audio yet. The queue holds stable song IDs, resolved to
+/* Playback: a queue of songs, played through the audio stream (audio.c,
+   Stages 5-6); its position is the clock. Without sound (A8) the clock is
+   TickCount, as in Stage 4. The queue holds stable song IDs, resolved to
    the current library whenever needed, so it survives rescans. */
 
 typedef enum

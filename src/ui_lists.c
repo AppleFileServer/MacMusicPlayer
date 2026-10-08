@@ -322,6 +322,6 @@ Boolean UIList_ItemTarget(const Screen *s, short index, Screen *next)
             return true;
 
         default:
-            return false;       /* songs, audiobooks: playback is Stage 4 */
+            return false;       /* songs, audiobooks: Select plays (ui_nav.c) */
     }
 }

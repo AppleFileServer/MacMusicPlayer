@@ -8,9 +8,11 @@
    audio ring keeps being refilled with another program in front (S2),
    and it accepts suspend/resume events (handled from Stage 6b-1). Window
    activation stays as before (needsActivateOnFGSwitch: MultiFinder sends
-   activate events). Partition: about 240 KB is in use while playing a
-   small library (measured); 512 KB preferred leaves room for a large
-   library, the import buffer and Standard File; 384 KB minimum. */
+   activate events). Partition (H1, measured for 1.0): about 262 KB is in
+   use before a library is read. 512 KB minimum holds 500 songs with
+   typical names while playing, importing and rescanning, with about
+   50 KB spare; 640 KB preferred also holds 500 songs whose tags are all
+   63 characters. 384 KB, the earlier minimum, can't read 500 songs. */
 resource 'SIZE' (-1) {
     reserved,
     acceptSuspendResumeEvents,
@@ -28,8 +30,8 @@ resource 'SIZE' (-1) {
     reserved,
     reserved,
     reserved,
-    512 * 1024,
-    384 * 1024
+    640 * 1024,
+    512 * 1024
 };
 
 /* Item 2 (the divider) is disabled: mask 0x7FFFFFFD clears its bit. */

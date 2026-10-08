@@ -47,15 +47,16 @@ enum
 /* "IPOD" + the ID, at least four digits. */
 static void MakeSongFileName(long id, Str63 name)
 {
-    Str255 digits;
+    Str255 digits, built;   /* built in a Str255: PStrAppend's size */
     short pad;
 
     NumToString(id, digits);
-    name[0] = 0;
-    PStrAppend(name, P("IPOD"));
+    built[0] = 0;
+    PStrAppend(built, P("IPOD"));
     for (pad = digits[0]; pad < 4; pad++)
-        PStrAppend(name, P("0"));
-    PStrAppend(name, digits);
+        PStrAppend(built, P("0"));
+    PStrAppend(built, digits);
+    BlockMove(built, name, built[0] + 1);
 }
 
 /* The source file name without a ".wav" ending (any case), at most 63. */

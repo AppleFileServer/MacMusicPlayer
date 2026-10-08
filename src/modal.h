@@ -28,6 +28,13 @@ pascal Boolean Modal_DialogFilter(DialogPtr dialog, EventRecord *event,
 pascal Boolean Modal_FileFilter(DialogPtr dialog, EventRecord *event,
                                 short *item);
 
+/* A user item's draw routine: the thick outline round the default
+   button, item 1 (the Toolbox draws none in a dialog). */
+pascal void Modal_DrawDefaultOutline(DialogPtr dialog, short item);
+
+/* A dialog item's handle. */
+Handle Modal_ItemHandle(DialogPtr dialog, short item);
+
 /* MenuSelect, DragWindow and TrackGoAway with the service called
    throughout, through the MenuHook and DragHook low-memory hooks, set only
    for the duration of the call. */

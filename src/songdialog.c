@@ -37,31 +37,6 @@ static void FormatDuration(long seconds, Str255 out)
     PStrAppend(out, number);
 }
 
-/* Draws the thick outline round the default (Import or Save) button. */
-static pascal void DrawDefaultOutline(DialogPtr dialog, short item)
-{
-    short type;
-    Handle handle;
-    Rect r;
-
-    (void)item;
-    GetDialogItem(dialog, kItemOK, &type, &handle, &r);
-    InsetRect(&r, -4, -4);
-    PenSize(3, 3);
-    FrameRoundRect(&r, 16, 16);
-    PenNormal();
-}
-
-static Handle ItemHandle(DialogPtr dialog, short item)
-{
-    short type;
-    Handle handle;
-    Rect r;
-
-    GetDialogItem(dialog, item, &type, &handle, &r);
-    return handle;
-}
-
 /* Checks the fields; on a problem explains it, selects the field and
    returns false (DECISION D25: the title may not be blank). */
 static Boolean ReadDetails(DialogPtr dialog, SongDetails *details)
@@ -72,7 +47,7 @@ static Boolean ReadDetails(DialogPtr dialog, SongDetails *details)
 
     for (i = 0; i < kSongTagCount; i++)
     {
-        GetDialogItemText(ItemHandle(dialog, kItemTitle + i), text);
+        GetDialogItemText(Modal_ItemHandle(dialog, kItemTitle + i), text);
         if (text[0] > kSongMaxString)
         {
             message[0] = 0;
@@ -92,7 +67,7 @@ static Boolean ReadDetails(DialogPtr dialog, SongDetails *details)
         return false;
     }
 
-    GetDialogItemText(ItemHandle(dialog, kItemTrack), text);
+    GetDialogItemText(Modal_ItemHandle(dialog, kItemTrack), text);
     track = 0;
     if (text[0] > 0)
     {
@@ -110,7 +85,8 @@ static Boolean ReadDetails(DialogPtr dialog, SongDetails *details)
     details->track = (short)track;
 
     details->audiobook =
-        GetControlValue((ControlHandle)ItemHandle(dialog, kItemAudiobook)) != 0;
+        GetControlValue((ControlHandle)Modal_ItemHandle(dialog,
+                                                        kItemAudiobook)) != 0;
     return true;
 }
 
@@ -135,19 +111,21 @@ Boolean SongDialog_Run(ConstStringPtr okTitle, ConstStringPtr fileName,
         return false;
     }
 
-    SetControlTitle((ControlHandle)ItemHandle(dialog, kItemOK), okTitle);
+    SetControlTitle((ControlHandle)Modal_ItemHandle(dialog, kItemOK), okTitle);
     for (i = 0; i < kSongTagCount; i++)
-        SetDialogItemText(ItemHandle(dialog, kItemTitle + i), details->text[i]);
+        SetDialogItemText(Modal_ItemHandle(dialog, kItemTitle + i),
+                          details->text[i]);
     if (details->track > 0)
     {
         NumToString(details->track, number);
-        SetDialogItemText(ItemHandle(dialog, kItemTrack), number);
+        SetDialogItemText(Modal_ItemHandle(dialog, kItemTrack), number);
     }
-    SetControlValue((ControlHandle)ItemHandle(dialog, kItemAudiobook),
+    SetControlValue((ControlHandle)Modal_ItemHandle(dialog, kItemAudiobook),
                     details->audiobook ? 1 : 0);
 
     GetDialogItem(dialog, kItemOutline, &type, &handle, &r);
-    SetDialogItem(dialog, kItemOutline, type, (Handle)DrawDefaultOutline, &r);
+    SetDialogItem(dialog, kItemOutline, type,
+                  (Handle)Modal_DrawDefaultOutline, &r);
 
     SelectDialogItemText(dialog, kItemTitle, 0, 32767);
     ShowWindow(dialog);
@@ -168,7 +146,7 @@ Boolean SongDialog_Run(ConstStringPtr okTitle, ConstStringPtr fileName,
             break;
         else if (item == kItemAudiobook)
         {
-            checkbox = (ControlHandle)ItemHandle(dialog, kItemAudiobook);
+            checkbox = (ControlHandle)Modal_ItemHandle(dialog, kItemAudiobook);
             SetControlValue(checkbox, !GetControlValue(checkbox));
         }
     }

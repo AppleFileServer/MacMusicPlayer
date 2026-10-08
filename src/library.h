@@ -120,7 +120,7 @@ ConstStringPtr Library_SongTitle(short song);
 long Library_SongID(short song);
 ConstStringPtr Library_SongArtistName(short song);   /* may be empty */
 ConstStringPtr Library_SongAlbumName(short song);    /* may be empty */
-long Library_SongSeconds(short song);
+long Library_SongSeconds(short song);   /* for tests and tools (H5) */
 long Library_SongAudioLength(short song);           /* bytes */
 
 /* Stage 7d: the song's rating, 0 (unrated) to 5. Setting it writes the

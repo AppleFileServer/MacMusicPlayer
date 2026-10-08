@@ -72,7 +72,8 @@ long Audio_Position(void);
 Boolean Audio_Ended(void);
 
 /* Underruns so far: times the main loop was held up longer than the
-   ring lasts, each followed by a restart from the end of the audio. */
+   ring lasts, each followed by a restart from the end of the audio.
+   For tests: the app itself doesn't use it (H5). */
 long Audio_Underruns(void);
 
 /* Stops sound and releases everything; call before quitting. */

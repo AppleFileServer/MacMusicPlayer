@@ -3,10 +3,10 @@
 /* SdVolume (low memory 0x0260) holds the level in its low three bits; the
    hardware takes it from VIA port A bits 0-2 (Mac Plus). The VIA's base
    address is in low memory at 0x01D4; port A's register is at offset
-   0x1E00 (register 15, 512 bytes apart). */
+   0x1E00 (register 15, 512 bytes apart), written in Volume_Set's
+   assembly. */
 #define kSdVolume       0x0260
 #define kVIA            0x01D4
-#define kVBufA          0x1E00
 
 short Volume_Get(void)
 {

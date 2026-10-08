@@ -167,30 +167,6 @@ static Boolean RemoveFromPlaylist(void)
 
 /* ---- New Playlist... -------------------------------------------------- */
 
-static pascal void DrawDefaultOutline(DialogPtr dialog, short item)
-{
-    short type;
-    Handle handle;
-    Rect r;
-
-    (void)item;
-    GetDialogItem(dialog, kItemCreate, &type, &handle, &r);
-    InsetRect(&r, -4, -4);
-    PenSize(3, 3);
-    FrameRoundRect(&r, 16, 16);
-    PenNormal();
-}
-
-static Handle ItemHandle(DialogPtr dialog, short item)
-{
-    short type;
-    Handle handle;
-    Rect r;
-
-    GetDialogItem(dialog, item, &type, &handle, &r);
-    return handle;
-}
-
 /* DECISION P9: "Untitled Playlist", or "Untitled Playlist 2", 3... if
    that name is taken. */
 static void DefaultName(Str255 name)
@@ -268,14 +244,15 @@ static Boolean AskPlaylistName(short playlist)
     {
         BlockMove(Library_PlaylistName(playlist), name,
                   Library_PlaylistName(playlist)[0] + 1);
-        SetDialogItemText(ItemHandle(dialog, kItemPrompt),
+        SetDialogItemText(Modal_ItemHandle(dialog, kItemPrompt),
                           P("New name for the playlist:"));
-        SetControlTitle((ControlHandle)ItemHandle(dialog, kItemCreate),
+        SetControlTitle((ControlHandle)Modal_ItemHandle(dialog, kItemCreate),
                         P("Rename"));
     }
-    SetDialogItemText(ItemHandle(dialog, kItemName), name);
+    SetDialogItemText(Modal_ItemHandle(dialog, kItemName), name);
     GetDialogItem(dialog, kItemOutline, &type, &handle, &r);
-    SetDialogItem(dialog, kItemOutline, type, (Handle)DrawDefaultOutline, &r);
+    SetDialogItem(dialog, kItemOutline, type,
+                  (Handle)Modal_DrawDefaultOutline, &r);
     SelectDialogItemText(dialog, kItemName, 0, 32767);
     ShowWindow(dialog);
 
@@ -290,7 +267,7 @@ static Boolean AskPlaylistName(short playlist)
         if (item != kItemCreate)
             continue;
 
-        GetDialogItemText(ItemHandle(dialog, kItemName), name);
+        GetDialogItemText(Modal_ItemHandle(dialog, kItemName), name);
         if (!NameIsUsable(name, playlist))
         {
             SelectDialogItemText(dialog, kItemName, 0, 32767);
