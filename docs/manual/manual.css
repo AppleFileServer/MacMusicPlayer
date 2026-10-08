@@ -347,3 +347,24 @@ figure.states span { display: block; font: 8.5pt var(--sans); margin-top: 2pt; }
 h3.ref-head { break-after: avoid; }
 table.ref.controls td:first-child { white-space: normal; width: 36%; }
 table.ref.controls td:nth-child(2) { width: 34%; }
+
+/* ---- Appendixes ------------------------------------------------------------ */
+
+/* The appendix's name at the top of its first page, in the margin column's
+   place, as an opener's (it also names the running feet). */
+.appendix-title { string-set: chapter attr(data-foot); margin: 0 0 18pt 0; font-family: var(--serif); }
+.appendix-title .ch { font-size: 15pt; margin: 0 0 2pt 0; }
+.appendix-title h1.name { font: 26pt/30pt var(--serif); font-weight: normal; margin: 0; }
+/* A message: its text in bold Helvetica, then what it means. */
+.flow .msg { break-inside: avoid; margin: 0 0 9pt 0; }
+.flow .msg p.msg-text { font: bold 9.5pt/12pt var(--sans); margin: 0 0 3pt 0; }
+.flow .msg figure.dialog { margin: 2pt 0 4pt 0; }
+/* Keycaps (§8.5): a key's name in a small rounded box. */
+kbd {
+    font: 8.5pt var(--sans); display: inline-block; min-width: 10pt; text-align: center;
+    padding: 0 3pt; border: 0.8pt solid #111; border-radius: 2.5pt;
+    box-shadow: 0.8pt 0.8pt 0 #111; margin: 0 1pt 1pt 0; line-height: 11pt;
+}
+h3.ref-head.loose { break-after: auto; }
+.appendix-title h1.name { position: relative; z-index: 1; display: inline-block; background: white; padding-right: 8pt; }
+table.ref.room td:first-child { white-space: normal; width: 60%; font-family: var(--sans); font-size: 9.5pt; }

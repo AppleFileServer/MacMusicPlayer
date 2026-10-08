@@ -45,6 +45,15 @@ music; these are the ones that still jar:
 | c2-export-menu (D17), c1-add-to (S40) | File Menu, Playlists Menu | the library as "MacMusic Library (MusicTest)" (good); the Playlists menu with "Pop" highlighted | fine as they are; a retake with every item enabled would show the menu at its fullest |
 | the six Now Playing states | MacMusic's Screens | "2 of 3" in five, "1 of 3" in the volume shot | one place in the list throughout |
 
+### Appendixes
+
+- **Appendix A's pictures:** the alerts show "Pop", "Good Luck, Babe"
+  and "She's Like Me" (fine; they're examples). The first-time alert is
+  pictured in both Chapter 1 and Appendix A.
+- **Appendix A, the first page:** its first group starts on the next
+  page, as the first message and its picture don't fit beside the
+  error-number table. Natural, but it leaves a short page.
+
 ## The program
 
 - **The Edit menu and desk accessories:** Undo, Cut, Copy, Paste and
@@ -55,6 +64,10 @@ music; these are the ones that still jar:
   that they're dimmed. A candidate for 1.0.1: enable them while a desk
   accessory's window is in front. (Worth logging in
   `docs/issues-found.md`.)
+- **A message that says "iPod":** "This WAV file is damaged: it has iPod
+  information that is not at the end of the file." (`src/wav.c`).
+  Appendix A covers it among the damaged-file messages without quoting
+  it. A candidate for 1.0.1: "MacMusic information".
 - **Song file names:** MacMusic names song files "IPOD" and a number
   (IPOD0001). The manual describes them only as "named by number", to
   keep "iPod" out of the text; renaming would need a library

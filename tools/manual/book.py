@@ -2,12 +2,27 @@
 draft's title page, the opener spread (SG10), pictures, and the HTML
 page around a chapter for Paged.js (docs/manual/manual.css)."""
 
+import os, struct
+
 BOOK = "MacMusic User&rsquo;s Guide"
+
+FIGURES = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                       "..", "..", "docs", "manual", "figures", "png")
+
+
+def png_size(name):
+    """A figure's width and height in pixels, from its PNG header."""
+    with open(os.path.join(FIGURES, name + ".png"), "rb") as f:
+        return struct.unpack(">II", f.read(24)[16:24])
 
 
 def img(name, width, cls="screen"):
-    """A figure from docs/manual/figures/png, `width` points wide."""
-    return '<img class="%s" src="figures/%s.png" style="width:%spt">' % (cls, name, width)
+    """A figure from docs/manual/figures/png, `width` points wide. Its
+    height is given too, so Paged.js lays out the page before the
+    picture has loaded."""
+    w, h = png_size(name)
+    return ('<img class="%s" src="figures/%s.png" style="width:%spt; height:%.1fpt">'
+            % (cls, name, width, float(width) * h / w))
 
 
 def draft_title(chapter, note):
