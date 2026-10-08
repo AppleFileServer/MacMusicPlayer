@@ -198,6 +198,25 @@ To set it up again:
     for s in 1.00 0.86; do venv/bin/python ~/MacPlusProjects/MacMusicPlayer/tools/manual/condense-font.py \
         "fonts/EBGaramond[wght].ttf" "fonts/EBGaramond-Italic[wght].ttf" fonts/built $s; done
 
-Then, in the repository: `tools/manual/make-figures.py` (the figures,
-from the owner's screenshots) and `tools/manual/build-pdf.sh` (the PDF,
-into `build-manual/`). Helvetica comes with macOS.
+Then, in the repository (each with `$T/venv/bin/python`):
+
+1. `tools/manual/make-figures.py docs/manual/figures/figures.txt
+   docs/manual/figures/png`: the figures, from the owner's screenshots in
+   `~/MacPlus/Screenshots/`.
+2. `tools/manual/make-cover.py`: MacMusic's icon, and the own-use
+   edition's cover (below).
+3. `tools/manual/make-book.py`: the whole *MacMusic User's Guide*,
+   `build-manual/MacMusic-Users-Guide.pdf` (laid out twice, for the page
+   numbers in the contents and the index). Each part can also be built
+   on its own for review: `make-chapter1.py` (and 2, 3, `make-appendixes.py`),
+   then `tools/manual/build-pdf.sh docs/manual/chapter1.html
+   build-manual/chapter1.pdf`.
+
+Helvetica comes with macOS.
+
+The own-use edition (decision MM1a) also needs
+`~/MacPlusProjects/manual-assets-private/` (or `MANUAL_ASSETS`), outside
+the repository and never shared: the MacDraw cover scan and the rainbow
+logo (see its README), and `cover-macmusic.jpg`, which `make-cover.py`
+makes from them. Without that folder, `make-book.py` builds the plain
+edition, `MacMusic-Users-Guide-plain.pdf`, with MacMusic's own icon.

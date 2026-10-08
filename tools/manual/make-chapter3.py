@@ -9,7 +9,7 @@ the margin, the text beside them.
 Build it with tools/manual/build-pdf.sh docs/manual/chapter3.html <pdf>."""
 import os, re, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from book import img, draft_title, opener, page
+from book import img, draft_title, opener, page, anchor
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(HERE, "..", "..", "docs", "manual", "chapter3.html")
@@ -18,19 +18,20 @@ SECTIONS = []           # (title, anchor), for the contents
 
 
 def section(title):
-    a = re.sub(r"[^a-z0-9]+", "-", re.sub(r"&[a-z]+;", "", title.lower())).strip("-")
+    a = anchor(title)
     SECTIONS.append((title, a))
     return '<div class="margin"><h2 class="margin-head" id="%s">%s</h2></div>' % (a, title)
 
 
 def sub(title):
     """A red-square subheading in the text column (§10)."""
-    return '<h3 class="ref-head">%s</h3>' % title
+    return '<h3 class="ref-head" id="r-%s">%s</h3>' % (anchor(title), title)
 
 
 def cmd(name, *paras):
     """A command: its name in the margin, what it does beside it."""
-    return ('<div class="entry"><div class="margin"><h4 class="cmd">%s</h4></div>' % name
+    return ('<div class="entry"><div class="margin"><h4 class="cmd" id="c-%s">%s</h4></div>'
+            % (anchor(name), name)
             + "".join("<p>%s</p>" % p for p in paras) + "</div>")
 
 
@@ -332,15 +333,18 @@ BODY = re.sub(r'(<div class="margin"><h2 class="margin-head"[^>]*>.*?</h2></div>
 CONTENTS = "\n".join('<li class="part"><a href="#%s">%s</a></li>' % (a, t)
                      for t, a in SECTIONS)
 
-body = (draft_title("Chapter 3: MacMusic Reference",
+DRAFT = draft_title("Chapter 3: MacMusic Reference",
                     "A draft for review, 8 October 2026. In the finished book this "
                     "chapter follows Chapter 2, and its pages are numbered on from "
                     "there.")
-        + opener(3, "MacMusic Reference", "c3-opener")
+PART = (opener(3, "MacMusic Reference", "c3-opener")
         + '<div class="chapter chapter-contents"><div class="flow">'
           '<div class="margin"><h2 class="contents-head">Contents</h2></div>'
           '<ul class="toc">%s</ul></div></div>\n' % CONTENTS
         + '<div class="chapter page-break"><div class="flow">%s</div></div>' % BODY)
 
-open(OUT, "w").write(page("MacMusic User&rsquo;s Guide: Chapter 3", body))
-print("wrote", os.path.normpath(OUT))
+
+# The chapter for the book (make-book.py), and on its own for review.
+if __name__ == "__main__":
+    open(OUT, "w").write(page("MacMusic User&rsquo;s Guide: Chapter 3", DRAFT + PART))
+    print("wrote", os.path.normpath(OUT))

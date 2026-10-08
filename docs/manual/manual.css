@@ -208,8 +208,10 @@ ul.toc li.task { padding-left: 12pt; margin-bottom: 0; font-size: 11pt; line-hei
    ones, taken from the last head on the page. */
 .chapter { page: chapter; font-family: var(--serif); }
 .tasks { page: tasks; font-family: var(--serif); }
-h2.margin-head, .lesson-head .title, h2.topic { string-set: section content(text); }
+h2.margin-head, .lesson-head .title, h2.topic, .appendix-title .name { string-set: section content(text); }
 .opener-title { string-set: chapter attr(data-foot); }
+/* (In the whole book, make-book.py writes each page's left-hand foot
+   and page number itself.) */
 @page chapter:left {
     @bottom-left { content: counter(page) "\2003\2003" string(chapter);
                    font: 9.5pt "MM Garamond 100"; color: #6d6d6d; }
@@ -368,3 +370,67 @@ kbd {
 h3.ref-head.loose { break-after: auto; }
 .appendix-title h1.name { position: relative; z-index: 1; display: inline-block; background: white; padding-right: 8pt; }
 table.ref.room td:first-child { white-space: normal; width: 60%; font-family: var(--sans); font-size: 9.5pt; }
+
+/* ---- The whole book: front and back matter (make-book.py) ------------------ */
+
+@page cover { margin: 0; }
+@page bare { }
+@page front:left  { @bottom-left  { content: counter(page, lower-roman); font: 9.5pt "MM Garamond 100"; color: #6d6d6d; } }
+@page front:right { @bottom-right { content: counter(page, lower-roman); font: 9.5pt "MM Garamond 100"; color: #6d6d6d; } }
+
+/* The cover (§12.1): the own-use edition's is one picture; the plain
+   edition's is the title, MacMusic's icon and the screen. */
+.cover { page: cover; width: 7.5in; height: 9in; overflow: hidden; position: relative; }
+.cover > img { width: 100%; height: 100%; object-fit: cover; }
+.cover.plain { padding: 60pt 0 0 120pt; box-sizing: border-box; }
+.cover.plain .cover-logo { position: absolute; left: 40pt; top: 60pt; }
+.cover.plain .cover-title { font: 34pt/38pt var(--serif); margin: 0 0 14pt 0; }
+.cover.plain > img.screen { image-rendering: pixelated; border: 10pt solid #111; }
+
+/* The copyright page (§12.3): two Garamond columns. */
+.copyright { page: bare; break-before: page; font-family: var(--serif); font-size: 9.5pt; line-height: 12pt; }
+.copy-columns { display: grid; grid-template-columns: 1fr 1fr; column-gap: 22pt; }
+.copy-columns p { margin: 0 0 7pt 0; }
+.copy-head { font: bold 10pt var(--sans); }
+.copyright p.caps { text-transform: uppercase; font-weight: bold; font-size: 8.5pt; line-height: 11pt; }
+
+/* The title page (§12.2): the name top left, the logo top right (the
+   four-column rules of MW 3 left out, the owner's choice). */
+.title-page { page: bare; break-before: right; position: relative; height: 540pt; font-family: var(--serif); }
+.title-name { position: absolute; left: 0; top: 0; font-size: 30pt; line-height: 34pt; margin: 0;
+              width: 300pt; }
+.title-logo { position: absolute; right: 0; top: 0; }
+
+/* The front matter's own pages, numbered in roman. */
+.front { page: front; break-before: page; font-family: var(--serif); }
+ul.book-toc li { display: flex; align-items: baseline; margin: 0 0 2pt 0; }
+ul.book-toc li .t { flex: 1; }
+ul.book-toc li .pg { padding-left: 12pt; }
+ul.book-toc li.toc-ch { font: bold 11pt/14pt var(--sans); margin-top: 10pt; }
+ul.book-toc li.toc-part { font: bold 10pt/13pt var(--sans); margin-top: 7pt; }
+ul.book-toc li.toc-sec { padding-left: 14pt; font-size: 11pt; line-height: 13pt; }
+
+ul.toc li .toc-t { flex: 1; }
+ul.toc li .toc-pg { padding-left: 12pt; }
+
+/* The glossary (§11): each term in bold Helvetica on its own line. */
+.flow .gloss { break-inside: avoid; margin: 0 0 7pt 0; }
+.flow .gloss p { margin: 0; }
+.flow .gloss p.term { font: bold 10pt/13pt var(--sans); }
+
+/* The index (§11): two columns under red letters, every letter kept. */
+.index-columns { columns: 2; column-gap: 22pt; font-size: 10.5pt; line-height: 13pt; column-rule: 0.6pt solid var(--rule); }
+h3.index-letter { font: bold 12pt var(--sans); color: var(--red); margin: 8pt 0 3pt 0; break-after: avoid; }
+p.ix { margin: 0; padding-left: 12pt; text-indent: -12pt; }
+
+/* The legal statement, and the reader comment page. */
+.flow.legal p { font-size: 11pt; line-height: 14pt; }
+.form p { margin: 10pt 0 4pt 0; }
+.form .tick { display: inline-block; margin-left: 12pt; font-family: var(--sans); font-size: 9.5pt; }
+.form .lines { height: 54pt; background: repeating-linear-gradient(transparent 0, transparent 17pt, #999 17pt, #999 18pt); }
+
+/* The covers at the back (§12.4). */
+.inside-back { page: bare; break-before: right; height: 10pt; }
+.back-cover { page: bare; break-before: page; position: relative; height: 556pt; }
+.back-cover .publisher { font: 900 22pt var(--sans); margin: 0; }
+.back-cover .back-logo { position: absolute; left: 0; bottom: 0; }

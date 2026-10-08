@@ -9,7 +9,7 @@ more tasks than fit carries on over the next page.
 Build it with tools/manual/build-pdf.sh docs/manual/chapter2.html <pdf>."""
 import os, re, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from book import img, draft_title, opener, page
+from book import img, draft_title, opener, page, anchor
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(HERE, "..", "..", "docs", "manual", "chapter2.html")
@@ -17,10 +17,6 @@ COLUMN = 101            # a task column's width, in points
 # Dialog and alert boxes are too wide to read at a column's width; they
 # are pictured in Appendix A, at full size, instead.
 DOUBLE = 216            # two columns together
-
-
-def anchor(title):
-    return re.sub(r"[^a-z0-9]+", "-", re.sub(r"&[a-z]+;", "", title.lower())).strip("-")
 
 
 class Task:
@@ -619,15 +615,18 @@ def contents():
     return "\n".join(rows)
 
 
-body = (draft_title("Chapter 2: Using MacMusic",
+DRAFT = draft_title("Chapter 2: Using MacMusic",
                     "A draft for review, 8 October 2026. In the finished book this "
                     "chapter follows Chapter 1, and its pages are numbered on from "
                     "there.")
-        + opener(2, "Using MacMusic", "c2-opener")
+PART = (opener(2, "Using MacMusic", "c2-opener")
         + '<div class="chapter chapter-contents"><div class="flow">'
           '<div class="margin"><h2 class="contents-head">Contents</h2></div>'
           '<ul class="toc">%s</ul></div></div>\n' % contents()
         + "\n".join(t.html() for t in TOPICS))
 
-open(OUT, "w").write(page("MacMusic User&rsquo;s Guide: Chapter 2", body))
-print("wrote", os.path.normpath(OUT))
+
+# The chapter for the book (make-book.py), and on its own for review.
+if __name__ == "__main__":
+    open(OUT, "w").write(page("MacMusic User&rsquo;s Guide: Chapter 2", DRAFT + PART))
+    print("wrote", os.path.normpath(OUT))

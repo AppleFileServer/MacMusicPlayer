@@ -3,6 +3,13 @@
 The book's title is ***MacMusic User's Guide*** (MM9).
 
 Status: approved (2026-10-08), decisions MM1-MM8 as recommended.
+**Status (2026-10-08):** Phases 1-6 done, and Phase 7 in draft: the
+whole book builds (`tools/manual/make-book.py`, 88 pages) with its front
+matter, three chapters, four appendixes, glossary, index and back
+matter. Next: the owner's review of the front and back matter, then
+Phase 8 (proofing), and the clean-up list in
+`docs/manual/review-issues.md`.
+
 Phase 1 done: `docs/manual/style-guide.md` (SG1-SG8) and the figure plan
 `docs/manual/figures.md` (F1-F6), from the owner's screenshots, which
 replace MM5's test-only build for all but one picture. Phase 3 done:
@@ -140,6 +147,8 @@ From general knowledge, not yet checked against the references:
   (MacMusic's own icon, a drawn cover) can always be made. MM1's rule
   otherwise stands: no Apple name as publisher, no Apple copyright
   line; the copyright page is MacMusic's.
+- **The cover's binding holes** are painted out (the owner's choice,
+  2026-10-08): the cover shows a plain left edge, not the wire binding.
 - **The cover (front matter, last to be made, O6):** MacDraw's
   composition, which fits the Mac Plus screen almost exactly: the
   rainbow logo top left, "MacMusic" in Garamond, MacMusic's Now Playing

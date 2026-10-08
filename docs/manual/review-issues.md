@@ -97,6 +97,22 @@ music; these are the ones that still jar:
 
 ## The text
 
+- **The copyright page's credits:** "Program and manual by Jack
+  McAteer," and the playful line ("Tested on a Macintosh Plus, with
+  'Chariots of Fire' played rather more times than Vangelis intended").
+  Yours to word as you wish (style guide §14).
+- **The legal statement's typo:** "imported into an MacMusic library"
+  (`docs/legal/legal-statement.md`, and so the Legal screen in
+  MacMusic). The manual quotes the statement as it is; fix it at the
+  source for 1.0.1, if you agree.
+- **The index:** about 90 subjects, pointing to lessons, tasks, commands
+  and sections; pages in the front matter (roman) aren't listed. A
+  letter's heading can fall at the foot of a column (S, on the second
+  index page). Worth a read-through for subjects you'd look for.
+- **The plain edition's cover** (no private assets) is simple: the
+  title, the icon and the screen. Only the own-use edition has the
+  MacDraw composition.
+
 - ~~**The sound output port (MU6, MU6a), to check.**~~ Confirmed by
   the owner 2026-10-08: a plug in the port silences the built-in
   speaker; a mono 3.5 mm miniplug, with an adaptor for stereo inputs.

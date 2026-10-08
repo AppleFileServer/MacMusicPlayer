@@ -440,10 +440,11 @@ PICTURES = {
     "IMG_QUIT": img("c1-quit", 112),
 }
 
-body = BODY.replace("DRAFT_TITLE", draft_title(
+DRAFT = draft_title(
     "Chapter 1: Learning MacMusic",
     "A draft for review, 8 October 2026. In the finished book this chapter "
-    "follows About This Manual, and its pages are numbered on from there."))
+    "follows About This Manual, and its pages are numbered on from there.")
+body = BODY.replace("DRAFT_TITLE\n", "")
 body = body.replace("OPENER", opener(1, "Learning MacMusic", "c1-opener"))
 body = body.replace("CONTENTS", CONTENTS)
 body = body.replace("WINDOW_FIGURE", WINDOW).replace("NOW_PLAYING_FIGURE", NOW_PLAYING)
@@ -456,7 +457,9 @@ for n, title, anchor in reversed(LESSONS):              # LESSON_10 before LESSO
 body = re.sub(r'(<div class="margin">(?:(?!</div>).)*</div>(?:</div>)?)(\s*<figure class="beside">.*?</figure>)?'
               r'(\s*<p.*?</p>)(\s*<figure class="wide">.*?</figure>)?',
               r'<div class="keep">\1\2\3\4</div>', body, flags=re.S)
+PART = body
 
-html = page("MacMusic User&rsquo;s Guide: Chapter 1", body)
-open(OUT, "w").write(html)
-print("wrote", os.path.normpath(OUT))
+# The chapter for the book (make-book.py), and on its own for review.
+if __name__ == "__main__":
+    open(OUT, "w").write(page("MacMusic User&rsquo;s Guide: Chapter 1", DRAFT + PART))
+    print("wrote", os.path.normpath(OUT))

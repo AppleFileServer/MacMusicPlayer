@@ -13,7 +13,7 @@ code). Page counts are estimates, for a 7½ x 9 in page.
 |---|---|---|
 | Cover | "MacMusic User's Guide" in Garamond (MM9); MacMusic's icon top left (in place of a logo); the screen picture with cable, mouse and hand (SG4) | S10, tinted |
 | Inside front cover | Copyright page, two columns: © 2026 Jack McAteer; the trademark acknowledgements; "Written by ..." and "Program by ..." credits, and a playful extra line; the not-affiliated statement; the licence terms or a pointer to them (§14) | |
-| i | Title page: "MacMusic User's Guide", the four-column rules, the icon top right | |
+| i | Title page: "MacMusic User's Guide", the icon (or the own-use logo) top right; no rules (the owner's choice) | |
 | ii | Contents (the whole book) | |
 | iii-iv | **About This Manual:** what MacMusic is for, in a paragraph; what you need (a Macintosh Plus with System 6.0.7, an Apple Hard Disk 20SC or other SCSI hard disk, 512K free under MultiFinder, and sound files prepared as *MacMusic Utilities* describes, MU2, MU4); **Other MacMusic manuals** (*MacMusic Utilities*, the companion book: preparing songs and getting them onto the Mac); what you should know already (the Mac basics, from the *Macintosh Owner's Guide*); how to use the book (three ways in, as MD 4: the tour, the task pages, or just try it); **If You've Used a Pocket Music Player** (as MD's "A Word to MacPaint Users": what will feel familiar, and what's different: the mouse and keyboard, the library on your disk, the Mac's own sound); conventions | D05 (Get Info: the memory size) |
 

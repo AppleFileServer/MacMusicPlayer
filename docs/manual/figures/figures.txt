@@ -95,3 +95,7 @@ c3-about        ~/MacPlus/Screenshots/About%20MacMusic.png box   nopointer # D06
 # Chapter 3's opener (SG10): the Settings screen, the whole screen in grey (S28)
 c3-opener-l     ~/MacPlus/Screenshots/Screenshot%202026-10-08%20at%2011.45.56.png 0,20,256,322 ink=c4c4c4
 c3-opener-r     ~/MacPlus/Screenshots/Screenshot%202026-10-08%20at%2011.45.56.png 256,20,256,322 ink=c4c4c4
+
+# The cover (SG4, MM1a): Now Playing, the whole screen in the cover's pale
+# blue, as MacDraw's cover prints its screen (S10)
+c0-cover-screen ~/MacPlus/Screenshots/Screenshot%202026-10-08%20at%2011.43.49.png full zoom=6 ink=1e2832 paper=bfdae1 nopointer

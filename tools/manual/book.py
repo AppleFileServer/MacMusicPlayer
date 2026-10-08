@@ -2,7 +2,7 @@
 draft's title page, the opener spread (SG10), pictures, and the HTML
 page around a chapter for Paged.js (docs/manual/manual.css)."""
 
-import os, struct
+import os, re, struct
 
 BOOK = "MacMusic User&rsquo;s Guide"
 
@@ -14,6 +14,12 @@ def png_size(name):
     """A figure's width and height in pixels, from its PNG header."""
     with open(os.path.join(FIGURES, name + ".png"), "rb") as f:
         return struct.unpack(">II", f.read(24)[16:24])
+
+
+def anchor(title):
+    """An id from a heading: lower case, entities and punctuation dropped."""
+    t = re.sub(r"&#?[a-z0-9]+;", "", title.lower())
+    return re.sub(r"[^a-z0-9]+", "-", re.sub(r"<[^>]+>", "", t)).strip("-")
 
 
 def img(name, width, cls="screen"):

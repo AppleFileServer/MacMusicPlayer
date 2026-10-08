@@ -4,12 +4,17 @@ DevTools protocol (as pagedjs-cli does): opens the page, waits until
 Paged.js has laid out every page (the page sets window.__pagedDone in
 PagedConfig.after), then prints at the CSS page size.
 
-Usage: print-pdf.py <chrome> <page.html> <out.pdf>"""
+Usage: print-pdf.py <chrome> <page.html> <out.pdf> [<anchors.json>]
+
+With anchors.json, it also writes where each element with an id fell:
+{id: page}, pages counted from 1 (make-book.py numbers the contents
+and the index from it)."""
 
 import base64, json, os, subprocess, sys, tempfile, time, urllib.request
 import websocket
 
 chrome, page, out = sys.argv[1], os.path.abspath(sys.argv[2]), sys.argv[3]
+anchors = sys.argv[4] if len(sys.argv) > 4 else None
 port = 9339
 profile = tempfile.mkdtemp(prefix="mm-chrome-")
 proc = subprocess.Popen([chrome, "--headless", "--disable-gpu",
@@ -59,6 +64,13 @@ try:
         sys.exit("Paged.js didn't finish within 2 minutes")
     pages = call("Runtime.evaluate",
                  expression="document.querySelectorAll('.pagedjs_page').length")["result"]["value"]
+    if anchors:
+        # The first page an id is on (a split element's later parts keep it).
+        found = call("Runtime.evaluate", expression="""(() => { const at = {};
+            for (const e of document.querySelectorAll('.pagedjs_page [id]'))
+                if (!(e.id in at)) at[e.id] = +e.closest('.pagedjs_page').dataset.pageNumber;
+            return JSON.stringify(at); })()""")
+        open(anchors, "w").write(found["result"]["value"])
     pdf = call("Page.printToPDF", preferCSSPageSize=True, printBackground=True,
                displayHeaderFooter=False)
     open(out, "wb").write(base64.b64decode(pdf["data"]))

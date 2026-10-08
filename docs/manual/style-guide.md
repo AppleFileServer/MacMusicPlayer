@@ -403,6 +403,9 @@ The product name in Garamond at the top left, and the four-column grid
 rules down the page. The logo in red sits at the top right. *For
 MacMusic, the logo is replaced (see §14).*
 
+*Decided 2026-10-08 (the owner):* MacMusic's title page leaves out the
+rules: the name at the top left and the logo at the top right only.
+
 ### 12.3 Copyright page (MW 2, MJ 2, MD 2)
 
 - Two columns in Garamond.

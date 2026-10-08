@@ -23,6 +23,7 @@ figures.txt has one figure per line (# starts a comment):
                     and its shadow
   options:  zoom=N        enlargement (default 4)
             ink=RRGGBB    the colour black pixels print in (default 000000)
+            paper=RRGGBB  the colour white pixels print in (default ffffff)
             erase=x,y,w,h paint an area white; repeatable
             nopointer     paint out the arrow pointer wherever it shows
                           (it is found exactly, from its own bitmap)
@@ -268,7 +269,7 @@ def main():
             x0, y0, k = map(int, words[1:4])
             continue
         name, source, crop = words[0], os.path.expanduser(words[1].replace("%20", " ")), words[2]
-        opts = {"zoom": "4", "ink": "000000"}
+        opts = {"zoom": "4", "ink": "000000", "paper": "ffffff"}
         erase = []
         for w in words[3:]:
             if w == "nopointer":
@@ -295,7 +296,8 @@ def main():
         zoom = int(opts["zoom"])
         part = part.resize((cw * zoom, ch * zoom), Image.NEAREST)
         ink = tuple(int(opts["ink"][i:i + 2], 16) for i in (0, 2, 4))
-        rgb = Image.new("RGB", part.size, (255, 255, 255))
+        paper = tuple(int(opts["paper"][i:i + 2], 16) for i in (0, 2, 4))
+        rgb = Image.new("RGB", part.size, paper)
         rgb.paste(Image.new("RGB", part.size, ink), mask=part.point(lambda v: 255 - v))
         rgb.save(os.path.join(out, name + ".png"), optimize=True)
         print("%-14s %-7s %dx%d" % (name, crop, cw, ch))

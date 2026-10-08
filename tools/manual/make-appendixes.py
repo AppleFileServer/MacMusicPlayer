@@ -10,7 +10,7 @@ User's Guide (Phase 6; outline.md):
 Build it with tools/manual/build-pdf.sh docs/manual/appendixes.html <pdf>."""
 import os, re, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from book import img, draft_title, page
+from book import img, draft_title, page, anchor
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(HERE, "..", "..", "docs", "manual", "appendixes.html")
@@ -18,14 +18,15 @@ SCALE = 0.55            # a dialog box's points per Mac pixel
 
 
 def appendix(letter, name, body, first=False):
-    return ('<div class="chapter%s"><div class="appendix-title" data-foot="Appendix %s: %s">'
+    return ('<div class="chapter%s"><div class="appendix-title" id="appendix-%s" '
+            'data-foot="Appendix %s: %s">'
             '<p class="ch">Appendix %s</p><h1 class="name">%s</h1></div>'
             '<div class="flow">%s</div></div>\n'
-            % ("" if first else " page-break", letter, name, letter, name, body))
+            % ("" if first else " page-break", letter.lower(), letter, name, letter, name, body))
 
 
 def sub(title):
-    return '<h3 class="ref-head loose">%s</h3>' % title
+    return '<h3 class="ref-head loose" id="a-%s">%s</h3>' % (anchor(title), title)
 
 
 def msg(text, meaning, figure=None):
@@ -54,8 +55,8 @@ def table(head, *rows, cls="ref"):
 
 
 def trouble(problem, *paras):
-    return ('<div class="entry"><div class="margin"><h4 class="cmd">%s</h4></div>%s</div>'
-            % (problem, "".join("<p>%s</p>" % p for p in paras)))
+    return ('<div class="entry"><div class="margin"><h4 class="cmd" id="t-%s">%s</h4></div>%s</div>'
+            % (anchor(problem), problem, "".join("<p>%s</p>" % p for p in paras)))
 
 
 def key(*names):
@@ -431,14 +432,17 @@ D = "".join([
 A = re.sub(r'(<h3 class="ref-head loose">.*?</h3>)(<div class="msg">.*?</div>)',
            r'<div class="keep">\1\2</div>', A, flags=re.S)
 
-body = (draft_title("Appendixes A to D",
+DRAFT = draft_title("Appendixes A to D",
                     "A draft for review, 8 October 2026. In the finished book the "
                     "appendixes follow Chapter 3, and their pages are numbered on "
                     "from there.")
-        + appendix("A", "Messages", A, first=False)
+PART = (appendix("A", "Messages", A, first=False)
         + appendix("B", "About Sound Files", B)
         + appendix("C", "Keyboard and Click Wheel Summary", C)
         + appendix("D", "Troubleshooting", D))
 
-open(OUT, "w").write(page("MacMusic User&rsquo;s Guide: Appendixes", body))
-print("wrote", os.path.normpath(OUT))
+
+# The chapter for the book (make-book.py), and on its own for review.
+if __name__ == "__main__":
+    open(OUT, "w").write(page("MacMusic User&rsquo;s Guide: Appendixes", DRAFT + PART))
+    print("wrote", os.path.normpath(OUT))
