@@ -38,6 +38,13 @@ only videos you own or have permission to save.
   rounded shape and nothing of the desktop. The same for dialogs, alerts
   and menus (a menu's corners are rounded too). The crop script checks
   each corner for desktop colours left behind.
+  As made (Phase 2): macOS's corners are smooth curves, not circular
+  arcs, so the mask follows their measured shape
+  (`tools/utilities-manual/make-figures.py`, CORNER_36), and each figure
+  gets a grey outline 2 pixels wide just inside its frame: a white
+  window needs an edge on a white page. A menu keeps its name's
+  highlight in the menu bar above it. Menus are translucent in macOS 26,
+  so a faint blur of what was behind them shows through, as on screen.
 - No torn edges for crops of modern windows: a partial window is cut
   square, with a thin grey rule, since macOS windows have no 1-bit
   pattern to tear.
