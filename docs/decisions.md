@@ -205,3 +205,18 @@ The click wheel (W: Stage 5c-1)
 | E2 | The abbreviated date, or the short one if it doesn't fit | `ui_nav.c` |
 | E3 | Hours and minutes only, redrawn on the minute | `ui_nav.c` |
 | E4 | PROVISIONAL: the Clock's layout, in the LCD's font | `lcd_layout.h` |
+
+## *MacMusic Utilities*, the companion manual (`manual-utilities.md`)
+
+| Code | Decision | Where |
+|---|---|---|
+| UB1 | For the owner's own use only, with the USB drive and its contents | the plan |
+| UB2 | The reader's world is a modern Mac and the Plus; the User's Guide's voice, no 1987 pretence | `docs/utilities-manual/style-addendum.md` |
+| UB3 | One series with the User's Guide: its design and tools | the style addendum |
+| UB4 | The owner's screenshots, cropped to the window, in greyscale; originals kept private | the style addendum |
+| UB5 | Getting Started, then a chapter per program; a part per program if a chapter grows too big | `docs/utilities-manual/outline.md` |
+| UB6 | The Backup Utility's chapter waits for the program, which gets its own plan | the plan |
+| UB7 | Every statement checked against the program; CHECK marks what isn't seen | the plan |
+| UB8 | PROVISIONAL: the USB drive's contents | the plan |
+| UB9 | Where the book's files live | the plan |
+| UB10 | The phases | the plan |
