@@ -95,6 +95,14 @@ Decisions UB1-UB10 were approved by the owner on 2026-10-09.
   wallpaper in flat pale-grey pixels, one per chapter, kept in the
   private assets (style addendum).
 
+- **The cover** (UC1-UC5, 2026-10-09): the User's Guide's MacDraw
+  composition, titled *MacMusic Utilities*, its screen the owner's Mini
+  vMac shot of a MacMusic Utilities disk with the three utilities'
+  1-bit icons (stand-in programs, props only). Made by
+  `tools/utilities-manual/make-cover.py` into the private assets; the
+  tinted screen (`ub-cover-screen`) is in the repository for the plain
+  edition, as the User's Guide's is.
+
 ## Screenshots still wanted
 
 For the Converter (when convenient): the Licences window; a refused

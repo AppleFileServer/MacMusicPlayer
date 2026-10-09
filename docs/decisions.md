@@ -220,3 +220,13 @@ The click wheel (W: Stage 5c-1)
 | UB8 | PROVISIONAL: the USB drive's contents | the plan |
 | UB9 | Where the book's files live | the plan |
 | UB10 | The phases | the plan |
+
+The cover (UC: *MacMusic Utilities*, Phase 8)
+
+| Code | Decision | Where |
+|---|---|---|
+| UC1 | A real Mini vMac screen: the owner's screenshot of a MacMusic Utilities disk holding three stand-in programs (props, kept outside the repository) | `tools/utilities-manual/make-cover.py` |
+| UC2 | The utilities' 1-bit icons: a compact Macintosh with a note, the double arrow, a clock | the stand-ins (scratchpad) |
+| UC3 | The icons named in full: MacMusic Converter Utility, MacMusic Transfer Utility, Macintosh Backup Utility | the stand-ins |
+| UC4 | The own edition's cover: the User's Guide's MacDraw composition, titled *MacMusic Utilities*, in the private assets only | `tools/utilities-manual/make-cover.py` |
+| UC5 | The plain edition's cover: MacMusic's icon, the title and the screen, as the User's Guide's | `make-book.py` (Phase 8) |
