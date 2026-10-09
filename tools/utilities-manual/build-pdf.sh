@@ -23,5 +23,13 @@ cp docs/manual/manual.css docs/utilities-manual/utilities.css "$TOOLS/paged.poly
 cp docs/utilities-manual/figures/png/*.png "$B/figures/"
 ASSETS=${UTILITIES_ASSETS:-$HOME/MacPlusProjects/manual-assets-private/utilities}
 [ -d "$ASSETS/figures" ] && cp "$ASSETS"/figures/*.png "$B/figures/"
+# The title page's logo: the User's Guide's (its own-use rainbow logo, if
+# there; else MacMusic's icon).
+cp docs/manual/figures/png/mm-icon.png "$B/figures/"
+rm -rf "$B/private"
+MANUAL=${MANUAL_ASSETS:-$HOME/MacPlusProjects/manual-assets-private}
+if [ -f "$MANUAL/rainbow-logo.png" ]; then
+    mkdir -p "$B/private" && cp "$MANUAL/rainbow-logo.png" "$B/private/"
+fi
 cp "$TOOLS"/fonts/built/*.ttf "$B/fonts/"
 "$TOOLS/venv/bin/python" tools/manual/print-pdf.py "$CHROME" "$B/page.html" "$2" ${3:+"$3"}
