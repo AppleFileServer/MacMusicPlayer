@@ -145,6 +145,9 @@ Glossary (about 3), index (about 3), inside back and back covers.
 | Back matter | 8 |
 | **The book** | **about 105-110** |
 
+Chapter 2 as drafted (Phase 3, 9 October 2026): 20 pages, with the
+task pages in the wide column (style addendum, "Task pages").
+
 Each program's chapter (21-25 pages) is the size of a User's Guide
 chapter (20-26), so one chapter per program fits (UB5). A part per
 program, each with Learning, Using and Reference chapters, would make

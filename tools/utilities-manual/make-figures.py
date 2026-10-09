@@ -12,6 +12,16 @@ screenshots (UB4; docs/utilities-manual/style-addendum.md):
   window needs an edge on a white page, and macOS's corners are smooth
   curves rather than circular arcs, so it also covers the slivers of
   desktop a circular mask leaves where each curve meets the sides;
+- a part of a window (for the task pages' narrow columns) is cut
+  square, inside the window, with a thin grey rule round it;
+- a chapter's opener art (style guide §8.6), in two halves: for the
+  owner's own edition, a scene from macOS's Macintosh wallpaper (the
+  original Macintosh's own 512 x 342 screens, Apple's artwork) in flat
+  pale-grey pixels (the owner's choice, 2026-10-09), written only to the
+  private assets (UTILITIES_ASSETS, default
+  ~/MacPlusProjects/manual-assets-private/utilities), never the
+  repository; in the repository, a plain stand-in: the Converter's
+  window enlarged and lightened;
 - the result is greyscale, in docs/utilities-manual/figures/png.
 
 The screenshots stay private, in
@@ -43,8 +53,14 @@ ABOUT = ((1124, 344, 1691, 725), 36)           # the About box
 APP_MENU = ((67, 6, 489, 53), ((80, 62, 715, 435), 28))      # its name, then the menu
 WINDOW_MENU = ((658, 6, 815, 53), ((660, 62, 1199, 579), 28))
 
+# A part of a window: (left, top, right, bottom) within it, in the
+# window's own pixels. Each section is its heading and its grey box.
+def section(top, bottom, heading=75, below=20):
+    return (0, top - heading, 1080, bottom + below)
+
+
 # Code: (screenshot, kind, frame). The codes are the outline's
-# (docs/utilities-manual/outline.md).
+# (docs/utilities-manual/outline.md); a part's code names what it shows.
 FIGURES = {
     "cv06": ("converter/cv06", "window", CONVERTER_A),
     "cv07": ("converter/cv07", "window", CONVERTER_A),
@@ -59,7 +75,45 @@ FIGURES = {
     "cv31": ("converter/cv31", "menu", APP_MENU),
     "cv32": ("converter/cv32", "menu", APP_MENU),
     "cv34": ("converter/cv34", "menu", WINDOW_MENU),
+    # Parts, for the task pages.
+    "cv06-source": ("converter/cv06", "part", (CONVERTER_A, section(261, 330))),
+    "cv06-sound": ("converter/cv06", "part", (CONVERTER_A, section(801, 1125))),
+    "cv06-convert": ("converter/cv06", "part", (CONVERTER_A, (4, 1140, 1076, 1242))),
+    "cv11-source": ("converter/cv11", "part", (CONVERTER_B, section(261, 418))),
+    "cv11-output": ("converter/cv11", "part", (CONVERTER_B, section(549, 934))),
+    "cv12-output": ("converter/cv12", "part", (CONVERTER_B, section(314, 597))),
+    "cv14-output": ("converter/cv14", "part", (CONVERTER_B, section(314, 733))),
+    "cv15-save-to": ("converter/cv15", "part", (CONVERTER_B, section(414, 497))),
+    "cv15-advanced": ("converter/cv15", "part", (CONVERTER_B, (0, 526, 1080, 1110))),
+    "cv16-youtube": ("converter/cv16", "part", (CONVERTER_B, section(261, 508))),
+    "cv17-youtube": ("converter/cv17", "part", (CONVERTER_B, section(261, 508))),
+    "cv18-output": ("converter/cv18", "part", (CONVERTER_B, section(639, 956))),
+    "cv22-output": ("converter/cv22", "part", (CONVERTER_B, section(639, 956))),
+    "cv20-progress": ("converter/cv20", "part", (CONVERTER_B, (4, 1130, 1076, 1242))),
+    "cv27-progress": ("converter/cv27", "part", (CONVERTER_B, (4, 1130, 1076, 1242))),
+    "cv28-results": ("converter/cv28", "part", (CONVERTER_B, section(927, 1100))),
+    # Chapter openers: (window, the part enlarged across the spread).
+    "c2-opener": ("converter/cv17", "opener", (CONVERTER_B, (0, 0, 1080, 648))),
 }
+
+# The own edition's openers: a scene from macOS's Macintosh wallpaper for
+# each chapter (the owner's choice of scenes, 2026-10-09).
+WALLPAPER = ("/System/Library/ExtensionKit/Extensions/WallpaperMacintoshExtension.appex"
+             "/Contents/Resources")
+PRIVATE = os.environ.get("UTILITIES_ASSETS", os.path.expanduser(
+    "~/MacPlusProjects/manual-assets-private/utilities"))
+SCENES = {
+    "c1-opener": "StartupWelcome",      # Getting Started: "Welcome to Macintosh"
+    "c2-opener": "AlertSounds",         # Converting Songs: the Sound control panel
+    "c3-opener": "FinderWindow",        # Moving Songs to the Macintosh: a disk's window
+    "c4-opener": "FinderTrash",         # Backing Up Your Macintosh: the Finder and the Trash
+}
+SCENE_SCALE = 5         # a Macintosh pixel, in the spread's pixels (150 per inch)
+SCENE_GREY = 205        # a black pixel's tone
+
+RULE = 2        # a part's rule, in the screenshots' pixels
+SPREAD = (2250, 1350)   # an opener spread, 15 x 9 in at 150 per inch
+PALE = 0.14     # how much of the window shows in an opener (the rest is white)
 
 SCALE = 4       # the masks are drawn this much larger, then reduced: smooth curves
 # macOS's corners aren't circular arcs but smooth ("continuous") curves
@@ -165,6 +219,18 @@ def desktop_in_band(crop, m, band=4):
 def make(code, entry):
     name, kind, frame = entry
     im = screenshot(name)
+    if kind in ("part", "opener"):
+        ((wl, wt, _, _), _), (l, t, r, b) = frame
+        crop = im.crop((wl + l, wt + t, wl + r, wt + b))
+        if kind == "part":
+            d = ImageDraw.Draw(crop)
+            d.rectangle((0, 0, crop.width - 1, crop.height - 1), outline=(GREY,) * 3, width=RULE)
+            crop.convert("L").save(os.path.join(OUT, code + ".png"), optimize=True)
+            return crop, None
+        art = crop.convert("L").resize(SPREAD, Image.LANCZOS)
+        art = Image.eval(art, lambda v: round(255 - (255 - v) * PALE))
+        halves(art, OUT, code)
+        return art, None
     box, shapes = shapes_of(kind, frame)
     crop = im.crop((box[0], box[1], box[2] + 1, box[3] + 1))
     m = mask(crop.size, shapes)
@@ -175,6 +241,29 @@ def make(code, entry):
     leaked = desktop_in_band(crop, m) if kind == "window" else None
     figure.convert("L").save(os.path.join(OUT, code + ".png"), optimize=True)
     return figure, leaked
+
+
+def halves(art, folder, code):
+    half = SPREAD[0] // 2
+    art.crop((0, 0, half, SPREAD[1])).save(os.path.join(folder, code + "-l.png"), optimize=True)
+    art.crop((half, 0, SPREAD[0], SPREAD[1])).save(os.path.join(folder, code + "-r.png"), optimize=True)
+
+
+def scenes():
+    """The own edition's openers, from the wallpaper's scenes, if this Mac
+    has them; into the private assets only."""
+    if not os.path.isdir(WALLPAPER):
+        print("no Macintosh wallpaper on this Mac: the openers stay plain")
+        return
+    folder = os.path.join(PRIVATE, "figures")
+    os.makedirs(folder, exist_ok=True)
+    for code, scene in SCENES.items():
+        screen = Image.open(os.path.join(WALLPAPER, scene + ".png")).convert("L")
+        screen = screen.point(lambda v: SCENE_GREY if v < 128 else 255)
+        big = screen.resize((screen.width * SCENE_SCALE, screen.height * SCENE_SCALE), Image.NEAREST)
+        x, y = (big.width - SPREAD[0]) // 2, (big.height - SPREAD[1]) // 2
+        halves(big.crop((x, y, x + SPREAD[0], y + SPREAD[1])), folder, code)
+        print("wrote %s (private): %s" % (code, scene))
 
 
 def corners(figure, n=48, zoom=4):
@@ -200,6 +289,7 @@ def main():
             bad.append(code)
         if sheet_dir:
             rows.append((code, corners(figure)))
+    scenes()
     if sheet_dir:
         os.makedirs(sheet_dir, exist_ok=True)
         for i in range(0, len(rows), 8):

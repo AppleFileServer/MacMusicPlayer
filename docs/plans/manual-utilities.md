@@ -86,6 +86,15 @@ Decisions UB1-UB10 were approved by the owner on 2026-10-09.
   7. Chapter 4 (after the Backup Utility exists);
   8. front and back matter, glossary, index, cover; the whole book.
 
+## Since approval
+
+- **The task pages** (Phase 3): in the wide text column, a modern window
+  being unreadable at a quarter-page column (style addendum; DECISION,
+  for the owner's review).
+- **The openers** (the owner, 2026-10-09): scenes from macOS's Macintosh
+  wallpaper in flat pale-grey pixels, one per chapter, kept in the
+  private assets (style addendum).
+
 ## Screenshots still wanted
 
 For the Converter (when convenient): the Licences window; a refused

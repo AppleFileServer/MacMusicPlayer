@@ -59,3 +59,36 @@ Opener spread; the chapter's contents; Introduction; a lesson or two
 (numbered within the chapter, as Chapter 1's of the User's Guide); task
 pages (style guide §9); the reference section (style guide §10): the
 window's parts with callouts, each control, the menus, Advanced.
+
+## Task pages (DECISION, Phase 3, for the owner's review)
+
+The User's Guide sets each task in a column a quarter of the page wide
+(style guide §9), which suits its small Macintosh Plus screens. A modern
+window is 540 points wide on screen; at a column's 101 points its text
+would print at about 2 points. So here a topic opens with its red margin
+head and introduction, and each task follows in the wide text column:
+its title ("To ...") in the margin in bold black Helvetica, its steps
+and its picture (a part of the window, about 260 points wide) beside
+it. Topics run on, one after another; each task is kept whole, and a
+topic's head stays with its first task.
+
+## Chapter openers (the owner's choice, 2026-10-09)
+
+Each chapter opens on a scene from macOS's Macintosh wallpaper (the
+original Macintosh's own 512 x 342 screens, which the wallpaper brings
+to life), across both pages in flat pale-grey pixels, as the User's
+Guide's openers show MacMusic's screen:
+
+| Chapter | Scene |
+|---|---|
+| 1, Getting Started | Welcome to Macintosh (StartupWelcome) |
+| 2, Converting Songs | the Sound control panel (AlertSounds) |
+| 3, Moving Songs to the Macintosh | a disk's Finder window (FinderWindow) |
+| 4, Backing Up Your Macintosh | the Finder and the Trash (FinderTrash) |
+
+The scenes are Apple's artwork, so they're made only into the private
+assets (`~/MacPlusProjects/manual-assets-private/utilities/figures`)
+and copied into the build, never into the repository; the repository
+holds a plain stand-in (the Converter's window, lightened), as the
+User's Guide's plain edition does for its cover (MM1a). Raised blocks,
+like the wallpaper's own rendering, were tried and not chosen.

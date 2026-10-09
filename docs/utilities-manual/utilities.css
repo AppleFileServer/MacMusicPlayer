@@ -1,0 +1,38 @@
+/* MacMusic Utilities: what differs from the User's Guide's styles
+   (docs/manual/manual.css, loaded first; style addendum, UB3-UB4). */
+
+/* Modern screens are greyscale photographs, not 1-bit: smooth them. */
+img.screen, .opener img { image-rendering: auto; }
+
+/* A whole window or dialog in the text column. */
+figure.window { margin: 6pt 0 10pt 0; break-inside: avoid; }
+figure.window img { display: block; }
+figure.window figcaption { font-size: 9pt; line-height: 11pt; color: var(--grey-text); margin-top: 3pt; }
+svg.callouts image { image-rendering: auto !important; }
+
+/* Task pages (style addendum): each task in the wide text column, its
+   title in the margin in bold black Helvetica, as the User's Guide's
+   task headings; a topic opens with its red margin head. */
+.tasks-wide .entry.task { clear: left; margin-top: 10pt; }
+h3.task-head { font: bold 10.5pt/12.5pt var(--sans); margin: 9pt 0 0 0; }
+.tasks-wide .entry.task p.step:first-child,
+.tasks-wide .entry.task .keep p.step { margin-top: 9pt; }
+.topic-block + .topic-block { margin-top: 0; }
+p.or { font: bold 9pt var(--sans); margin: 4pt 0; }
+
+/* A topic runs on after the last (the tasks are kept whole instead). */
+.topic-block { margin-top: 18pt; }
+.topic-block:first-of-type { margin-top: 0; }
+/* A labelled window starts below the head beside it. */
+.flow figure.wide { clear: left; padding-top: 6pt; }
+table.ref.stages td:first-child { white-space: normal; width: 44%; font-family: var(--sans); font-size: 9.5pt; }
+
+/* The opener's title (the owner's choice, 2026-10-09): its white panel
+   framed by a thin red rule, with even room inside, so it reads as a
+   label laid on the picture; moved left by its padding, so the text
+   still lines up with the margin column. */
+.opener-title {
+    border: 0.75pt solid var(--red);
+    padding: 9pt 12pt 11pt 12pt;
+    left: calc(52pt - 12pt - 0.75pt);
+}
