@@ -12,6 +12,9 @@
 #                    ones (only if the toolchain no longer starts after a
 #                    Homebrew upgrade; the replaced files are kept as
 #                    *.before-restore)
+#   CONVERTER, CONVERTER_TOOLS   the converter's repository and tools
+#                    (defaults ~/MacPlusProjects/MacMusicConverter,
+#                    ~/MacPlusProjects/converter-tools)
 #   RETRO68, MINIVMAC, LAUNCHAPPL_CFG, MANUAL_TOOLS   where to restore
 #                    to (defaults ~/Retro68-build, ~/minivmac,
 #                    ~/.LaunchAPPL.cfg, ~/MacPlusProjects/manual-tools)
@@ -31,6 +34,8 @@ RETRO68=${RETRO68:-$HOME/Retro68-build}
 MINIVMAC=${MINIVMAC:-$HOME/minivmac}
 CFG=${LAUNCHAPPL_CFG:-$HOME/.LaunchAPPL.cfg}
 MANUAL_TOOLS=${MANUAL_TOOLS:-$HOME/MacPlusProjects/manual-tools}
+CONVERTER=${CONVERTER:-$HOME/MacPlusProjects/MacMusicConverter}
+CONVERTER_TOOLS=${CONVERTER_TOOLS:-$HOME/MacPlusProjects/converter-tools}
 ORIGINAL_RETRO68=/Users/jack/Retro68-build      # where it was archived from
 ORIGINAL_PROJECT=/Users/jack/MacPlusProjects/MacMusicPlayer
 TMP=$(mktemp -d)
@@ -124,6 +129,21 @@ elif [ -e "$HERE/manual-tools.tar.gz" ]; then
         echo "      rm -rf $MANUAL_TOOLS/venv && python3 -m venv $MANUAL_TOOLS/venv \\"
         echo "        && $MANUAL_TOOLS/venv/bin/pip install fonttools pillow websocket-client"
     fi
+fi
+
+# The MacMusic Converter Utility: its repository and its pinned tools.
+if [ -e "$CONVERTER/.git" ]; then kept "the converter's repository ($CONVERTER)"
+elif [ -e "$HERE/MacMusicConverter.bundle" ]; then
+    mkdir -p "$(dirname "$CONVERTER")"
+    git clone -q "$HERE/MacMusicConverter.bundle" "$CONVERTER"
+    done_ "the converter's repository, cloned into $CONVERTER"
+fi
+if [ -e "$CONVERTER_TOOLS" ]; then kept "the converter's tools ($CONVERTER_TOOLS)"
+elif [ -e "$HERE/converter-tools.tar.gz" ]; then
+    tar -xzf "$HERE/converter-tools.tar.gz" -C "$TMP"
+    mkdir -p "$(dirname "$CONVERTER_TOOLS")"
+    mv "$TMP/converter-tools" "$CONVERTER_TOOLS"
+    done_ "the converter's tools, into $CONVERTER_TOOLS"
 fi
 
 echo

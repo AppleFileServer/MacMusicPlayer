@@ -225,3 +225,17 @@ the repository and never shared: the MacDraw cover scan and the rainbow
 logo (see its README), and `cover-macmusic.jpg`, which `make-cover.py`
 makes from them. Without that folder, `make-book.py` builds the plain
 edition, `MacMusic-Users-Guide-plain.pdf`, with MacMusic's own icon.
+
+## 11. The MacMusic Converter Utility
+
+A separate project, in `~/MacPlusProjects/MacMusicConverter/` (its own
+git repository): the Mac app that makes MacMusic's WAV files. Its pinned
+tools are in `~/MacPlusProjects/converter-tools/` (FFmpeg 9.0.2, yt-dlp,
+Deno; versions and checksums in its `MANIFEST.txt`); its build and
+releases are described in its own `Documentation/BUILDING.md` and
+`RELEASES.md`. The environment archive holds both
+(`converter-tools.tar.gz`, `MacMusicConverter.bundle`), and `restore.sh`
+puts them back. Its WAV format follows this project's importer,
+`src/wav.c`: a change there must be matched in the converter's
+`MacMusicWAVValidator`.
+

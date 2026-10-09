@@ -20,6 +20,8 @@ your own use; don't share or publish it.
 | `minivmac.tar.gz` | Mini vMac (app, configuration, source), the Plus ROM, the System 6.0.7 disks, the autoquit disk, the disk links | `~/minivmac` |
 | `testdisks.tar.gz` | the persistent test disks | the repository's `testdisks/` |
 | `LaunchAPPL.cfg` | LaunchAPPL's settings | `~/.LaunchAPPL.cfg` |
+| `converter-tools.tar.gz` | the MacMusic Converter Utility's pinned tools: FFmpeg 9.0.2, yt-dlp, Deno | `~/MacPlusProjects/converter-tools` |
+| `MacMusicConverter.bundle` | the converter's repository, every commit and tag | `~/MacPlusProjects/MacMusicConverter` (cloned) |
 | `manual-tools.tar.gz` | the *MacMusic User's Guide*'s tools: headless Chrome, Paged.js, the EB Garamond fonts and their built copies, the Python venv | `~/MacPlusProjects/manual-tools` |
 | `bluescsi-template.hda` | a working BlueSCSI image's first 96 blocks (partition map and driver), for Scratch images | stays here; `tools/make-release.sh` finds it |
 | `restore.sh` | puts it all back | |
@@ -57,6 +59,14 @@ Not in this archive, on purpose: your screenshots
 (`~/MacPlusProjects/manual-assets-private/`: the MacDraw cover scan and
 the rainbow logo). Back those up yourself. Without the private assets,
 `make-book.py` builds the plain edition.
+
+## The MacMusic Converter Utility
+
+The Mac app that makes MacMusic's WAV files (and MP3s), from local files
+or YouTube. After restoring, see its `README.md` and
+`Documentation/BUILDING.md` in `~/MacPlusProjects/MacMusicConverter/`: `tools/test.sh`, then `tools/build-app.sh`
+(the app, with these tools inside it). Its releases are in
+`~/MacPlusProjects/releases/MacMusic-Converter-Utility-*`.
 
 ## If the toolchain doesn't start
 

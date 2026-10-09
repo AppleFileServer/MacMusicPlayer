@@ -9,6 +9,9 @@
 #   minivmac.tar.gz         Mini vMac: app, configuration, source, ROM,
 #                           System disks, autoquit disk, disk links
 #   testdisks.tar.gz        testdisks/MusicTest.dsk and Transfer.dsk
+#   converter-tools.tar.gz  the MacMusic Converter Utility's tools (FFmpeg,
+#                           yt-dlp, Deno), pinned (its BUILDING.md)
+#   MacMusicConverter.bundle  the converter's repository (git bundle, with tags)
 #   manual-tools.tar.gz     the manual's tools (headless Chrome, Paged.js,
 #                           the fonts, the Python venv); not the owner's
 #                           screenshots or the private cover assets (E2, E3)
@@ -24,6 +27,8 @@
 #   RETRO68, MINIVMAC   where they are (defaults ~/Retro68-build, ~/minivmac)
 #   TEMPLATE            a BlueSCSI image to take the template from
 #   MANUAL_TOOLS        the manual's tools (default ~/MacPlusProjects/manual-tools)
+#   CONVERTER, CONVERTER_TOOLS   the converter's repository and tools (defaults
+#                       ~/MacPlusProjects/MacMusicConverter, ~/MacPlusProjects/converter-tools)
 
 set -eu
 cd "$(dirname "$0")/.."
@@ -31,6 +36,8 @@ PROJECT=$(pwd)
 RETRO68=${RETRO68:-$HOME/Retro68-build}
 MINIVMAC=${MINIVMAC:-$HOME/minivmac}
 MANUAL_TOOLS=${MANUAL_TOOLS:-$HOME/MacPlusProjects/manual-tools}
+CONVERTER=${CONVERTER:-$HOME/MacPlusProjects/MacMusicConverter}
+CONVERTER_TOOLS=${CONVERTER_TOOLS:-$HOME/MacPlusProjects/converter-tools}
 VERSION=$(sed -n 's/^project(MacMusic VERSION \([0-9.]*\)).*/\1/p' CMakeLists.txt)
 OUT=$HOME/MacPlusProjects/environment-$VERSION
 [ "${1:-}" = "--out" ] && OUT=$2
@@ -80,6 +87,11 @@ dd if="$TEMPLATE" of="$OUT/bluescsi-template.hda" bs=512 count=96 2> /dev/null
 echo "== the manual's tools"
 tar -czf "$OUT/manual-tools.tar.gz" -C "$(dirname "$MANUAL_TOOLS")" \
     --exclude '__pycache__' "$(basename "$MANUAL_TOOLS")"
+
+echo "== the converter: its tools and its repository"
+tar -czf "$OUT/converter-tools.tar.gz" -C "$(dirname "$CONVERTER_TOOLS")" "$(basename "$CONVERTER_TOOLS")"
+git -C "$CONVERTER" bundle create "$OUT/MacMusicConverter.bundle" --all 2> /dev/null
+git -C "$CONVERTER" bundle verify "$OUT/MacMusicConverter.bundle" > /dev/null 2>&1
 
 echo "== the repository"
 git bundle create "$OUT/MacMusic.bundle" --all 2> /dev/null
