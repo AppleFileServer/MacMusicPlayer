@@ -19,7 +19,7 @@ BlueSCSI; MacMusic and the *MacMusic User's Guide*); what you should
 know already (using a Mac; the Plus as the User's Guide teaches it);
 how to use the book; conventions (your Mac and the Macintosh Plus).
 
-## Chapter 1: Getting Started (about 12 pages)
+## Chapter 1: Getting Started (10 pages as drafted, 2026-10-10)
 
 - Opener spread; contents.
 - **Introduction: From Your Music to MacMusic.** The journey of a song

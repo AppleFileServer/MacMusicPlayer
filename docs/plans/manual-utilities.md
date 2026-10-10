@@ -117,6 +117,13 @@ Decisions UB1-UB10 were approved by the owner on 2026-10-09.
   Chapter 4's opener changed to MacPaint's quit dialog, as its first
   scene cropped too like Chapter 3's.
 
+- **Chapter 1** (Phase 5, drafted 2026-10-10): a song's journey in one
+  picture (drawn: the programs in red-ruled boxes, the Backup Utility
+  apart in a dashed one), what's on the USB drive (PROVISIONAL, UB8),
+  installing (the Converter's install screenshots, the Finder window
+  cropped to its sidebar and first rows), a tour of the journey pointing
+  to each chapter, and What Now?
+
 ## Screenshots still wanted
 
 For the Converter (when convenient): the Licences window; a refused

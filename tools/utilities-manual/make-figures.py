@@ -53,6 +53,8 @@ ABOUT = ((1124, 344, 1691, 725), 36)           # the About box
 BACKUP = ((408, 212, 2407, 1611), 56)          # the Backup Utility's window (a toolbar window's corners)
 BACKUP_SHEET = ((888, 720, 1927, 1101), 56)    # its "Back up ...?" sheet
 TRANSFER = ((648, 192, 2167, 1631), 36)        # the Transfer Utility's window
+FINDER = ((504, 276, 2599, 1505), 56)          # the Finder window, installing (cv01-cv05)
+ARCHIVE = ((1048, 518, 1791, 789), 36)         # Archive Utility, expanding the zip
 APP_MENU = ((67, 6, 489, 53), ((80, 62, 715, 435), 28))      # its name, then the menu
 WINDOW_MENU = ((658, 6, 815, 53), ((660, 62, 1199, 579), 28))
 
@@ -65,6 +67,8 @@ def section(top, bottom, heading=75, below=20):
 # Code: (screenshot, kind, frame). The codes are the outline's
 # (docs/utilities-manual/outline.md); a part's code names what it shows.
 FIGURES = {
+    **{"cv%02d" % n: ("converter/cv%02d" % n, "window", FINDER) for n in (1, 3, 4, 5)},
+    "cv02": ("converter/cv02", "window", ARCHIVE),
     "cv06": ("converter/cv06", "window", CONVERTER_A),
     "cv07": ("converter/cv07", "window", CONVERTER_A),
     "cv08": ("converter/cv08", "window", OPEN_PANEL),
@@ -92,6 +96,10 @@ FIGURES = {
     "bu08-history": (None, "partof", ("bu08", (920, 262, 2000, 820))),
     "bu08-manifest": (None, "partof", ("bu08", (920, 840, 2000, 1396))),
     "bu08-toolbar": (None, "partof", ("bu08", (1480, 0, 2000, 104))),
+    # Installing (Chapter 1): the Finder window's sidebar and first rows.
+    "cv01-zip": (None, "partof", ("cv01", (0, 0, 1320, 420))),
+    "cv03-app": (None, "partof", ("cv03", (0, 0, 1320, 420))),
+    "cv04-drag": (None, "partof", ("cv04", (0, 0, 1320, 420))),
     # Parts of the Transfer Utility's window.
     "tu01-files": (None, "partof", ("tu01", (0, 100, 1520, 690))),
     "tu01-disk": (None, "partof", ("tu01", (0, 730, 1520, 1260))),
@@ -121,6 +129,7 @@ FIGURES = {
     "c2-opener": ("converter/cv17", "opener", (CONVERTER_B, (0, 0, 1080, 648))),
     "c4-opener": ("backup/bu08", "opener", (BACKUP, (0, 0, 2000, 1200))),
     "c3-opener": ("new-2026-10-10/n01", "opener", (TRANSFER, (0, 0, 1520, 912))),
+    "c1-opener": ("converter/cv05", "opener", (FINDER, (0, 0, 2096, 1230))),
 }
 
 # The own edition's openers: a scene from macOS's Macintosh wallpaper for

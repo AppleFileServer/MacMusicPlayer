@@ -36,3 +36,6 @@ table.ref.stages td:first-child { white-space: normal; width: 44%; font-family: 
     padding: 9pt 12pt 11pt 12pt;
     left: calc(52pt - 12pt - 0.75pt);
 }
+
+/* Chapter 1: the journey picture. */
+figure.journey { margin: 8pt 0 12pt 0; break-inside: avoid; }
