@@ -111,6 +111,11 @@ guide):
     end the log with a "DONE" line so a cut-off log is caught.
 
 ## After 1.0 (roadmap, not defects)
+- **Future releases** (the owner, 2026-10-10): the whole MacMusic system
+  as "B-1.0 Personal" and "B-1.1 Personal" (with a v1.1 Update Card),
+  and public systems from 1.1 in American, British and other languages,
+  for the Plus and possibly earlier Macs. For later review:
+  `docs/plans/future-releases.md`.
 - **Fast scanning:** a library scan opens and reads every song file, so
   500 songs take about 1.5-2 minutes at Plus speed (H1). A cache of the
   song details, checked against each file's modification date, would
