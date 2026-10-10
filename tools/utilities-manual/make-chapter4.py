@@ -8,9 +8,11 @@ Facts come from the Backup Utility's 1.0 source (its window, sheets and
 messages) and its SPECIFICATION.md; the figures from the owner's
 screenshots (bu01-bu14), taken with an earlier build: where 1.0 differs
 (the card's registered name in the backup sheet, the Eject button, the
-manifest's order), the text describes 1.0, and the figures are to be
-replaced from new screenshots (CHECK). What no screenshot shows yet is
-marked CHECK.
+manifest's order), the text describes 1.0. Captures of 1.0 made on
+2026-10-10 (bu-...) picture what they can: they were taken with a test
+folder chosen as the card, so only parts that don't show the folder's
+disk (Macintosh HD) are used. What no screenshot shows yet, chiefly a
+real card connected, is marked CHECK.
 
 Build it with tools/utilities-manual/build-pdf.sh docs/utilities-manual/chapter4.html <pdf>."""
 import os, re, sys
@@ -116,12 +118,13 @@ LESSON_2 = "".join([
     "from a snapshot, as it was then.</p>",
     steps("> In the history, select the snapshot to restore from.",
           "Its contents are listed below it, its disks first."),
-    fig("bu08-manifest", TASK),
+    fig("bu-verified-snapshot", TASK),
     steps("> Click Restore… in the toolbar.",
           "> Click &ldquo;Chosen files and folders,&rdquo; and tick the disk image.",
-          "> Click Choose, choose a folder on your Mac, and click Restore.",
-          "The disk image is copied into the folder, and checked against the "
-          "snapshot. (CHECK: the Restore sheet isn&rsquo;t yet pictured.)",
+          "> Click Choose, choose a folder on your Mac, and click Restore."),
+    fig("bu-restore", TEXT),
+    steps("The disk image is copied into the folder, and checked against the "
+          "snapshot. The sheet says how many files were restored; click Done.",
           "> Shut the Plus down, put its card in your Mac, and drag the restored "
           "disk image onto the card, replacing the damaged one.",
           "~ Only you ever change the card: the Backup Utility doesn&rsquo;t write "
@@ -148,7 +151,7 @@ TOPICS = [
                "in the history.",
                "The backup goes ahead: it keeps the disk as it is. An earlier "
                "snapshot, from before the power cut, may be the better one to "
-               "restore from. (CHECK: the warning isn&rsquo;t yet pictured.)")),
+               "restore from."), ("bu-warnings-status", "wide")),
            T("To Cancel a Backup", steps(
                "> Click Cancel, or press Esc.",
                "It stops. What it had copied isn&rsquo;t kept as a snapshot; your "
@@ -200,16 +203,16 @@ TOPICS = [
                "> Select it and click Verify Backup in the toolbar.",
                "Every file is read again and checked against the snapshot&rsquo;s "
                "record. It says &ldquo;Verified: 13 files match,&rdquo; or names each file "
-               "that doesn&rsquo;t, and how. (CHECK: not yet pictured.)")),
+               "that doesn&rsquo;t, and how."), "bu-verified-snapshot"),
            T("To Keep a Snapshot", steps(
                "> Control-click the snapshot, and choose Keep (Never Thin).",
                "It&rsquo;s marked with a pin, and thinning never removes it. Choose "
-               "Don&rsquo;t Keep to take the mark off.")),
+               "Don&rsquo;t Keep to take the mark off."), ("bu-menu", 140)),
            T("To Delete a Snapshot", steps(
                "> Control-click it, choose Delete…, and click Move to Trash.",
                "It goes to the Trash, so it can be put back until the Trash is "
                "emptied. If it&rsquo;s the card&rsquo;s only backup, you&rsquo;re told so "
-               "first.")),
+               "first."), ("bu-delete", 200)),
            T("To Clear Incomplete Jobs", steps(
                "Backups that failed, were cancelled, or were interrupted (if your "
                "Mac stopped during one) are listed under the history as incomplete "
@@ -225,7 +228,8 @@ TOPICS = [
                "> Click &ldquo;Chosen files and folders,&rdquo; and tick them.",
                "> Click Choose, choose a folder, and click Restore.",
                "If a file of the same name is there, you&rsquo;re asked: Keep Both, "
-               "Replace or Skip, with &ldquo;Do the same for the rest.&rdquo;")),
+               "Replace or Skip, with &ldquo;Do the same for the rest.&rdquo; Skip "
+               "leaves the file there as it is."), ("bu-conflict", 180)),
            T("To Restore the Whole Card to a Folder", steps(
                "> Click Restore…, keep &ldquo;The whole snapshot, into a new folder,&rdquo; "
                "choose where, and click Restore.",
@@ -262,7 +266,7 @@ TOPICS = [
                "> To keep backups elsewhere, click Choose… beside Backup folder; Use "
                "Default goes back to Mac Plus Backups.",
                "> To keep every snapshot, turn off &ldquo;Thin older snapshots after each "
-               "backup.&rdquo; (CHECK: not yet pictured.)")),
+               "backup.&rdquo;"), "bu-settings"),
            ]),
 ]
 
@@ -364,9 +368,10 @@ PART = re.sub(r'(<div class="margin">(?:(?!</div>).)*</div>(?:</div>)?)(\s*<p.*?
               r'<div class="keep">\1\2</div>', PART, flags=re.S)
 
 DRAFT = draft_title("Chapter 4: Backing Up Your Macintosh",
-                    "A draft for review, 10 October 2026. The figures are from an "
-                    "earlier build of the Backup Utility, to be replaced with "
-                    "screenshots of 1.0; CHECK marks what no screenshot shows yet.")
+                    "A draft for review, 10 October 2026. Most figures are from an "
+                    "earlier build of the Backup Utility; those of 1.0 replace them "
+                    "where they can. CHECK marks what still needs a screenshot with "
+                    "a real card in the Mac.")
 
 if __name__ == "__main__":
     open(OUT, "w").write(page("MacMusic Utilities: Chapter 4", DRAFT + PART))

@@ -6,13 +6,11 @@ and 4: introduction, two lessons, task pages, reference.
 
 Facts come from the Transfer Utility's 1.0 source (its window, alerts
 and messages) and its SPECIFICATION.md; the figures from the owner's
-screenshots of 2026-10-10 (tuNN), taken just before three small changes
-(sizes the Finder's way, the file list's columns, "Keep Building"): the
-text describes 1.0, and the figures are to be replaced where they
-differ (CHECK). Its window is half again the Converter's, so its parts
-print across the whole page. The real Plus check of 1.0 is still to do
-(the owner's), so what the Plus shows is stated only as the proof image
-showed it (2026-10-09).
+screenshots of 2026-10-10 (tuNN), and from captures of 1.0 itself made
+the same day (tu-..., and the Plus's screens from Mini vMac, plus-...).
+Its window is half again the Converter's, so its parts print across the
+whole page. The real Plus check of 1.0 is still to do (the owner's), so
+what the Plus shows is as Mini vMac showed it.
 
 Build it with tools/utilities-manual/build-pdf.sh docs/utilities-manual/chapter3.html <pdf>."""
 import os, re, sys
@@ -34,16 +32,17 @@ def wide(name):
     return '<figure class="window wide">%s</figure>' % img(name, 448)
 
 
-# The window with eight songs added (tu01), labelled: 1520 x 1440 pixels.
+# The window with six songs added, two of them renamed (tu01), labelled:
+# 1520 x 1440 pixels.
 SCALE = TEXT / 1520
 WINDOW = figure("figures/tu01.png", 1520, 1440, SCALE, [
-    ("The songs", 26, 40, 130),
-    ("What each|is called|on the Mac", 52, 330, 250),
-    ("Add Files, Remove|and Clear All", 116, 90, 605),
-    ("SCSI ID", 150, 60, 775),
-    ("The image&rsquo;s|file name", 168, 60, 842),
-    ("Size", 205, 60, 1038),
-    ("Build Transfer|Image", 278, 1100, 1375),
+    ("The songs", 40, 40, 237),
+    ("What each|is called|on the Mac", 62, 350, 333),
+    ("Add Files, Remove|and Clear All", 116, 90, 602),
+    ("SCSI ID", 158, 60, 795),
+    ("The image&rsquo;s|file name", 176, 60, 872),
+    ("Size", 220, 60, 1094),
+    ("Build Transfer|Image", 278, 1100, 1380),
 ])
 
 INTRO = "".join([
@@ -91,8 +90,10 @@ LESSON_1 = "".join([
     wide("tu01-disk"),
     steps("> Click Build Transfer Image.",
           "The Transfer Utility makes the disk, copies the songs onto it, and "
-          "checks it. (CHECK: the progress isn&rsquo;t yet pictured.) When it&rsquo;s "
-          "done, Result shows the disk image, and what to do with it."),
+          "checks it, saying at the foot of the window what it&rsquo;s doing."),
+    wide("tu-progress-foot"),
+    steps("When it&rsquo;s done, Result shows the disk image, and what to do "
+          "with it."),
     wide("tu03-result"),
     steps("> Click Show in Finder.",
           "> Shut the Plus down with Shut Down, switch it off, take the card out "
@@ -102,9 +103,12 @@ LESSON_1 = "".join([
           "> Put the card back in the BlueSCSI, and switch the Plus on.",
           "A disk called Transfer appears on the Plus&rsquo;s desktop, with your "
           "songs in its WAV Files folder.",
-          "~ Import them with MacMusic&rsquo;s Import Song: see the <i>MacMusic "
-          "User&rsquo;s Guide</i>, Lesson 7. (CHECK: the Plus&rsquo;s screens are to be "
-          "pictured, from Mini vMac.)"),
+          "> Open the Transfer disk, and its WAV Files folder.",
+          "~ The songs show most clearly by name: choose by Name from the View "
+          "menu."),
+    fig("plus-wav-files", TEXT),
+    steps("> Import them with MacMusic&rsquo;s Import Song: see the <i>MacMusic "
+          "User&rsquo;s Guide</i>, Lesson 7."),
 ])
 
 LESSON_2 = "".join([
@@ -141,15 +145,16 @@ TOPICS = [
                "8-bit).",
                "> Remove it, or make a MacMusic WAV of it with the Converter, and add "
                "that instead.",
-               "~ The disk isn&rsquo;t built while a refused song is in the list. "
-               "(CHECK: not yet pictured.)")),
+               "~ The disk isn&rsquo;t built while a refused song is in the list."),
+             ("tu-refused-files", "wide")),
            T("If a Name Is Changed", steps(
                "A Macintosh file name is at most 31 characters, without colons, and "
                "two names that differ only in capitals count as the same. Where a "
                "name has to change, the new one is shown in orange under On the "
                "Mac: a long name shortened, a colon made a hyphen, a second "
-               "&ldquo;clash.wav&rdquo; made &ldquo;clash 2.wav.&rdquo; (CHECK: not yet "
-               "pictured.)")),
+               "&ldquo;Clash.wav&rdquo; beside &ldquo;clash.wav&rdquo; made &ldquo;Clash "
+               "2.wav,&rdquo; &ldquo;Rock: Live.wav&rdquo; made &ldquo;Rock- Live.wav.&rdquo; The "
+               "file on your Mac keeps its name."), ("tu01-files", "wide")),
            ]),
 
     Topic("The Disk",
@@ -160,7 +165,7 @@ TOPICS = [
                "Choose an ID no other disk image on the card uses.",
                "~ ID 0 is usually your startup disk&rsquo;s: if you choose it, you&rsquo;re "
                "asked to confirm (Use ID 0 Anyway), since putting the image on the "
-               "card would replace your startup disk.")),
+               "card would replace your startup disk."), ("tu-id0", 200)),
            T("How the Size Is Worked Out", steps(
                "The songs&rsquo; size, plus a quarter as much again for adding more, "
                "plus 4 MiB for the disk&rsquo;s own needs, rounded up to whole "
@@ -178,7 +183,7 @@ TOPICS = [
                "* <b>Keep Both</b> saves the new one as &ldquo;HD60_512 Transfer "
                "2.hda.&rdquo; Both use the same SCSI ID, so put only one on the card.",
                "* <b>Replace</b> puts the new one in place of the old.",
-               "* <b>Cancel</b> builds nothing.")),
+               "* <b>Cancel</b> builds nothing."), ("tu-already", 200)),
            ]),
 
     Topic("Building",
@@ -193,12 +198,14 @@ TOPICS = [
                "> Click Cancel, or press Esc.",
                "Nothing is saved.",
                "~ If you quit while it&rsquo;s building, you&rsquo;re asked first: Keep "
-               "Building, or Stop and Quit.")),
+               "Building, or Stop and Quit. Stop and Quit leaves your songs, and any "
+               "disk image already finished, as they are."), ("tu-quit", 160)),
            T("To See What Was Checked", steps(
                "> Click &ldquo;What was checked&rdquo; under Result.",
                "It lists each check the finished disk passed: its layout, its "
                "volume, and each song, byte for byte. Copy Summary copies the lot, "
-               "to keep or to send. (CHECK: not yet pictured.)")),
+               "to keep or to send. Any name that had to change is listed at the "
+               "end."), ("tu-checked-result", "wide")),
            ]),
 
     Topic("On the Card and the Plus",
@@ -313,9 +320,9 @@ PART = re.sub(r'(<div class="margin">(?:(?!</div>).)*</div>(?:</div>)?)(\s*<p.*?
 
 DRAFT = draft_title("Chapter 3: Moving Songs to the Macintosh",
                     "A draft for review, 10 October 2026. The figures are from the "
-                    "owner's screenshots, taken just before three small changes to "
-                    "the Transfer Utility; CHECK marks what no screenshot shows yet. "
-                    "The Transfer Utility 1.0's check on the real Plus is still to do.")
+                    "owner's screenshots and from captures of 1.0 (the Plus&rsquo;s "
+                    "screens from Mini vMac). The Transfer Utility 1.0&rsquo;s check "
+                    "on the real Plus is still to do.")
 
 if __name__ == "__main__":
     open(OUT, "w").write(page("MacMusic Utilities: Chapter 3", DRAFT + PART))

@@ -6,8 +6,8 @@ lessons, the task pages and the Converter's reference.
 
 Facts come from the Converter's 1.0 source (MainWindowView.swift,
 AppModel.swift, AppDelegate.swift, the engine's messages) and the
-owner's screenshots (figure codes cvNN). CHECK marks what no screenshot
-shows yet (UB7).
+owner's screenshots (figure codes cvNN), with captures of 1.0 made on
+2026-10-10 (cv-...). CHECK marks what no screenshot shows yet (UB7).
 
 Task pages: the User's Guide sets each task in a column a quarter of the
 page wide, which suits its small Macintosh Plus screens. A modern window
@@ -123,10 +123,10 @@ LESSON_1 = "".join([
           "MacMusic WAV, and checking the result. A song of a few minutes "
           "takes a few seconds."),
     fig("cv27-progress", TASK),
-    steps("When it&rsquo;s finished, Results shows the new file, its length "
-          "and size, with a Show in Finder button to find it. (Lesson 2 "
-          "pictures a result.)",
-          "~ CHECK: a screenshot of this song&rsquo;s result is wanted."),
+    steps("When it&rsquo;s finished, Results shows the new file, its length, "
+          "size and loudest peak, with a Show in Finder button to find it, and "
+          "what was done to the sound. (The picture shows another song&rsquo;s.)"),
+    fig("cv-wav-only-results", TASK),
 ])
 
 LESSON_2 = "".join([
@@ -175,6 +175,12 @@ TOPICS = [
                "Drag the song from the Finder onto the window.",
                "The window shows what the song is. To choose a different one, "
                "click Choose Another."), "cv06-source"),
+           T("If a Sound File Can&rsquo;t Be Used", steps(
+               "The Converter says why, under the song&rsquo;s name: it couldn&rsquo;t "
+               "be read as audio (it may be damaged, or not a sound file), it has "
+               "no sound in it, or its sound is damaged. Click Details to see more.",
+               "> Choose another song, or another copy of it (Appendix A)."),
+             "cv-refused-source"),
            T("To Convert a YouTube Video", steps(
                "> Click YouTube at the top of the window.",
                "> Paste the video&rsquo;s address into the box, and click Look Up "
@@ -195,7 +201,8 @@ TOPICS = [
                "* YouTube couldn&rsquo;t be reached: check the internet "
                "connection, and try again.",
                "If it says YouTube has changed in a way it can&rsquo;t handle, "
-               "see Appendix C, &ldquo;Troubleshooting.&rdquo;")),
+               "see Appendix C, &ldquo;Troubleshooting.&rdquo; Click Details for "
+               "what YouTube said."), "cv-not-retrieved-youtube"),
            ]),
 
     Topic("Choosing What to Make",
@@ -212,8 +219,7 @@ TOPICS = [
                "When you click Convert, it asks:",
                "* <b>Re-encode</b> makes the MP3 anyway.",
                "* <b>WAV Only</b> makes just the MacMusic WAV.",
-               "* <b>Cancel</b> makes nothing.",
-               "~ CHECK: a screenshot of this question is wanted."), "cv11-output"),
+               "* <b>Cancel</b> makes nothing."), "cv11-output", ("cv-reencode", 200)),
            ]),
 
     Topic("Naming the Song",
@@ -288,20 +294,20 @@ TOPICS = [
           "YouTube. The foot of the window says what&rsquo;s happening.</p>",
           [T("To Cancel a Conversion", steps(
                "> Click Cancel, or press Esc.",
-               "It stops, and nothing half-made is kept."), "cv20-progress"),
+               "It stops, and nothing half-made is kept: Results says so."),
+             "cv20-progress", "cv-cancelled-results"),
            T("If You Quit While It Works", steps(
                "The Converter asks first:",
                "* <b>Keep Converting</b> carries on.",
                "* <b>Stop and Quit</b> stops it and quits. The file being made "
-               "isn&rsquo;t saved; anything already finished is kept.",
-               "~ CHECK: a screenshot of this question is wanted.")),
+               "isn&rsquo;t saved; anything already finished is kept."), ("cv-quit", 160)),
            ]),
 
     Topic("Afterwards",
           "<p>Results, at the foot of the window, shows what was made.</p>",
           [T("To Find the Files", steps(
                "> Click Show in Finder beside a file in Results.",
-               "A Finder window opens with the file selected."), "cv28-results"),
+               "A Finder window opens with the file selected."), "cv28-results", "cv-finder"),
            T("To Put the Songs on the Macintosh Plus", steps(
                "The MacMusic WAV files are the ones for the Plus. Chapter 3, "
                "&ldquo;Moving Songs to the Macintosh,&rdquo; explains how to put "
@@ -374,9 +380,9 @@ REFERENCE = "".join([
     cmd("FFmpeg, yt-dlp and Deno", "The programs inside the Converter that do "
         "the work: FFmpeg reads and makes the sound, yt-dlp and Deno fetch from "
         "YouTube. Their versions are shown here; see Appendix D."),
-    cmd("Version", "The Converter&rsquo;s version, 1.0. Licences shows the "
-        "licences of the programs inside it (CHECK: its window isn&rsquo;t yet "
-        "pictured)."),
+    cmd("Version", "The Converter&rsquo;s version, 1.0. Licences opens the "
+        "licences of the programs inside it, a file called THIRD-PARTY-NOTICES.md, "
+        "in the app your Mac uses for such files."),
 
     section("The Menus"),
     "<p>The Converter&rsquo;s menus are the usual ones of a Mac program.</p>",
@@ -385,7 +391,7 @@ REFERENCE = "".join([
         "shows its version; Hide, Hide Others and Show All; Quit MacMusic "
         "Converter Utility (Command-Q)."),
     cmd("Edit menu", "Cut, Copy and Paste, for the Title, File name and "
-        "address boxes (CHECK: not yet pictured)."),
+        "address boxes."),
     cmd("View menu", "Enter Full Screen."),
     cmd("Window menu", "Close (Command-W), Minimize (Command-M), Zoom, and "
         "macOS&rsquo;s other ways to arrange the window."),
@@ -436,9 +442,9 @@ PART = re.sub(r'(<div class="margin">(?:(?!</div>).)*</div>(?:</div>)?)(\s*<p.*?
               r'<div class="keep">\1\2</div>', PART, flags=re.S)
 
 DRAFT = draft_title("Chapter 2: Converting Songs",
-                    "A draft for review, 9 October 2026. In the finished book this "
+                    "A draft for review, 10 October 2026. In the finished book this "
                     "chapter follows Chapter 1, and its pages are numbered on from "
-                    "there. CHECK marks what no screenshot shows yet.")
+                    "there.")
 
 if __name__ == "__main__":
     open(OUT, "w").write(page("MacMusic Utilities: Chapter 2", DRAFT + PART))

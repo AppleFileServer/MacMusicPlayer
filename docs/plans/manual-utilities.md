@@ -124,22 +124,37 @@ Decisions UB1-UB10 were approved by the owner on 2026-10-09.
   cropped to its sidebar and first rows), a tour of the journey pointing
   to each chapter, and What Now?
 
+- **Captures of 1.0** (2026-10-10, taken by Claude with the owner's
+  leave, kept privately in `utilities-screenshots/taken-2026-10-10/`):
+  each window captured alone, so its frame is the whole image; sheets
+  and alerts cut out of them. They replace the Transfer Utility's
+  provisional figures (`tu01` and its parts, and `tu-...`), add the
+  Converter's missing questions and results (`cv-...`), the Plus's
+  WAV Files folder from Mini vMac (`plus-wav-files`), and what the
+  Backup Utility shows without a card (`bu-...`: the Restore sheet and
+  its conflict question, Verify's result, the snapshot menu, Delete,
+  Settings). A folder chosen as the card shows the Mac's own disk in the
+  card details, so those screens are used only in parts.
+- **The Backup Utility in the appendixes** (2026-10-10): its messages,
+  its backup folder, troubleshooting and its specification, from its
+  1.0 source.
+- **The whole book** (Phase 8, 2026-10-10): `make-book.py`, as the
+  User's Guide's, with each chapter's ids prefixed (`c1-` ... `c4-`),
+  the full glossary (with the Backup Utility's words) and the index;
+  110 pages.
+
+- **The Quick Reference Card** (2026-10-10, the owner's request):
+  `make-card.py`, four pages the manuals' size, after Apple's Macintosh
+  Quick Reference Card (1988, 030-3180-B): a song's journey and the three
+  utilities, then MacMusic's controls, screens, menus, importing from the
+  Transfer disk, playlists and limits, all from the two manuals.
+
 ## Screenshots still wanted
 
-For the Converter (when convenient): the Licences window; a refused
-file and a refused video, with their messages; Show in Finder's result;
-cancelling a conversion; the question when quitting mid-conversion; the
-MP3 re-encode question (Re-encode / WAV Only). For the Transfer
-Utility (beyond `n01`-`n07`): the progress while building; a refused
-song and a renamed one; "How is this worked out?" and "What was
-checked" opened; the ID 0 and "already there" questions; the quit
-question; and, after the latest changes, the file list again. The
-Plus's own screens (the Transfer disk, its WAV Files folder): from Mini
-vMac. For the Backup Utility
-(1.0, to replace `bu01`-`bu14`, taken with an earlier build): the window
-waiting for a card, the card connected (with "Registered as" and Eject),
-the backup sheet, progress, the result; the registration sheet; the
-clean-shutdown warning (the test card in `~/MacPlusProjects/backup-work`);
-Verify Backup's result; the Restore… sheet and its conflict question;
-a snapshot's menu and the Delete… question; Restore to a New Card…;
-Settings.
+For the Backup Utility, with a real card in the Mac: the window with
+the card connected ("Registered as", Eject), the registration sheet,
+the card ready to back up and the Back Up sheet (to replace `bu13`
+and the card details), and Restore to a New Card with only the new card
+listed. The Plus's own screens again after the owner's Plus check, if
+the real Plus shows them differently from Mini vMac (its WAV Files
+folder in icon view). The Converter's Edit menu (optional).

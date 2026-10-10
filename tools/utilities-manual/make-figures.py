@@ -58,6 +58,22 @@ ARCHIVE = ((1048, 518, 1791, 789), 36)         # Archive Utility, expanding the 
 APP_MENU = ((67, 6, 489, 53), ((80, 62, 715, 435), 28))      # its name, then the menu
 WINDOW_MENU = ((658, 6, 815, 53), ((660, 62, 1199, 579), 28))
 
+# The captures of 2026-10-10 (taken-2026-10-10/): each window captured
+# alone, so its frame is the whole image (sized when it's read); an alert
+# captured as a region has 20 pixels round it; a sheet is measured within
+# its window.
+def whole(radius):
+    return ("whole", radius)
+REGION_ALERT = ((20, 20, 539, 555), 56)        # "Stop ... and quit?"
+RESTORE_CONFLICT = ((20, 20, 539, 719), 56)    # "... is already there"
+ORIGIN = ((0, 0, 0, 0), 0)                     # a part cut straight from a capture
+T = "taken-2026-10-10/"
+SHEETS = {      # sheets and alerts, measured within their windows' captures
+    "cv-reencode": ((280, 378, 799, 885), 56),
+    "bu-restore": ((440, 306, 1559, 1093), 72),
+    "bu-delete": ((740, 464, 1259, 935), 56),
+}
+
 # A part of a window: (left, top, right, bottom) within it, in the
 # window's own pixels. Each section is its heading and its grey box.
 def section(top, bottom, heading=75, below=20):
@@ -87,6 +103,28 @@ FIGURES = {
     "bu13-sheet": ("backup/bu13", "window", BACKUP_SHEET),
     # The MacMusic Transfer Utility (the owner's screenshots, 2026-10-10).
     **{"tu%02d" % n: ("new-2026-10-10/n%02d" % n, "window", TRANSFER) for n in (1, 2, 3, 5, 6, 7)},
+    # The captures of 2026-10-10 (Claude's, with the owner's leave).
+    "tu01": (T + "a02", "window", whole(36)),          # six songs, two renamed
+    "tu-refused": (T + "a01", "window", whole(36)),
+    "tu-progress": (T + "a06b", "window", whole(36)),
+    "tu-checked": (T + "a08", "window", whole(36)),
+    "tu-already": (T + "a04", "window", ((500, 466, 1019, 973), 56)),
+    "tu-id0": (T + "a11", "window", ((500, 500, 1019, 939), 56)),
+    "tu-quit": (T + "a12", "window", REGION_ALERT),
+    "plus-wav-files": (T + "p03", "part", (ORIGIN, (0, 64, 2048, 1432))),
+    "cv-refused": (T + "c01", "window", whole(36)),
+    "cv-not-retrieved": (T + "c04", "window", whole(36)),
+    "cv-reencode": (T + "c05", "window", None),           # its sheet, measured below
+    "cv-wav-only": (T + "c06", "window", whole(36)),
+    "cv-cancelled": (T + "c10", "window", whole(36)),
+    "cv-finder": (T + "c07", "window", whole(56)),
+    "cv-quit": (T + "c11", "window", REGION_ALERT),
+    "bu-verified": (T + "b06", "window", whole(56)),
+    "bu-restore": (T + "b08", "window", None),
+    "bu-conflict": (T + "b09", "window", RESTORE_CONFLICT),
+    "bu-delete": (T + "b12", "window", None),
+    "bu-menu": (T + "b11", "window", ((1102, 360, 1463, 689), 28)),
+    "bu-settings": (T + "b14", "window", whole(36)),
     # Parts of the Backup Utility's window, cut from its figures (so the
     # corners are already the page's white): (figure, part).
     "bu01-status": (None, "partof", ("bu01", (0, 100, 2000, 290))),
@@ -101,8 +139,17 @@ FIGURES = {
     "cv03-app": (None, "partof", ("cv03", (0, 0, 1320, 420))),
     "cv04-drag": (None, "partof", ("cv04", (0, 0, 1320, 420))),
     # Parts of the Transfer Utility's window.
-    "tu01-files": (None, "partof", ("tu01", (0, 100, 1520, 690))),
-    "tu01-disk": (None, "partof", ("tu01", (0, 730, 1520, 1260))),
+    "tu01-files": (None, "partof", ("tu01", (0, 100, 1520, 650))),
+    "tu01-disk": (None, "partof", ("tu01", (0, 690, 1520, 1220))),
+    "tu-refused-files": (None, "partof", ("tu-refused", (0, 100, 1520, 790))),
+    "tu-progress-foot": (None, "partof", ("tu-progress", (0, 1300, 1520, 1436))),
+    "tu-checked-result": (None, "partof", ("tu-checked", (0, 460, 1520, 1290))),
+    "cv-wav-only-results": (None, "partof", ("cv-wav-only", (0, 850, 1080, 1130))),
+    "cv-cancelled-results": (None, "partof", ("cv-cancelled", (0, 970, 1080, 1130))),
+    "cv-refused-source": (None, "partof", ("cv-refused", (0, 186, 1080, 497))),
+    "cv-not-retrieved-youtube": (None, "partof", ("cv-not-retrieved", (0, 186, 1080, 583))),
+    "bu-verified-snapshot": (None, "partof", ("bu-verified", (920, 835, 2000, 1235))),
+    "bu-warnings-status": (None, "partof", ("bu-verified", (0, 104, 2000, 262))),
     "tu03-save-to": (None, "partof", ("tu03", (0, 620, 1520, 790))),
     "tu03-result": (None, "partof", ("tu03", (0, 950, 1520, 1290))),
     "tu05-drop": (None, "partof", ("tu05", (0, 100, 1520, 470))),
@@ -168,7 +215,12 @@ def screenshot(name):
     found = glob.glob(os.path.join(SHOTS, name + " *.png"))
     if len(found) != 1:
         sys.exit("%s: expected one screenshot, found %d" % (name, len(found)))
-    return Image.open(found[0]).convert("RGB")
+    im = Image.open(found[0])
+    if im.mode in ("RGBA", "LA", "P"):     # a window captured alone: its corners are clear
+        white = Image.new("RGBA", im.size, "white")
+        white.alpha_composite(im.convert("RGBA"))
+        im = white
+    return im.convert("RGB")
 
 
 def inset(radius, y):
@@ -273,6 +325,10 @@ def make(code, entry):
         art = Image.eval(art, lambda v: round(255 - (255 - v) * PALE))
         halves(art, OUT, code)
         return art, None
+    if frame is None:
+        frame = SHEETS[code]
+    if frame[0] == "whole":
+        frame = ((0, 0, im.width - 1, im.height - 1), frame[1])
     box, shapes = shapes_of(kind, frame)
     crop = im.crop((box[0], box[1], box[2] + 1, box[3] + 1))
     m = mask(crop.size, shapes)

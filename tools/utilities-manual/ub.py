@@ -139,8 +139,10 @@ class Topic:
 
 
 def T(title, body, *figures):
-    """A task: its title in the margin, its steps and pictures beside it."""
-    pics = "".join(fig(f, w) for f, w in ((f if isinstance(f, tuple) else (f, TASK)) for f in figures))
+    """A task: its title in the margin, its steps and pictures beside it
+    (a picture's width "wide" puts it across the whole page)."""
+    pics = "".join(('<figure class="window wide">%s</figure>' % img(f, 448)) if w == "wide" else fig(f, w)
+                   for f, w in ((f if isinstance(f, tuple) else (f, TASK)) for f in figures))
     return (title, '<div class="entry task"><div class="margin"><h3 class="task-head" id="%s">%s</h3></div>%s%s</div>'
             % (anchor(title), title, body, pics))
 

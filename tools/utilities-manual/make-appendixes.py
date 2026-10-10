@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
 """Writes docs/utilities-manual/appendixes.html, the appendixes of
 *MacMusic Utilities* (Phase 6; docs/utilities-manual/outline.md):
-  A  Messages: every message the Converter and the Transfer Utility
-     show, quoted from their 1.0 source, with what it means and what to do;
+  A  Messages: every message each utility shows, quoted from its 1.0
+     source, with what it means and what to do;
   B  About the Files;
   C  Troubleshooting;
   D  Specifications and Licences.
 
-The Backup Utility's parts follow when it exists (UB6). CHECK marks what
-waits for the owner's Plus check of the Transfer Utility, or for
-screenshots (UB7).
+The Backup Utility's parts are quoted from its 1.0 source (Sources/,
+Errors.swift and the window's sheets). CHECK marks what waits for the
+owner's Plus check of the Transfer Utility, a real card, or the USB
+drive (UB7, UB8).
 
 Build it with tools/utilities-manual/build-pdf.sh docs/utilities-manual/appendixes.html <pdf>."""
 import os, re, sys
@@ -113,7 +114,7 @@ A = "".join([
         "which loses a little quality; a higher bitrate can&rsquo;t bring it back. Make "
         "the MP3 anyway, or just the MacMusic WAV?"),
         "Re-encode makes the MP3 anyway; WAV Only makes just the MacMusic WAV; "
-        "Cancel makes nothing. (CHECK: not yet pictured.)"),
+        "Cancel makes nothing.", ("cv-reencode", 180)),
     msg("<b>" + q("Chill Dreamy.mp3") + " already exists in " + q("MacMusic Files") + "</b><br>"
         + q("Keep Both saves the new file under the next free name. Replace puts it in "
             "place of what&rsquo;s there."),
@@ -136,7 +137,7 @@ A = "".join([
     msg("<b>Stop the conversion and quit?</b><br>" + q("The file being converted won&rsquo;t "
         "be saved. Anything already finished is kept."),
         "You chose Quit while a song was converting. Keep Converting carries on; "
-        "Stop and Quit stops and quits. (CHECK: not yet pictured.)"),
+        "Stop and Quit stops and quits.", ("cv-quit", 150)),
 
     sub("In the Results"),
     "<p>After a conversion, Results says what was done to the sound, and may add "
@@ -174,9 +175,8 @@ A = "".join([
         "shouldn&rsquo;t happen: if it does again, note the message."),
 
     part("MacMusic Transfer Utility"),
-    "<p class=\"grey\">CHECK: these are quoted from the Transfer Utility 1.0&rsquo;s "
-    "source; they&rsquo;ll be pictured, and checked against its screens, when its "
-    "chapter is written.</p>",
+    "<p class=\"grey\">These are quoted from the Transfer Utility 1.0&rsquo;s source; "
+    "those Chapter 3 pictures were checked against its screens.</p>",
 
     sub("Adding Files"),
     msg(q("It isn&rsquo;t a WAV file."),
@@ -225,7 +225,129 @@ A = "".join([
     msg(q("Cancelled. Nothing was saved."), "You clicked Cancel."),
     msg("<b>Stop building the disk and quit?</b><br>" + q("The disk being built won&rsquo;t be "
         "saved. Your files and any finished disk are left as they are."),
-        "You chose Quit while a disk was being built."),
+        "You chose Quit while a disk was being built. Keep Building carries on; Stop "
+        "and Quit stops and quits.", ("tu-quit", 150)),
+
+    part("Macintosh Backup Utility"),
+    "<p class=\"grey\">These are quoted from the Backup Utility 1.0&rsquo;s source; "
+    "those Chapter 4 pictures were checked against its screens.</p>",
+
+    sub("Your Card"),
+    msg(q("Waiting for a card"),
+        "No card is chosen. Shut the Plus down, and put its card in your Mac; it&rsquo;s "
+        "recognised when it appears. Or click Choose Card."),
+    msg("<b>Register this card?</b><br>" + q("... looks like a BlueSCSI card. Give it a name, "
+        "and its backups are kept together under it, and it&rsquo;s recognised whenever "
+        "it&rsquo;s inserted."),
+        "Type a name and click Register, or click Not Now. Nothing is written to the "
+        "card."),
+    msg("<b>Is this ...?</b><br>" + q("It has the same name, size and format as ..., but macOS "
+        "gives it a different identity, as it does a card that&rsquo;s been reformatted."),
+        "Yes, the Same Card keeps its backups together; No, a Different Card registers "
+        "it as a new one."),
+    msg(q("... is connected") + " (a notification)",
+        "The card went in while the Backup Utility was in the background."),
+    msg(q("macOS hasn&rsquo;t allowed this app to read the card. Allow it in System Settings, "
+          "Privacy &amp; Security, Files &amp; Folders (Removable Volumes), then choose the "
+          "card again."),
+        "macOS asks once whether the Backup Utility may read removable disks; the answer "
+        "was no. Change it where the message says."),
+    msg(q("The card couldn&rsquo;t be read: ..."),
+        "The card, or a file on it, can&rsquo;t be read. Eject it, put it in again, and "
+        "try again; if it still fails, the card may be failing: restore its backup onto "
+        "a new one."),
+    msg(q("The card couldn&rsquo;t be ejected"),
+        "Something on your Mac is using the card. Close it, and try again, or eject the "
+        "card in the Finder."),
+
+    sub("Backing Up"),
+    msg(q("... wasn&rsquo;t shut down cleanly: the Plus may have lost power while using it. "
+          "This backup keeps it as it is; an earlier snapshot may be the better one to "
+          "restore."),
+        "A disk on the card wasn&rsquo;t put away properly. The backup goes ahead; think "
+        "which snapshot to restore from if you need to.", ("bu-verified-snapshot", 260)),
+    msg(q("The card holds a BlueSCSI firmware update package; it&rsquo;s backed up like "
+          "everything else."),
+        "A file that updates the BlueSCSI itself is on the card. It&rsquo;s left out when "
+        "restoring onto a new card, unless you ask for it."),
+    msg(q("There isn&rsquo;t room for this backup in the backup folder. Free some space, or "
+          "choose another folder in Settings.") + " and " + q("There isn&rsquo;t room for "
+          "the backup: it needs about ... MB, and ... MB is free."),
+        "Make room on your Mac, or choose a backup folder on another disk."),
+    msg(q("The backup folder isn&rsquo;t available, or can&rsquo;t be written to: ..."),
+        "The folder is on a disk that isn&rsquo;t connected, or is locked. Connect it, or "
+        "choose another in Settings."),
+    msg(q("Backed up and verified") + " and " + q("Backed up and verified, with warnings"),
+        "Every file was copied and checked; the snapshot is in the history. With "
+        "warnings: see the warning above."),
+    msg(q("Not verified: the card changed during the backup"),
+        "A file was different afterwards: " + q("It was changed during the backup.") + ", "
+        + q("Its size changed during the backup.") + ", " + q("It was replaced during the "
+        "backup.") + " or " + q("It disappeared from the card during the backup.") + " "
+        "Make sure nothing else is using the card, and back up again."),
+    msg(q("The backup failed") + " and " + q("The backup couldn&rsquo;t start"),
+        "A file couldn&rsquo;t be read or written; the message names it."),
+    msg(q("The backup was cancelled") + " and " + q("The card was removed during the backup"),
+        "Nothing is kept as a snapshot. Each ends with " + q("It isn&rsquo;t a restore point; "
+        "your earlier backups aren&rsquo;t affected.")),
+    msg(q("A snapshot called ... is already there, so this one wasn&rsquo;t saved."),
+        "A snapshot of the same name is already in the backup folder (most unlikely, "
+        "as each name ends with a number of its own). Back up again."),
+
+    sub("The History"),
+    msg(q("Verified: ... files match") + " and " + q("... problems found"),
+        "Verify Backup&rsquo;s result. A problem is a file missing, the wrong size, "
+        "&ldquo;its contents have changed,&rdquo; one that can&rsquo;t be read, or one "
+        "&ldquo;not in the manifest.&rdquo; A snapshot with problems may be damaged: "
+        "restore from another."),
+    msg("<b>Delete the snapshot ...?</b><br>" + q("It goes to the Trash, so it can be put back "
+        "until the Trash is emptied."),
+        "Move to Trash or Cancel. If it&rsquo;s the card&rsquo;s only backup, it says so.",
+        ("bu-delete", 180)),
+    msg("<b>Clear the incomplete jobs?</b><br>" + q("They hold no restore points: backups that "
+        "failed, were cancelled, or found the card changed. Your snapshots aren&rsquo;t "
+        "affected."), "Move to Trash or Cancel."),
+    msg(q("Interrupted: it has no record (the app or the Mac stopped during the backup)."),
+        "An incomplete job left by a backup that never finished. Clear it."),
+    msg(q("Its folder and its manifest don&rsquo;t agree.") + " and " + q("The snapshot&rsquo;s "
+        "manifest isn&rsquo;t valid: ..."),
+        "Something in the backup folder has been changed by hand. Don&rsquo;t restore from "
+        "that snapshot."),
+    msg(q("The snapshot couldn&rsquo;t be deleted"),
+        "The message says why; a snapshot that&rsquo;s locked, or on a disk that&rsquo;s "
+        "gone, can&rsquo;t be."),
+
+    sub("Restoring"),
+    msg("<b>&ldquo;...&rdquo; is already there</b><br>" + q("Keep Both saves the backup&rsquo;s "
+        "copy under the next free name. Replace puts it in place of what&rsquo;s there."),
+        "Keep Both, Replace or Skip; with Do the same for the rest, the answer goes for "
+        "every such file.", ("bu-conflict", 160)),
+    msg(q("Restored ... files, each checked against the backup.") + " and " + q("... file(s) "
+        "couldn&rsquo;t be restored."),
+        "The result, with any files skipped or kept under a new name listed below it. A "
+        "file that fails says why: " + q("The backup&rsquo;s copy doesn&rsquo;t match its "
+        "manifest: the backup may be damaged.")),
+    msg(q("... isn&rsquo;t a complete, verified snapshot, so it can&rsquo;t be restored from."),
+        "Only a verified snapshot can be restored from."),
+
+    sub("Restoring Onto a New Card"),
+    msg(q("Empty, and ready."), "The card can be restored onto."),
+    msg(q("The card isn&rsquo;t empty (...). Restore only onto a newly formatted card, so "
+          "nothing on it can be replaced."),
+        "The Backup Utility won&rsquo;t write to a card that holds anything. Use a new "
+        "card, or erase this one in Disk Utility if you&rsquo;re sure."),
+    msg(q("The card is formatted as ...; BlueSCSI needs exFAT (or FAT32). Format it as exFAT "
+          "first."),
+        "In Disk Utility: Erase, Format ExFAT, Scheme Master Boot Record."),
+    msg(q("The card is too small: it needs ... MB, and has ... MB free."), "Use a bigger card."),
+    msg("<b>Restore onto ...?</b><br>" + q("... is written to ... The Macintosh Plus will use "
+        "these disks when the card goes in its BlueSCSI. This isn&rsquo;t a copy of the whole "
+        "old card, only of its files."), "Restore to Card, or Cancel."),
+    msg(q("Restored ... files; all ... checked on the card.") + " and " + q("Some files "
+        "don&rsquo;t match: ..."),
+        "The result. If some don&rsquo;t match, the new card may be faulty: try another."),
+    msg(q("Recorded as ...&rsquo;s replacement: its backups carry on under that name."),
+        "After Use as ...&rsquo;s Replacement."),
 ])
 
 # ---- Appendix B: About the Files ---------------------------------------------
@@ -283,10 +405,31 @@ B = "".join([
     "colon, and ignore the difference between capital and small letters. So the "
     "Transfer Utility changes names where it must: a long name is shortened; a "
     "colon becomes a hyphen (Rock: Live.wav becomes Rock- Live.wav); and of two "
-    "names that differ only in capitals, the second gets a number (clash.wav "
-    "becomes clash 2.wav). Letters the Macintosh can&rsquo;t show are changed "
+    "names that differ only in capitals, the second gets a number (Clash.wav, "
+    "beside clash.wav, becomes Clash 2.wav). Letters the Macintosh can&rsquo;t show are changed "
     "for the nearest it can. The window shows every new name before the disk is "
     "made.</p>",
+
+    sub("The Backup Folder"),
+    "<p>The Macintosh Backup Utility keeps everything in one folder, Mac Plus "
+    "Backups in your home folder unless you choose another:</p>",
+    table(("", ""),
+          ("Snapshots", "a folder for each snapshot, named by its date and time and a "
+           "number (2026-10-10_12-05-13_4914, say), holding Files, a copy of everything "
+           "on the card, and SnapshotManifest.json, the record of every file with its "
+           "size and check-sum (SHA-256)"),
+          ("Catalog", "the list of snapshots, for quick browsing (catalog.json); the "
+           "registered cards (cards.json); the snapshots marked Keep (pins.json)"),
+          ("Logs", "made with the folder; 1.0 keeps nothing in it"),
+          cls="ref spec"),
+    "<p>A snapshot is never changed once it&rsquo;s made, and each stands on its "
+    "own: its disk images are ordinary files, which can be copied straight back "
+    "onto a card with the Finder. A backup still in progress is in a hidden "
+    "folder, and only gets its name when every file has been checked. Leave "
+    "the folder&rsquo;s contents to the Backup Utility: don&rsquo;t rename or "
+    "change them.</p>",
+    "<p>Each snapshot takes as much room as the card&rsquo;s files: a card with "
+    "2 GB of disks takes about 2 GB a backup. Thinning keeps that in check.</p>",
 ])
 
 # ---- Appendix C: Troubleshooting ------------------------------------------------
@@ -317,6 +460,31 @@ C = "".join([
             "see Appendix B, &ldquo;Names on the Macintosh.&rdquo; Type a shorter "
             "File name in the Converter for a better one."),
 
+    sub("Backups"),
+    trouble("The card isn&rsquo;t recognised",
+            "The Backup Utility knows a BlueSCSI card by its bluescsi.ini, its log, or "
+            "its disk images. If it doesn&rsquo;t recognise one, click Choose Card and "
+            "choose it yourself.",
+            "CHECK: not yet seen with a real card in this Mac."),
+    trouble("The card can&rsquo;t be read",
+            "The first time, macOS asks whether the Backup Utility may read removable "
+            "disks. If you said no, allow it in System Settings, Privacy &amp; "
+            "Security, Files &amp; Folders, and choose the card again."),
+    trouble("The backup says the card changed",
+            "Something else read or wrote the card during the backup: the Finder "
+            "making its hidden files, perhaps, or another program. Back up again."),
+    trouble("The backups take too much room",
+            "Turn on thinning in Settings, delete snapshots you don&rsquo;t need, or "
+            "choose a backup folder on a bigger disk. Deleted snapshots go to the "
+            "Trash: empty it to get the room back."),
+    trouble("A disk on the Plus has gone wrong",
+            "Restore its disk image from a snapshot from before it went wrong "
+            "(Chapter 4, Lesson 2). A snapshot marked with a warning sign has a disk "
+            "that wasn&rsquo;t shut down cleanly; one before it may be better."),
+    trouble("The card itself has failed",
+            "Restore the newest snapshot onto a new card (Chapter 4, &ldquo;To Restore "
+            "Onto a New Card&rdquo;)."),
+
     sub("On the Macintosh Plus"),
     trouble("The disk doesn&rsquo;t appear",
             "Check that the image&rsquo;s name starts HD and a SCSI ID (0 to 6), "
@@ -339,6 +507,8 @@ D = "".join([
           ("The Macintosh", "a Macintosh Plus with System 6.0.7, MacMusic 1.0, and a "
            "BlueSCSI (for the Transfer Utility&rsquo;s disks)"),
           ("YouTube", "an internet connection; the Converter doesn&rsquo;t sign in"),
+          ("Backups", "a slot or reader for SD cards; room on your Mac for the "
+           "snapshots"),
           cls="ref spec"),
 
     sub("MacMusic Converter Utility 1.0"),
@@ -361,6 +531,19 @@ D = "".join([
           ("Saves to", "~/Music/MacMusic Transfer, or a folder you choose"),
           cls="ref spec"),
 
+    sub("Macintosh Backup Utility 1.0"),
+    table(("", ""),
+          ("Reads", "a BlueSCSI SD card (exFAT or FAT32), or a folder you choose; never "
+           "writes to it"),
+          ("Makes", "snapshots: a full copy of the card, every file checked (SHA-256)"),
+          ("Keeps", "with thinning, the newest of each day for a week, each week for a "
+           "month, each month for a year; at least two; any marked Keep"),
+          ("Restores", "files, or the whole snapshot, to a folder; or everything onto a "
+           "new, empty card"),
+          ("Saves to", "~/Mac Plus Backups, or a folder you choose"),
+          cls="ref spec"),
+    "<p>The Backup Utility uses only macOS&rsquo;s own software.</p>",
+
     sub("Software Inside the Utilities"),
     "<p>The utilities do their work with these programs, which come inside them, "
     "each under its own licence:</p>",
@@ -380,10 +563,9 @@ D = "".join([
 ])
 
 DRAFT = draft_title("Appendixes A to D",
-                    "A draft for review, 9 October 2026, for the MacMusic Converter "
-                    "Utility and the MacMusic Transfer Utility; the Macintosh Backup "
-                    "Utility&rsquo;s parts follow when it exists. CHECK marks what "
-                    "waits for screenshots or the Plus check.")
+                    "A draft for review, 10 October 2026, for all three utilities. "
+                    "CHECK marks what waits for the Plus check, a real card, or the "
+                    "USB drive (UB8).")
 PART = (appendix("A", "Messages", A)
         + appendix("B", "About the Files", B)
         + appendix("C", "Troubleshooting", C)

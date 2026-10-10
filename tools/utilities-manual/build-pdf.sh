@@ -31,5 +31,9 @@ MANUAL=${MANUAL_ASSETS:-$HOME/MacPlusProjects/manual-assets-private}
 if [ -f "$MANUAL/rainbow-logo.png" ]; then
     mkdir -p "$B/private" && cp "$MANUAL/rainbow-logo.png" "$B/private/"
 fi
+# The whole book's own-use cover (make-cover.py).
+if [ -f "$ASSETS/cover-utilities.jpg" ]; then
+    mkdir -p "$B/private" && cp "$ASSETS/cover-utilities.jpg" "$B/private/"
+fi
 cp "$TOOLS"/fonts/built/*.ttf "$B/fonts/"
 "$TOOLS/venv/bin/python" tools/manual/print-pdf.py "$CHROME" "$B/page.html" "$2" ${3:+"$3"}

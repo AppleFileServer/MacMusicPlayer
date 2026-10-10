@@ -6,8 +6,7 @@ About This Manual, and the glossary of the words the Converter and
 Transfer Utility chapters use. The cover is made last (as the User's
 Guide's), and the index once every chapter is written.
 
-What's provisional: the USB drive's contents (UB8) and the Backup
-Utility's description (UB6) are marked CHECK.
+What's provisional: the USB drive's contents (UB8) are marked CHECK.
 
 Build it with tools/utilities-manual/build-pdf.sh docs/utilities-manual/front.html <pdf>."""
 import os, sys
@@ -104,8 +103,7 @@ ABOUT = "".join([
           "from its SD card.",
           "The <b>Macintosh Backup Utility</b> keeps copies of the BlueSCSI&rsquo;s "
           "SD cards on your Mac, rather as Time Machine does for your Mac, so a "
-          "disk can be put back if something on the Plus is lost. (CHECK: it&rsquo;s "
-          "described here as planned.)"),
+          "disk can be put back if something on the Plus is lost."),
 
     margin_sub("What&rsquo;s on the USB drive"),
     "<p>The USB drive in the box holds:</p>",
@@ -169,6 +167,15 @@ GLOSSARY = [
     ("BlueSCSI", "A small board that plugs into the Macintosh Plus&rsquo;s SCSI "
      "port and acts as one or more hard disks, reading disk images from an SD "
      "card."),
+    ("backup folder", "The folder on your Mac where the Backup Utility keeps "
+     "its snapshots: Mac Plus Backups, in your home folder, unless you choose "
+     "another."),
+    ("check-sum", "A number worked out from every byte of a file, so that a "
+     "copy can be checked against it: one byte different, and the number is "
+     "different. The Backup Utility uses SHA-256."),
+    ("clean shutdown", "A disk put away properly, as Shut Down does. A disk "
+     "that lost power while the Plus was using it wasn&rsquo;t shut down "
+     "cleanly, and may be damaged."),
     ("dBFS", "Decibels below full scale: how loud a sound is compared with the "
      "loudest a file can hold. 0 dBFS is the most; &minus;1.0 dBFS is just "
      "below it."),
@@ -177,17 +184,27 @@ GLOSSARY = [
     ("disk template", "The start of a BlueSCSI disk image (its partition map "
      "and Apple&rsquo;s hard disk driver), which the Transfer Utility copies at "
      "the start of every disk it makes."),
+    ("eject", "To tell your Mac you&rsquo;ve finished with a disk or card, so "
+     "it can be taken out safely."),
+    ("exFAT", "The way of keeping files that SD cards for a BlueSCSI use, "
+     "which your Mac reads and writes."),
     ("Finder", "The program that shows your files, folders and disks, on your "
      "Mac and on the Macintosh Plus alike."),
     ("HFS", "The Macintosh&rsquo;s own way of keeping files on a disk, which "
      "System 6 uses. A Transfer Utility disk is an HFS disk."),
     ("import", "In MacMusic, to add a song to your library, with Import Song "
      "from the File menu (<i>MacMusic User&rsquo;s Guide</i>)."),
+    ("incomplete job", "A backup that didn&rsquo;t finish, or wasn&rsquo;t "
+     "verified. It holds no snapshot, and can be cleared."),
     ("kbps", "Thousands of bits a second: how much an MP3 uses for each second "
      "of sound. The Converter&rsquo;s MP3s are 192 kbps."),
     ("MacMusic WAV", "The one kind of sound file MacMusic plays: a WAV file, "
      "mono, with 22,050 samples a second, 8 bits each. The Converter makes "
      "them."),
+    ("manifest", "A snapshot&rsquo;s record of every file in it, with its "
+     "size and check-sum."),
+    ("Mini vMac", "A program that makes your Mac act as a Macintosh Plus. "
+     "Some of this manual&rsquo;s pictures of the Plus come from it."),
     ("mono", "Sound on one channel. MacMusic plays in mono, since the Macintosh "
      "has one sound channel; a stereo song is mixed into one."),
     ("MP3", "A kind of sound file that takes much less room than a WAV file, "
@@ -196,6 +213,10 @@ GLOSSARY = [
     ("normalise", "To make a song louder or quieter, so that its loudest moment "
      "reaches a set level."),
     ("peak", "A song&rsquo;s loudest moment."),
+    ("register", "In the Backup Utility, to give a card a name, so it&rsquo;s "
+     "recognised whenever it&rsquo;s inserted and its backups are kept "
+     "together."),
+    ("restore", "To copy files back out of a snapshot."),
     ("re-encode", "To make an MP3 from a song that&rsquo;s already an MP3 (or "
      "another compressed kind), which loses a little quality."),
     ("Results", "The part of the Converter&rsquo;s window that shows what a "
@@ -209,10 +230,18 @@ GLOSSARY = [
      "usually 0. Each disk image on a BlueSCSI&rsquo;s card has one."),
     ("SD card", "The small memory card a BlueSCSI keeps its disk images on. You "
      "copy disk images to it on your Mac."),
+    ("snapshot", "A complete copy of everything on a card at one moment, made "
+     "by the Backup Utility and checked file by file."),
+    ("thinning", "Removing older snapshots after a backup, so that the "
+     "backups don&rsquo;t fill your Mac: one a day for a week, one a week for "
+     "a month, one a month for a year."),
     ("title", "A song&rsquo;s name as MacMusic shows it. The Converter puts it "
      "inside the WAV file."),
+    ("Transfer disk", "The disk the Transfer Utility makes, called Transfer, "
+     "with your songs in its WAV Files folder."),
     ("trim silence", "In the Converter, to cut long silence at the start or end "
      "of a song down to half a second."),
+    ("verify", "To check every file of a snapshot against its manifest."),
     ("WAV file", "A common kind of sound file. MacMusic plays one kind of WAV "
      "file only: see MacMusic WAV."),
     ("YouTube address", "A video&rsquo;s web address, from your browser&rsquo;s "
@@ -233,7 +262,7 @@ PART = FRONT                       # for the whole book (make-book.py, Phase 8)
 BACK = glossary()
 
 DRAFT = draft_title("Front matter and glossary",
-                    "A draft for review, 9 October 2026: the title page, the "
+                    "A draft for review, 10 October 2026: the title page, the "
                     "copyright page and About This Manual, with a first glossary "
                     "(which goes at the back of the book). The cover and the index "
                     "come last. CHECK marks what&rsquo;s provisional.")
