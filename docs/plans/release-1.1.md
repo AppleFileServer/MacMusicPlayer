@@ -147,11 +147,26 @@ ordinary libraries, the Finder alone for the largest; the User's Guide is
 to say so. The cache (N11-9) must add no memory, and the faster sort
 (N11-23) needs only a 1K work list.
 
-**Printing on the 1 MB Plus: not yet measured.** The fresh System has no
-printer chosen in the Chooser yet, so every Printing Manager call returned
-an error (-43, then -192) before using any memory. A second run, after
-choosing the ImageWriter in the Chooser, gives those figures; and
-`PrPicFile`'s need still waits for the real ImageWriter.
+**Printing on the 1 MB Plus, under MultiFinder** (the printer chosen in
+the Chooser, as a user would; a one-page job, MacMusic's partition about
+550K):
+
+| | ImageWriter (printer port, AppleTalk off) | LaserWriter (AppleTalk on) |
+|---|---|---|
+| Most heap used beyond MacMusic's own, `PrOpen` to `PrCloseDoc` | **2.1K** | **3.0K** |
+| After `PrClose` | all given back | all given back |
+| Paper | A4 | A4 |
+| The job | spooled (`PrPicFile` then prints it: not run, as it waits for the printer) | handed to **PrintMonitor** for background printing, which tried to print it and said "the LaserWriter named 'LaserWriter' could not be found" |
+
+So printing on a 1 MB Plus costs MacMusic only a few K; the larger
+figures on the 4 MB test System (15K, 62K) were its drivers using more
+when more was free, or printing in the foreground. Background printing to
+a LaserWriter runs PrintMonitor as a program of its own, which needs its
+own room under MultiFinder: on the 1 MB Plus it found it, beside
+MacMusic. Choosing the LaserWriter, the Chooser reminds the user to
+"choose Page Setup and confirm the settings", as N11-16 already has
+MacMusic do. `PrPicFile`'s need (the ImageWriter's printing pass) still
+waits for the real ImageWriter.
 
 ## Part A: the cut-off prompt (the issues log, 2026-10-08)
 
