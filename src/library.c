@@ -119,22 +119,34 @@ static short CompareNames(ConstStringPtr a, ConstStringPtr b)
     return (short)RelStringTrap(textA, textB, (lengthA << 16) | lengthB);
 }
 
-/* Insertion sorts; lists are at most kMaxSongs long. */
+/* 1.1 (N11-23): every song by title, with a merge sort. 1.0's insertion
+   sort made about 62,000 comparisons for 500 songs (28 s at Plus speed);
+   this makes about 4,000. It's stable, as the insertion sort was (a tie
+   keeps the songs' order in the folder), so the order is 1.0's. */
+static short gMergeWork[kMaxSongs];
+
 static void SortSongsByTitle(short *songs, short count)
 {
-    short i, j, s;
+    short half, i, j, k;
 
-    for (i = 1; i < count; i++)
-    {
-        s = songs[i];
-        for (j = i; j > 0 && CompareNames(PoolString(Songs()[songs[j - 1]].title),
-                                          PoolString(Songs()[s].title)) > 0; j--)
-            songs[j] = songs[j - 1];
-        songs[j] = s;
-    }
+    if (count < 2)
+        return;
+    half = count / 2;
+    SortSongsByTitle(songs, half);
+    SortSongsByTitle(songs + half, count - half);
+    for (i = 0, j = half, k = 0; i < half && j < count; )
+        gMergeWork[k++] = CompareNames(PoolString(Songs()[songs[i]].title),
+                                       PoolString(Songs()[songs[j]].title)) <= 0
+                          ? songs[i++] : songs[j++];
+    while (i < half)
+        gMergeWork[k++] = songs[i++];
+    while (j < count)
+        gMergeWork[k++] = songs[j++];
+    BlockMove(gMergeWork, songs, (long)count * sizeof(short));
 }
 
-/* DECISION (D13, Inferred): an album's songs are in track order. */
+/* DECISION (D13, Inferred): an album's songs are in track order (an
+   insertion sort: an album's few songs). */
 static void SortSongsByTrack(short *songs, short count)
 {
     short i, j, s;
@@ -181,9 +193,29 @@ static short FindNameString(const NameSet *set, ConstStringPtr name)
     return kNone;
 }
 
+/* 1.1 (N11-23): a song's group in its sorted list, by binary search,
+   instead of 1.0's search from the start for every song (14 s for 500
+   at Plus speed). The list is in CompareNames order (InsertName), so the
+   names equal to this one by CompareNames ("The Beatles" and "beatles",
+   say) sit together; the one EqualString matches is among them, and is
+   the group 1.0's search found. */
 static short FindName(const NameSet *set, long offset)
 {
-    return FindNameString(set, PoolString(offset));
+    ConstStringPtr name = PoolString(offset);
+    short low = 0, high = set->count, middle;
+
+    while (low < high)
+    {
+        middle = (low + high) / 2;
+        if (CompareNames(PoolString(set->names[middle]), name) < 0)
+            low = middle + 1;
+        else
+            high = middle;
+    }
+    for (; low < set->count && CompareNames(PoolString(set->names[low]), name) == 0; low++)
+        if (EqualString(PoolString(set->names[low]), name, true, true))
+            return low;
+    return kNone;
 }
 
 short Library_FindArtist(ConstStringPtr name)   { return FindNameString(&gArtists, name); }

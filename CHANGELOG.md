@@ -11,6 +11,12 @@ library conversion. The decision codes in brackets are explained in
 - **The Create New Library prompt (N11-1):** the Save dialog's prompt is
   now "New library in:", which fits; 1.0's "Create new MacMusic Library
   in:" was cut to "Create new MacMusic". From the issues log, 2026-10-08.
+- **Faster reading of the library (N11-23):** the songs are sorted by
+  title with a merge sort, and each song's artist, album, genre and
+  composer found by a binary search, instead of 1.0's insertion sort and
+  search from the start. The same lists in the same order (a new host
+  test, `test_sorting`, checks them against 1.0's way); a full read of
+  500 songs at Plus speed takes 12-16 s instead of 49 s.
 
 ## After 1.0
 

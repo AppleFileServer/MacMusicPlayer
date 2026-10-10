@@ -21,7 +21,8 @@ MODULES="src/songfile.c src/library.c src/libfolder.c src/fileops.c
 failed=0
 # test name, then any arguments it is run with ("-" for none)
 for run in "songfile -" "library -" "playlists -" "marker -" "prefs -" \
-           "prefs locked-old" "prefs both" "shuffle -"; do
+           "prefs locked-old" "prefs both" "shuffle -" \
+           "sorting -"; do
     set -- $run
     name=$1
     exe="$OUT/test_$name"
