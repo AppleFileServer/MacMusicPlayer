@@ -123,6 +123,33 @@ KanjiTalk), International English (Z).
 - Each target needs its own testing set-up (a Mini vMac built for each
   model and memory size, with its System).
 
+### Making less of the program load (noted 2026-10-10)
+
+From the 1.1 discussion of printing; for the smaller Macs and the
+multi-machine releases:
+
+- **Optional add-ons as separate files.** A part of MacMusic (printing,
+  first) could live in a file beside the program, a "MacMusic Printing"
+  file holding it as a code resource (Retro68's `--mac-flat`). If the file
+  is there, MacMusic offers its commands; if not, they're absent. The
+  user adds or removes it by dragging the file, as HyperCard's XCMDs are.
+  More to test than a segment (loading code from another file), and less
+  standard; worth it only where a part is wanted on some machines and not
+  others.
+- **An installer.** Apple's Installer, with a MacMusic script, could put
+  the right version on each machine (Plus, 512Ke, 512K, 128K) and leave
+  out what that machine can't use, as it does for the System. Apple
+  licensed the Installer to developers to distribute: fine for the
+  Personal systems, but for a public release it's Apple's software and
+  would need Apple's licence, which can't now be had. The alternative is
+  an installer of MacMusic's own: a new program to write and test. Either
+  way, an installer only chooses what's copied; what runs must still fit.
+- **Where the memory goes** (Part 0 and 1.0's H1): the sound ring 148K,
+  the library up to about 300K for 500 long-named songs, the code about
+  110K. Reaching 512K or 128K depends mostly on segmenting the whole
+  program, a smaller ring and a smaller library limit; making printing
+  optional saves only a few K.
+
 ## Order (to agree later)
 
 Nothing here is scheduled. MacMusic 1.1 comes first (`release-1.1.md`);

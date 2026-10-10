@@ -70,6 +70,89 @@ Throwaway builds, never in the project:
 
 I report the numbers; the decisions below are then confirmed or changed.
 
+## Part 0: the results (2026-10-10)
+
+Measured in Mini vMac at 1x with LaunchAPPL (the Finder alone, 4 MB), with
+throwaway builds in the scratchpad; 500 test songs, 40 artists, 90 albums.
+
+**Start-up (a full read, 500 songs): 49 s**, made up of:
+
+| Part | Time |
+|---|---|
+| Opening and reading the 500 files (`ScanSongs`) | 6-7 s |
+| Building the group lists (`InsertName`) | 1 s |
+| Finding each song's artist, album, genre and composer (`FindName`: a straight search through each list, for each song) | 14 s |
+| Sorting the songs by title (`SortSongsByTitle`: an insertion sort, about 62,000 comparisons by the `RelString` trap) | 28 s |
+| Sorting by ID | 0.03 s |
+
+For comparison: a merge sort of the same titles took **2.7 s**; listing the
+folder without opening any file, **0.1 s**; reading the folder's date, a
+moment; reading a 60,000-byte file (a cache's size), a moment; 1.0's
+duplicate-ID check, 0.25 s.
+
+So **most of start-up is spent sorting and grouping in memory, not reading
+the disk.** The cache (N11-2 to N11-10) saves only the 6-7 s of reading in
+Mini vMac (whose disk takes no time; on the real Plus the reading may be a
+larger share). **N11-23 (agreed 2026-10-10), added to Part B:** sort
+the titles with a merge sort, and note each song's groups as the lists are
+built, instead of searching for them afterwards. The same lists and the
+same order as 1.0, in about 4 s instead of 43 s; with the cache, start-up
+would take about 5 s for 500 songs.
+
+**Printing (heap used beyond MacMusic's own 271K), the British drivers:**
+
+| | ImageWriter | LaserWriter |
+|---|---|---|
+| `PrOpen` | +1.8K | +1.7K |
+| `PrintDefault` | +8.3K | +9.8K |
+| `PrOpenDoc` | +15.3K | +61.6K, then error -98 (no AppleTalk network in Mini vMac) |
+| `PrClose` | all given back | all given back |
+| Default paper | **A4** | **A4** |
+| The job | spooled, then `PrPicFile` (not measured: it waits for the printer) | sent straight to the printer |
+
+The British drivers default to A4, so N11-16's first Page Setup simply
+shows A4. A LaserWriter job needs at least 62K more.
+
+**A 1 MB Plus (Mini vMac built with 1 MB; a clean British System 6.0.7 by
+the Installer's Easy Install: Macintosh Plus System Software and all the
+printer software):**
+
+| | System | Finder | Free for MacMusic |
+|---|---|---|---|
+| The Finder alone | 166K | | **858K** |
+| MultiFinder | 271K | 160K | **593K** (the largest free block) |
+
+MacMusic's SIZE asks for 640K and accepts 512K, so under MultiFinder on a
+1 MB Plus it gets 593K. By 1.0's memory table (outstanding-issues.md, H1),
+that holds 500 songs with typical names with room to spare, but only just
+holds 500 songs whose every detail is 63 characters; printing to the
+ImageWriter (about 16K, plus `PrPicFile`'s) fits, a LaserWriter job (62K+)
+may not with a large library.
+
+**MacMusic 1.0's code on that 1 MB Plus, under MultiFinder** (the same
+measuring build, launched from the Finder): the Finder said "640K needed,
+598K available" and offered to open it in the memory there was; MacMusic's
+partition was then about 556K.
+
+| 500 songs | Full read | After reading |
+|---|---|---|
+| Typical details (as the 4 MB runs) | 52 s, the same as with 4 MB | **about 215K to spare** (36K free in the heap, 184K more it can grow into) |
+| Every detail 63 characters | stopped at the reading: **"There is not enough memory to read the MacMusic Library."** | no library |
+
+So on a 1 MB Plus under MultiFinder, 1.0 holds a 500-song library with
+ordinary names comfortably, but not one with every detail at the full 63
+characters (as 1.0's own table predicted for 512K). Under the Finder alone
+it has 858K, enough for either. N11-22 holds as written: MultiFinder for
+ordinary libraries, the Finder alone for the largest; the User's Guide is
+to say so. The cache (N11-9) must add no memory, and the faster sort
+(N11-23) needs only a 1K work list.
+
+**Printing on the 1 MB Plus: not yet measured.** The fresh System has no
+printer chosen in the Chooser yet, so every Printing Manager call returned
+an error (-43, then -192) before using any memory. A second run, after
+choosing the ImageWriter in the Chooser, gives those figures; and
+`PrPicFile`'s need still waits for the real ImageWriter.
+
 ## Part A: the cut-off prompt (the issues log, 2026-10-08)
 
 - **N11-1.** File > Choose Library > Create New Library: Standard File's
@@ -143,6 +226,15 @@ song at Plus speed. Nothing is kept between runs.
   modification date, the song count, a check-sum) and fixed-length
   entries with Pascal strings, big-endian, as the other MacMusic files.
   Described in `docs/` with the library's other files.
+- **N11-23. Faster sorting and grouping (agreed 2026-10-10, from Part 0).**
+  Most of a full read is spent in memory, not on the disk: the title sort
+  (an insertion sort, 28 s for 500 songs at 1x) and the search for each
+  song's groups (14 s). So: the titles sorted with a merge sort (2.7 s
+  measured, with a work list of 1K), and each song's artist, album, genre
+  and composer noted as the group lists are built, instead of searched
+  for afterwards. The same lists in the same order as 1.0 (a host test
+  compares them, title by title, with 1.0's sort on the 500-song and
+  307-song libraries), with ties kept in 1.0's order.
 
 ## Part C: printing
 
@@ -256,6 +348,21 @@ dialogs, no reading or writing of the print record's private fields.
     library and a LaserWriter job can't both fit there, MacMusic says
     so (N11-20) rather than failing;
   - the User's Guide says what works with 1 MB, and how.
+
+- **N11-24. Printing in a code segment of its own (agreed 2026-10-10).**
+  The printing code (Page Setup, the lists dialog, the layout and the
+  page drawing) goes in its own CODE segment, loaded by the Segment
+  Loader only when Page Setup or Print Library is chosen, and unloaded
+  with `UnloadSeg` when the job ends, as *Inside Macintosh* (Volume II,
+  "The Segment Loader") describes. A user who never prints never has it
+  in memory; the driver's own memory is already given back at `PrClose`
+  (Part 0). Built with Retro68's `--mac-segments` and a segment map, a
+  change to MacMusic's CMake settings only, not to the toolchain. The
+  rest of the program stays in its main segment for 1.1 (segmenting it
+  all is for the smaller Macs, `future-releases.md`). To check: that the
+  segment loads and unloads (the heap before and after a print, on the
+  1 MB Plus), and that a print with the segment's disk locked or slow
+  still works.
 
 ### Not in 1.1 (for printing)
 
