@@ -221,6 +221,33 @@ void LCDDraw_Logo(void)
              srcOr);
 }
 
+/* 1.1 (N11-8), PROVISIONAL: "Loading the library..." in the small font
+   (Geneva 9, as Legal), centred under the logo at start-up; over a
+   screen already showing (Rescan Library), in a band across its foot,
+   below a rule. The iPod shows nothing of the kind. */
+#define kLoadingBaseline    (kLCDHeight - 30)
+#define kBandTop            (kLCDHeight - 17)
+
+void LCDDraw_Loading(ConstStringPtr text, Boolean withLogo)
+{
+    Rect band;
+
+    if (withLogo)
+        LCDDraw_Logo();
+    else
+    {
+        SetRect(&band, 0, kBandTop, kLCDWidth, kLCDHeight);
+        EraseRect(&band);
+        MoveTo(0, kBandTop);
+        LineTo(kLCDWidth - 1, kBandTop);
+    }
+    LCDDraw_UseSmallFont(true);
+    MoveTo((kLCDWidth - StringWidth(text)) / 2,
+           withLogo ? kLoadingBaseline : kLCDHeight - 5);
+    DrawString(text);
+    LCDDraw_UseSmallFont(false);
+}
+
 /* ---- Now Playing ------------------------------------------------------ */
 
 /* Small font used on Now Playing for "3 of 12" and the times (F1). Glyphs

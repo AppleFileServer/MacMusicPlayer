@@ -34,6 +34,10 @@ void LCDDraw_Row(short position, ConstStringPtr text, ConstStringPtr value,
 /* The start-up screen: the Apple logo centred on a blank LCD. */
 void LCDDraw_Logo(void);
 
+/* 1.1: the "loading" message, under the logo (withLogo) or in a band
+   across the foot of the screen as it is. */
+void LCDDraw_Loading(ConstStringPtr text, Boolean withLogo);
+
 /* Small font (counter and times on Now Playing). C strings. */
 short LCDDraw_SmallTextWidth(const char *text);
 void LCDDraw_SmallText(short left, short top, const char *text);

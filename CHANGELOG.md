@@ -29,6 +29,11 @@ library conversion. The decision codes in brackets are explained in
   so a Plus whose clock has stopped can't be misled. Rescan Library
   reads every file. Starting with 500 songs at Plus speed: 7.5 s. A new
   host test, `test_cache`.
+- **"Loading the library…" (N11-8, PROVISIONAL):** shown, with the watch
+  cursor, when songs have to be read from their files: under the Apple
+  logo when MacMusic starts or changes library, and in a band across the
+  foot of the screen at Rescan Library. Not shown when every song comes
+  from the cache, nor for Import and Export.
 
 ## After 1.0
 

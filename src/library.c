@@ -77,6 +77,11 @@ typedef struct { unsigned long modDate; long length; } FileStat;
 #define Stats()             ((FileStat *)*gStatsH)
 static long gCacheAt[kMaxSongs];
 
+/* 1.1 (N11-8): called once a scan, when its first song has to be read
+   from its file (not when every song comes from the cache). */
+static LibraryNotice gReadingNotice;
+static Boolean gNoticed;
+
 #define Songs()             ((SongRec *)*gSongsH)
 #define PoolString(offset)  ((ConstStringPtr)(*gPoolH + (offset)))
 
@@ -270,6 +275,11 @@ static Boolean AddSongFile(const LibraryFolder *folder, ConstStringPtr fileName,
     cached = gUseCache && LibCache_Find(fileName, modDate, length, &gInfo, &at);
     if (!cached && !SongFile_Read(folder->vRefNum, folder->folderID, fileName, &gInfo))
         return false;
+    if (!cached && !gNoticed && gReadingNotice != nil)
+    {
+        gNoticed = true;
+        gReadingNotice();
+    }
 
     for (i = 0; i < gSongCount; i++)
         if (Songs()[i].id == gInfo.id)
@@ -538,6 +548,7 @@ static Boolean ScanWith(const LibraryFolder *folder, Boolean useCache)
        can't be loaded, or the scan then runs short of memory, the scan is
        done again without it, as 1.0 does: any library 1.0 can read, 1.1
        can. */
+    gNoticed = false;
     useCache = useCache && LibCache_Load(folder);
     gStatsH = NewHandle(0);
     ok = ScanOnce(folder, useCache);
@@ -600,6 +611,11 @@ Boolean Library_ScanAll(const LibraryFolder *folder)
 short Library_ReadFromFilesCount(void)
 {
     return gReadFromFiles;
+}
+
+void Library_SetReadingNotice(LibraryNotice notice)
+{
+    gReadingNotice = notice;
 }
 
 void Library_ForgetCached(short song)

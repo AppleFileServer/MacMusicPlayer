@@ -120,6 +120,9 @@ static void ChangeOutside(long id, const char *title)
     CHECK_EQ(SongFile_WriteInfo(gF.vRefNum, gF.folderID, PS(name), &info), noErr);
 }
 
+static int gNotices;
+static void Notice(void) { gNotices++; }
+
 static short SongWithID(long id)
 {
     short n = Library_SongCount(), i;
@@ -335,6 +338,29 @@ int main(void)
         TestMem_SetLimit(0);
     }
     CHECK_EQ(TestFS_OpenFiles(), 0);
+
+    Test("the loading notice: once when files are read, never from the cache");
+    Library(20);
+    Library_SetReadingNotice(Notice);
+    gNotices = 0;
+    CHECK(Library_Scan(&gF));                   /* the first start: no cache */
+    CHECK_EQ(gNotices, 1);
+    gNotices = 0;
+    CHECK(Library_Scan(&gF));                   /* all from the cache */
+    CHECK_EQ(gNotices, 0);
+    ChangeOutside(7, "Changed");
+    CHECK(Library_Scan(&gF));                   /* one file read */
+    CHECK_EQ(gNotices, 1);
+    gNotices = 0;
+    TestFS_WriteFile(gF.folderID, "Notes", 'TEXT', 'ttxt', "hello", 5);
+    CHECK(Library_Scan(&gF));                   /* a file that isn't a song */
+    CHECK_EQ(gNotices, 0);
+    CHECK(Library_ScanAll(&gF));                /* Rescan Library */
+    CHECK_EQ(gNotices, 1);
+    Library_SetReadingNotice(nil);
+    gNotices = 0;
+    CHECK(Library_ScanAll(&gF));
+    CHECK_EQ(gNotices, 0);
 
     return TestsDone("test_cache");
 }

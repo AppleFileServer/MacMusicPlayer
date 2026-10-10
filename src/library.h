@@ -44,6 +44,11 @@ short Library_ReadFromFilesCount(void);
 /* 1.1: marks the song's cache entry stale, before its file is changed
    (Edit Song, a rating), so it's read again at the next scan. */
 void Library_ForgetCached(short song);
+/* 1.1 (N11-8): a function the scan calls once, when it first has to read
+   a song from its file, so the user can be told the library is loading;
+   nil for none (the default). */
+typedef void (*LibraryNotice)(void);
+void Library_SetReadingNotice(LibraryNotice notice);
 
 short Library_SkippedCount(void);   /* files skipped by the last scan */
 long Library_NextSongID(void);      /* one more than the largest ID */

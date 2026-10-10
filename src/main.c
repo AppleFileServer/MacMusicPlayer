@@ -357,6 +357,21 @@ static void UpdateFileMenu(void)
    keeps the logo up for at least kLogoTicks, discards clicks and keys
    made meanwhile, and shows the main menu. Rescanning invalidates list
    positions, so every restart returns to the main menu (D26). */
+/* 1.1 (N11-8): the scan's notice that it has to read songs from their
+   files: "Loading the library..." under the logo (a start or a change of
+   library), or across the foot of the screen (Rescan Library). */
+static void ShowLoading(Boolean withLogo)
+{
+    LCD_BeginDraw();
+    LCDDraw_Loading(P("Loading the library\xC9"), withLogo);
+    LCD_EndDraw();
+    PresentLCD();
+    SetCursor(*GetCursor(watchCursor));
+}
+
+static void LoadingAtStart(void)        { ShowLoading(true); }
+static void LoadingOverScreen(void)     { ShowLoading(false); }
+
 static void BeginRestart(void)
 {
     LCD_BeginDraw();
@@ -364,10 +379,13 @@ static void BeginRestart(void)
     LCD_EndDraw();
     RedrawWindowNow();
     gLogoShownAt = TickCount();
+    Library_SetReadingNotice(LoadingAtStart);
 }
 
 static void EndRestart(void)
 {
+    Library_SetReadingNotice(nil);
+    InitCursor();
     RedrawWindowNow();          /* alerts may have covered the window */
     while (TickCount() - gLogoShownAt < kLogoTicks)
         ;
@@ -478,7 +496,9 @@ static void RescanLibrary(void)
         Playback_TogglePause();
     UI_BeginLibraryEdit();
     SetCursor(*GetCursor(watchCursor));
+    Library_SetReadingNotice(LoadingOverScreen);
     LibSetup_RescanAll();
+    Library_SetReadingNotice(nil);
     InitCursor();
     Playback_LibraryChanged();
     UI_EndLibraryEdit();
