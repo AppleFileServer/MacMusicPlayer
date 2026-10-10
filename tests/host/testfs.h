@@ -39,6 +39,13 @@ void TestFS_AddHostFile(long dir, const char *name, const char *hostPath,
                         OSType type, OSType creator);
 int TestFS_OpenFiles(void);             /* files left open: should be 0 */
 
+/* 1.1: files' modification dates come from a clock that moves on a
+   second at each change, or stays put (a Plus with a flat battery). */
+void TestFS_SetClock(unsigned long seconds, Boolean stopped);
+unsigned long TestFS_ModDate(long dir, const char *name);
+void TestFS_SetModDate(long dir, const char *name, unsigned long date);
+unsigned short TestFS_FinderFlags(long dir, const char *name);
+
 /* Standard File: the reply the next SFPGetFile or SFPPutFile gives. */
 void TestSF_SetReply(Boolean good, short vRefNum, OSType type,
                      const char *name);

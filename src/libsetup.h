@@ -16,6 +16,8 @@ Boolean LibSetup_ChooseLibrary(void);
 
 /* Rebuilds the library from the current folder (empty if none). */
 void LibSetup_Rescan(void);
+/* 1.1 (N11-6): Rescan Library's full read, ignoring the cache. */
+void LibSetup_RescanAll(void);
 
 /* File > Library Info... (Stage 8d-2): Songs (of the 500-song limit,
    audiobooks included), Playlists, Size (the songs' audio), Free (on the

@@ -478,7 +478,7 @@ static void RescanLibrary(void)
         Playback_TogglePause();
     UI_BeginLibraryEdit();
     SetCursor(*GetCursor(watchCursor));
-    LibSetup_Rescan();
+    LibSetup_RescanAll();
     InitCursor();
     Playback_LibraryChanged();
     UI_EndLibraryEdit();

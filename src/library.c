@@ -1,3 +1,4 @@
+#include <string.h>
 #include <Files.h>
 #include <Memory.h>
 #include <TextUtils.h>
@@ -6,6 +7,7 @@
 #include "fileopen.h"
 #include "songfile.h"
 #include "fileops.h"
+#include "libcache.h"
 
 #define kDirectoryAttribute     0x10    /* ioFlAttrib bit 4 */
 
@@ -62,6 +64,18 @@ static short gPlaylistsOverLimit;       /* playlist files beyond kMaxPlaylists *
 
 /* One song file as read; static to keep it off the small stack. */
 static SongInfo gInfo;
+
+/* 1.1, the cache (libcache.c): during a scan, whether it's in use, how
+   many songs were read from their files and how many came from it, and
+   each song's file date and length (a handle freed when the scan ends).
+   After it, where each song's entry is in the cache file, for
+   Library_ForgetCached (-1: none). */
+static Boolean gUseCache;
+static short gReadFromFiles, gFromCache;
+static Handle gStatsH;
+typedef struct { unsigned long modDate; long length; } FileStat;
+#define Stats()             ((FileStat *)*gStatsH)
+static long gCacheAt[kMaxSongs];
 
 #define Songs()             ((SongRec *)*gSongsH)
 #define PoolString(offset)  ((ConstStringPtr)(*gPoolH + (offset)))
@@ -162,17 +176,25 @@ static void SortSongsByTrack(short *songs, short count)
 
 /* Inserts a pool string into a sorted offset list, unless an identical
    name is already there. Returns false if the list is full. */
-static Boolean InsertName(long *names, short *count, short max, long offset)
+static Boolean InsertName(long *names, short *count, short max, long offset,
+                          long *group)
 {
     ConstStringPtr name = PoolString(offset);
     short i, j;
 
+    /* 1.1 (N11-23): *group is the name the song is grouped under (the
+       one already there, or this one), or -1 if the list is full. */
+    *group = -1;
     for (i = 0; i < *count; i++)
         if (EqualString(PoolString(names[i]), name, true, true))
+        {
+            *group = names[i];
             return true;
+        }
 
     if (*count >= max)
         return false;
+    *group = offset;
 
     for (i = 0; i < *count && CompareNames(PoolString(names[i]), name) <= 0; i++)
         ;
@@ -190,31 +212,6 @@ static short FindNameString(const NameSet *set, ConstStringPtr name)
     for (i = 0; i < set->count; i++)
         if (EqualString(PoolString(set->names[i]), name, true, true))
             return i;
-    return kNone;
-}
-
-/* 1.1 (N11-23): a song's group in its sorted list, by binary search,
-   instead of 1.0's search from the start for every song (14 s for 500
-   at Plus speed). The list is in CompareNames order (InsertName), so the
-   names equal to this one by CompareNames ("The Beatles" and "beatles",
-   say) sit together; the one EqualString matches is among them, and is
-   the group 1.0's search found. */
-static short FindName(const NameSet *set, long offset)
-{
-    ConstStringPtr name = PoolString(offset);
-    short low = 0, high = set->count, middle;
-
-    while (low < high)
-    {
-        middle = (low + high) / 2;
-        if (CompareNames(PoolString(set->names[middle]), name) < 0)
-            low = middle + 1;
-        else
-            high = middle;
-    }
-    for (; low < set->count && CompareNames(PoolString(set->names[low]), name) == 0; low++)
-        if (EqualString(PoolString(set->names[low]), name, true, true))
-            return low;
     return kNone;
 }
 
@@ -261,13 +258,17 @@ static long PoolAdd(ConstStringPtr s)
 /* Reads and checks one file. Returns false if it is not a valid song
    (the caller counts it as skipped); sets *outOfMemory on a memory error. */
 static Boolean AddSongFile(const LibraryFolder *folder, ConstStringPtr fileName,
-                           Boolean *outOfMemory)
+                           unsigned long modDate, long length, Boolean *outOfMemory)
 {
     SongRec song;
     long offsets[kSongTagCount + 1];
+    long at = -1;
+    Boolean cached;
     short i;
 
-    if (!SongFile_Read(folder->vRefNum, folder->folderID, fileName, &gInfo))
+    /* 1.1: from the cache if the file is as it was; else from the file. */
+    cached = gUseCache && LibCache_Find(fileName, modDate, length, &gInfo, &at);
+    if (!cached && !SongFile_Read(folder->vRefNum, folder->folderID, fileName, &gInfo))
         return false;
 
     for (i = 0; i < gSongCount; i++)
@@ -300,12 +301,24 @@ static Boolean AddSongFile(const LibraryFolder *folder, ConstStringPtr fileName,
     song.fileName = offsets[5];
 
     SetHandleSize(gSongsH, (long)(gSongCount + 1) * sizeof(SongRec));
+    if (MemError() == noErr && gStatsH != nil)
+        SetHandleSize(gStatsH, (long)(gSongCount + 1) * sizeof(FileStat));
     if (MemError() != noErr)
     {
         *outOfMemory = true;
         return false;
     }
+    if (gStatsH != nil)
+    {
+        Stats()[gSongCount].modDate = modDate;
+        Stats()[gSongCount].length = length;
+    }
+    gCacheAt[gSongCount] = at;
     Songs()[gSongCount++] = song;
+    if (cached)
+        gFromCache++;
+    else
+        gReadFromFiles++;
 
     if (song.id > gMaxSongID)
         gMaxSongID = song.id;
@@ -341,7 +354,8 @@ static Boolean ScanSongs(const LibraryFolder *folder)
             else
                 gSkipped++;
         }
-        else if (!AddSongFile(folder, name, &outOfMemory))
+        else if (!AddSongFile(folder, name, pb.hFileInfo.ioFlMdDat,
+                              pb.hFileInfo.ioFlLgLen, &outOfMemory))
             gSkipped++;
 
         if (outOfMemory)
@@ -386,50 +400,68 @@ static Boolean ScanPlaylists(const LibraryFolder *folder)
     return true;
 }
 
+enum { kArtist, kAlbum, kGenre, kComposer };
+
+static long *GroupField(SongRec *song, short kind)
+{
+    return kind == kArtist ? &song->artistName : kind == kAlbum ? &song->albumName
+         : kind == kGenre ? &song->genreName : &song->composerName;
+}
+
+static short *GroupOf(SongRec *song, short kind)
+{
+    return kind == kArtist ? &song->artist : kind == kAlbum ? &song->album
+         : kind == kGenre ? &song->genre : &song->composer;
+}
+
+/* 1.1 (N11-23): one kind of group. Each song's group is noted as the list
+   is built (InsertName says which name it went under), then numbered by
+   that name's place in the finished list: the group 1.0 found by
+   searching the list for each song, without comparing names again (each
+   comparison is a call to the ROM, and 1.0's search made thousands). */
+static long gGroupName[kMaxSongs];
+
+static void GroupSongs(NameSet *set, short kind)
+{
+    short i, j;
+    SongRec *song;
+
+    for (i = 0; i < gSongCount; i++)
+    {
+        song = &Songs()[i];
+        gGroupName[i] = -1;
+        if (!(song->flags & kSongFlagAudiobook) && PoolString(*GroupField(song, kind))[0] != 0)
+            InsertName(set->names, &set->count, kMaxGroups, *GroupField(song, kind),
+                       &gGroupName[i]);
+    }
+    for (i = 0; i < gSongCount; i++)
+    {
+        song = &Songs()[i];
+        *GroupOf(song, kind) = kNone;
+        for (j = 0; gGroupName[i] >= 0 && j < set->count; j++)
+            if (set->names[j] == gGroupName[i])
+            {
+                *GroupOf(song, kind) = j;
+                break;
+            }
+    }
+}
+
 /* Groups songs into artists, albums, genres and composers. Runs once the
    pool is locked, since it compares strings in place. */
 static void IndexSongs(void)
 {
     short i, j, s;
-    SongRec *song;
 
     /* PROVISIONAL (D18): audiobooks appear only under Audiobooks.
        PROVISIONAL (D19): albums are grouped by name alone.
        DECISION (D20): an empty field creates no group; such songs are
        still reached through "All". A full group table leaves the song
        ungrouped in the same way. */
-    for (i = 0; i < gSongCount; i++)
-    {
-        song = &Songs()[i];
-        if (song->flags & kSongFlagAudiobook)
-            continue;
-
-        if (PoolString(song->artistName)[0] != 0)
-            InsertName(gArtists.names, &gArtists.count, kMaxGroups, song->artistName);
-        if (PoolString(song->albumName)[0] != 0)
-            InsertName(gAlbums.names, &gAlbums.count, kMaxGroups, song->albumName);
-        if (PoolString(song->genreName)[0] != 0)
-            InsertName(gGenres.names, &gGenres.count, kMaxGroups, song->genreName);
-        if (PoolString(song->composerName)[0] != 0)
-            InsertName(gComposers.names, &gComposers.count, kMaxGroups, song->composerName);
-    }
-
-    for (i = 0; i < gSongCount; i++)
-    {
-        song = &Songs()[i];
-        song->artist = song->album = song->genre = song->composer = kNone;
-        if (song->flags & kSongFlagAudiobook)
-            continue;
-
-        if (PoolString(song->artistName)[0] != 0)
-            song->artist = FindName(&gArtists, song->artistName);
-        if (PoolString(song->albumName)[0] != 0)
-            song->album = FindName(&gAlbums, song->albumName);
-        if (PoolString(song->genreName)[0] != 0)
-            song->genre = FindName(&gGenres, song->genreName);
-        if (PoolString(song->composerName)[0] != 0)
-            song->composer = FindName(&gComposers, song->composerName);
-    }
+    GroupSongs(&gArtists, kArtist);
+    GroupSongs(&gAlbums, kAlbum);
+    GroupSongs(&gGenres, kGenre);
+    GroupSongs(&gComposers, kComposer);
 
     for (i = 0; i < gSongCount; i++)
         gSongsByTitle[i] = i;
@@ -445,39 +477,138 @@ static void IndexSongs(void)
     }
 }
 
-Boolean Library_Scan(const LibraryFolder *folder)
+/* 1.1: writes a new cache from the scanned songs, in their folder order. */
+static void SaveCache(const LibraryFolder *folder)
 {
-    Boolean ok;
+    SongRec *song;
+    short i;
 
+    if (gStatsH == nil || LibCache_BeginSave(folder) != noErr)
+    {
+        LibCache_EndSave();
+        for (i = 0; i < gSongCount; i++)
+            gCacheAt[i] = -1;
+        return;
+    }
+    for (i = 0; i < gSongCount; i++)
+    {
+        song = &Songs()[i];
+        memset(&gInfo, 0, sizeof gInfo);
+        gInfo.id = song->id;
+        gInfo.seconds = song->seconds;
+        gInfo.audioOffset = song->audioOffset;
+        gInfo.audioLength = song->audioLength;
+        gInfo.fingerprint = song->fingerprint;
+        gInfo.track = song->track;
+        gInfo.flags = song->flags;
+        BlockMove(PoolString(song->title), gInfo.text[0], PoolString(song->title)[0] + 1);
+        BlockMove(PoolString(song->artistName), gInfo.text[1], PoolString(song->artistName)[0] + 1);
+        BlockMove(PoolString(song->albumName), gInfo.text[2], PoolString(song->albumName)[0] + 1);
+        BlockMove(PoolString(song->genreName), gInfo.text[3], PoolString(song->genreName)[0] + 1);
+        BlockMove(PoolString(song->composerName), gInfo.text[4], PoolString(song->composerName)[0] + 1);
+        gCacheAt[i] = LibCache_SaveEntry(PoolString(song->fileName), Stats()[i].modDate,
+                                         Stats()[i].length, &gInfo);
+    }
+    if (LibCache_EndSave() != noErr)
+        for (i = 0; i < gSongCount; i++)
+            gCacheAt[i] = -1;
+}
+
+/* One pass over the folder, with or without the cache. */
+static Boolean ScanOnce(const LibraryFolder *folder, Boolean useCache)
+{
     Library_Clear();
+    gUseCache = useCache;
+    gReadFromFiles = gFromCache = 0;
+    if (gStatsH != nil)
+        SetHandleSize(gStatsH, 0);
 
     gSongsH = NewHandle(0);
     gPoolH = NewHandle(0);
     if (gSongsH == nil || gPoolH == nil)
-    {
-        Library_Clear();
         return false;
-    }
+    return ScanSongs(folder) && ScanPlaylists(folder);
+}
 
-    ok = ScanSongs(folder) && ScanPlaylists(folder);
+static Boolean ScanWith(const LibraryFolder *folder, Boolean useCache)
+{
+    Boolean ok;
+
+    /* N11-9: the cache is held in memory only during the scan. If it
+       can't be loaded, or the scan then runs short of memory, the scan is
+       done again without it, as 1.0 does: any library 1.0 can read, 1.1
+       can. */
+    useCache = useCache && LibCache_Load(folder);
+    gStatsH = NewHandle(0);
+    ok = ScanOnce(folder, useCache);
+    if (!ok && useCache)
+    {
+        LibCache_Unload();
+        ok = ScanOnce(folder, false);
+        useCache = false;
+    }
 
     /* From here on the handles never grow, so lock them high in the heap
        and let the UI keep pointers into the pool. */
-    MoveHHi(gSongsH);
-    HLock(gSongsH);
-    MoveHHi(gPoolH);
-    HLock(gPoolH);
-
-    if (!ok)
+    if (ok)
+    {
+        MoveHHi(gSongsH);
+        HLock(gSongsH);
+        MoveHHi(gPoolH);
+        HLock(gPoolH);
+    }
+    else
     {
         Library_Clear();
+        LibCache_Unload();
+        if (gStatsH != nil)
+            DisposeHandle(gStatsH);
+        gStatsH = nil;
         return false;
     }
 
     IndexSongs();
     gFolder = *folder;
     gHaveFolder = true;
+
+    /* A new cache if anything is different: no cache, a song read from
+       its file, or one in the cache that's gone. (A file that isn't a
+       song is read again each time, and changes nothing.) */
+    if (!useCache || gReadFromFiles > 0 || gFromCache != LibCache_Count())
+    {
+        LibCache_Unload();
+        SaveCache(folder);
+    }
+    LibCache_Unload();
+    if (gStatsH != nil)
+        DisposeHandle(gStatsH);
+    gStatsH = nil;
+    gUseCache = false;
     return true;
+}
+
+Boolean Library_Scan(const LibraryFolder *folder)
+{
+    return ScanWith(folder, true);
+}
+
+Boolean Library_ScanAll(const LibraryFolder *folder)
+{
+    return ScanWith(folder, false);
+}
+
+short Library_ReadFromFilesCount(void)
+{
+    return gReadFromFiles;
+}
+
+void Library_ForgetCached(short song)
+{
+    if (gHaveFolder && song >= 0 && song < gSongCount && gCacheAt[song] >= 0)
+    {
+        LibCache_Forget(&gFolder, gCacheAt[song]);
+        gCacheAt[song] = -1;
+    }
 }
 
 short Library_SkippedCount(void)
@@ -1066,6 +1197,7 @@ OSErr Library_SetSongRating(short song, short rating)
         return fnfErr;
     if (flags == Songs()[song].flags)
         return noErr;
+    Library_ForgetCached(song);         /* 1.1: before the file changes */
     err = SongFile_WriteFlags(gFolder.vRefNum, gFolder.folderID,
                               PoolString(Songs()[song].fileName),
                               Songs()[song].id, flags);

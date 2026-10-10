@@ -16,7 +16,19 @@ library conversion. The decision codes in brackets are explained in
   composer found by a binary search, instead of 1.0's insertion sort and
   search from the start. The same lists in the same order (a new host
   test, `test_sorting`, checks them against 1.0's way); a full read of
-  500 songs at Plus speed takes 12-16 s instead of 49 s.
+  500 songs at Plus speed takes 12 s instead of 49 s. Each song's group
+  is noted as the lists are built, with no string comparisons beyond
+  1.0's.
+- **The library's cache (N11-2 to N11-10):** an invisible folder
+  "MacMusic Cache" in the library holds "Song Details": each song's file
+  name, date and length, and what the scan reads from it. A file that
+  matches is taken from the cache, anything else read from its file, so
+  the songs, their order and the alerts are 1.0's; a damaged cache is
+  ignored, and if memory is short the scan is done without it. Before
+  Edit Song or a rating changes a song file, its entry is marked stale,
+  so a Plus whose clock has stopped can't be misled. Rescan Library
+  reads every file. Starting with 500 songs at Plus speed: 7.5 s. A new
+  host test, `test_cache`.
 
 ## After 1.0
 

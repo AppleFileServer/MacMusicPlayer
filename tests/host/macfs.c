@@ -28,6 +28,8 @@ typedef struct
     unsigned char *data;
     long length, capacity;
     char *hostPath;         /* read-only file on this Mac's disk */
+    unsigned long modDate;  /* set from the clock when the file changes */
+    unsigned short finderFlags;
 } Node;
 
 typedef struct
@@ -47,6 +49,16 @@ static Boolean gMounted, gVolumeLocked;
 static long gFreeBytes;
 static Str31 gVolumeName;
 static unsigned long gVolumeCreated;
+/* The clock that sets files' modification dates: it moves on a second at
+   each change unless stopped (a Plus whose battery has run down starts
+   from the same time at every power-on). */
+static unsigned long gClock;
+static Boolean gClockStopped;
+
+static unsigned long Now(void)
+{
+    return gClockStopped ? gClock : gClock++;
+}
 
 /* ---- Names and nodes ---------------------------------------------------- */
 
@@ -133,6 +145,7 @@ static long NewNode(long parent, ConstStringPtr name, Boolean isDir)
     n->parent = parent;
     memcpy(n->name, name, name[0] + 1);
     n->isDir = isDir;
+    n->modDate = Now();
     return gNodeCount++;
 }
 
@@ -196,6 +209,8 @@ static long FreeBytesLeft(void)
 
 void TestFS_Reset(void)
 {
+    gClock = 3000000000UL;          /* 1999 */
+    gClockStopped = false;
     long i;
     int r;
 
@@ -446,6 +461,8 @@ OSErr PBGetCatInfoSync(CInfoPBRec *pb)
     if (gNodes[n].isDir)
     {
         memset(&pb->dirInfo.ioDrUsrWds, 0, sizeof(DInfo));
+        pb->dirInfo.ioDrUsrWds.frFlags = gNodes[n].finderFlags;
+        pb->dirInfo.ioDrMdDat = gNodes[n].modDate;
         pb->dirInfo.ioDrDirID = gNodes[n].id;
         pb->dirInfo.ioDrParID = gNodes[n].parent;
     }
@@ -454,10 +471,28 @@ OSErr PBGetCatInfoSync(CInfoPBRec *pb)
         memset(&f->ioFlFndrInfo, 0, sizeof(FInfo));
         f->ioFlFndrInfo.fdType = gNodes[n].type;
         f->ioFlFndrInfo.fdCreator = gNodes[n].creator;
+        f->ioFlFndrInfo.fdFlags = gNodes[n].finderFlags;
         f->ioDirID = gNodes[n].id;
         f->ioFlLgLen = gNodes[n].length;
+        f->ioFlMdDat = gNodes[n].modDate;
         f->ioFlParID = gNodes[n].parent;
     }
+    return f->ioResult = noErr;
+}
+
+/* Sets a folder's or file's Finder flags (the only part MacMusic sets). */
+OSErr PBSetCatInfoSync(CInfoPBRec *pb)
+{
+    HFileInfo *f = &pb->hFileInfo;
+    long n;
+    OSErr err;
+
+    if (gVolumeLocked)
+        return f->ioResult = vLckdErr;
+    if ((err = Lookup(f->ioVRefNum, f->ioDirID, f->ioNamePtr, &n)) != noErr)
+        return f->ioResult = err;
+    gNodes[n].finderFlags = gNodes[n].isDir ? pb->dirInfo.ioDrUsrWds.frFlags
+                                            : f->ioFlFndrInfo.fdFlags;
     return f->ioResult = noErr;
 }
 
@@ -562,6 +597,7 @@ OSErr FSWrite(short refNum, long *count, const void *buffer)
     memcpy(n->data + o->mark, buffer, want);
     o->mark += want;
     *count = want;
+    n->modDate = Now();
     return noErr;
 }
 
@@ -603,6 +639,7 @@ OSErr SetEOF(short refNum, long eof)
     if (eof > n->length)
         Grow(n, eof);
     n->length = eof;
+    n->modDate = Now();
     if (o->mark > eof)
         o->mark = eof;
     return noErr;
@@ -816,4 +853,43 @@ OSErr PBCatMoveSync(CMovePBRec *pb)
         return pb->ioResult = err;
     gNodes[n].parent = dir;
     return pb->ioResult = noErr;
+}
+
+/* ---- The clock and dates (1.1, the library's cache) --------------------- */
+
+void TestFS_SetClock(unsigned long seconds, Boolean stopped)
+{
+    gClock = seconds;
+    gClockStopped = stopped;
+}
+
+unsigned long TestFS_ModDate(long dir, const char *name)
+{
+    Str63 p;
+    long n;
+
+    ToPascal(name, p);
+    n = FindChild(dir, p);
+    return n < 0 ? 0 : gNodes[n].modDate;
+}
+
+void TestFS_SetModDate(long dir, const char *name, unsigned long date)
+{
+    Str63 p;
+    long n;
+
+    ToPascal(name, p);
+    n = FindChild(dir, p);
+    if (n >= 0)
+        gNodes[n].modDate = date;
+}
+
+unsigned short TestFS_FinderFlags(long dir, const char *name)
+{
+    Str63 p;
+    long n;
+
+    ToPascal(name, p);
+    n = FindChild(dir, p);
+    return n < 0 ? 0 : gNodes[n].finderFlags;
 }

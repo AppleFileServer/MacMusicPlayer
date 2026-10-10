@@ -34,6 +34,16 @@ void Library_Clear(void);
 /* Rebuilds the library from a folder. Returns false only if memory ran
    out; unreadable or unrecognised files are skipped and counted. */
 Boolean Library_Scan(const LibraryFolder *folder);
+/* 1.1 (N11-6): reads every song from its file, ignoring the cache, as
+   Rescan Library does; the cache is written afresh. Library_Scan uses
+   the cache (libcache.h). */
+Boolean Library_ScanAll(const LibraryFolder *folder);
+/* How many songs the last scan read from their files (the rest came
+   from the cache). */
+short Library_ReadFromFilesCount(void);
+/* 1.1: marks the song's cache entry stale, before its file is changed
+   (Edit Song, a rating), so it's read again at the next scan. */
+void Library_ForgetCached(short song);
 
 short Library_SkippedCount(void);   /* files skipped by the last scan */
 long Library_NextSongID(void);      /* one more than the largest ID */

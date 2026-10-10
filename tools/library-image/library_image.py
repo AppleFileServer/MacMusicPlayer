@@ -300,7 +300,7 @@ def step_check(a):
                         os.path.join(host, 'macfs.c'),
                         os.path.join(host, 'mactoolbox.c')]
                        + [os.path.join(src, m) for m in
-                          ('library.c', 'songfile.c', 'fileops.c', 'libfolder.c')],
+                          ('library.c', 'libcache.c', 'songfile.c', 'fileops.c', 'libfolder.c')],
                        capture_output=True, text=True)
     if r.returncode:
         sys.exit('could not build the check:\n' + r.stderr)

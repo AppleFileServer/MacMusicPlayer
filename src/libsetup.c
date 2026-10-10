@@ -162,7 +162,7 @@ void LibSetup_ShowInfo(void)
     Alert(kInfoAlert, Modal_DialogFilter);
 }
 
-void LibSetup_Rescan(void)
+static void Rescan(Boolean all)
 {
     if (!gHaveLibrary)
     {
@@ -170,10 +170,23 @@ void LibSetup_Rescan(void)
         return;
     }
 
-    if (!Library_Scan(&gFolder))
+    if (!(all ? Library_ScanAll(&gFolder) : Library_Scan(&gFolder)))
         Message_Show(P("There is not enough memory to read the MacMusic Library."), noErr);
     else
         ReportSkipped();
+}
+
+/* Starting up, and after Import, Export or a change of library: with the
+   cache (1.1). */
+void LibSetup_Rescan(void)
+{
+    Rescan(false);
+}
+
+/* File > Rescan Library (N11-6): every song read from its file. */
+void LibSetup_RescanAll(void)
+{
+    Rescan(true);
 }
 
 /* Asks for a library (an existing one if findExisting, else where to

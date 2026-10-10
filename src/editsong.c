@@ -58,6 +58,7 @@ Boolean EditSong_Run(short song, Boolean *rescan)
     if (!changed)
         return false;
 
+    Library_ForgetCached(song);         /* 1.1: before the file changes */
     err = SongFile_WriteInfo(vRefNum, dirID, fileName, &edited);
     if (err != noErr)
     {

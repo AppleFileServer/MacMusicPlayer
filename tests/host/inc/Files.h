@@ -7,6 +7,7 @@ enum { fsAtMark = 0, fsFromStart = 1, fsFromLEOF = 2, fsFromMark = 3 };
 
 typedef struct { OSType fdType, fdCreator; unsigned short fdFlags;
                  Point fdLocation; short fdFldr; } FInfo;
+enum { fInvisible = 16384 };
 typedef struct { Rect frRect; unsigned short frFlags; Point frLocation;
                  short frView; } DInfo;
 
@@ -17,10 +18,12 @@ typedef struct { Rect frRect; unsigned short frFlags; Point frLocation;
 
 typedef struct { PB_HEADER short ioFRefNum; SignedByte ioFVersNum, filler1;
     short ioFDirIndex; SignedByte ioFlAttrib, ioACUser; FInfo ioFlFndrInfo;
-    long ioDirID; long ioFlLgLen; long ioFlParID; } HFileInfo;
+    long ioDirID; long ioFlLgLen; long ioFlParID;
+    unsigned long ioFlMdDat; } HFileInfo;
 typedef struct { PB_HEADER short ioFRefNum; SignedByte ioFVersNum, filler1;
     short ioFDirIndex; SignedByte ioFlAttrib, ioACUser; DInfo ioDrUsrWds;
-    long ioDrDirID; long ioDrNmFls; long ioDrParID; } DirInfo;
+    long ioDrDirID; long ioDrNmFls; long ioDrParID;
+    unsigned long ioDrMdDat; } DirInfo;
 typedef union { HFileInfo hFileInfo; DirInfo dirInfo; } CInfoPBRec, *CInfoPBPtr;
 
 typedef struct { PB_HEADER short ioRefNum; SignedByte ioVersNum, ioPermssn;
@@ -39,6 +42,7 @@ typedef struct { PB_HEADER short filler1; short ioWDIndex; long ioWDProcID;
 typedef struct { PB_HEADER long ioNewDirID; long ioDirID; } CMovePBRec;
 
 OSErr PBGetCatInfoSync(CInfoPBRec *pb);
+OSErr PBSetCatInfoSync(CInfoPBRec *pb);
 OSErr PBHOpenSync(HParamBlockRec *pb);
 OSErr PBHGetFInfoSync(HParamBlockRec *pb);
 OSErr PBHSetFInfoSync(HParamBlockRec *pb);

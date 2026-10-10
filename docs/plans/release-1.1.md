@@ -241,6 +241,29 @@ song at Plus speed. Nothing is kept between runs.
   modification date, the song count, a check-sum) and fixed-length
   entries with Pascal strings, big-endian, as the other MacMusic files.
   Described in `docs/` with the library's other files.
+- **Agreed 2026-10-10, before building the cache (B2):**
+  - **N11-4 (a) dropped:** the folder is always listed (0.1 s for 500
+    songs); only (b), each file's name, date and length, is used.
+  - **N11-5 revised:** the cache isn't updated in memory or written at
+    quit. Before MacMusic changes a song file (Edit Song, a rating), it
+    marks that song's entry stale in the cache file (one 4-byte write,
+    made before the song is written), so the file is read again at the
+    next scan whatever its date: a Plus whose battery has run down
+    restarts its clock from the same time, and could give a changed file
+    the date it had before. Dates and lengths then catch changes made
+    outside MacMusic; Rescan Library reads everything.
+  - **N11-7:** no check of which folder a cache belongs to: every entry
+    is checked against its own file, so a library copied to another disk
+    keeps its cache. The check-sum and a header written last stay.
+  - **N11-9:** the cache file is held in memory during the scan only
+    (about 55K for 500 songs with ordinary details). If it can't be, or
+    the scan then runs short of memory, the scan is done again without
+    it, so any library 1.0 can read, 1.1 can.
+- **B2 as built (measured in Mini vMac at 1x, 500 songs):** first start
+  (no cache) 12.3 s; a later start 7.5 s (0.1 s loading the cache, 1.4 s
+  listing the folder, 6 s sorting and grouping, 3 s of it the title
+  sort's calls to `RelString`); Rescan Library 12.8 s. 1.0: 49 s.
+
 - **N11-23. Faster sorting and grouping (agreed 2026-10-10, from Part 0).**
   Most of a full read is spent in memory, not on the disk: the title sort
   (an insertion sort, 28 s for 500 songs at 1x) and the search for each
