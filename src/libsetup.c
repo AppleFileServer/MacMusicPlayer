@@ -362,3 +362,11 @@ void LibSetup_TestUseFolder(const LibraryFolder *folder)
     gHaveLibrary = true;
 }
 #endif
+
+/* 1.1, printing: the library folder's name, as the Finder shows it. */
+void LibSetup_LibraryName(Str31 name)
+{
+    name[0] = 0;
+    if (!gHaveLibrary || !Folder_Find(&gLocation, name))
+        BlockMove(P("MacMusic Library"), name, 17);
+}

@@ -33,6 +33,8 @@ add_application(MacMusic
     src/libsetup.c
     src/library.c
     src/libcache.c
+    src/print.c
+    src/printlayout.c
     src/message.c
     src/modal.c
     src/wav.c
@@ -55,6 +57,10 @@ add_application(MacMusic
     ${CMAKE_BINARY_DIR}/version.r
 )
 target_include_directories(MacMusic PRIVATE ${CMAKE_BINARY_DIR})
+
+# 1.1 (N11-24): printing in a code segment of its own.
+target_link_options(MacMusic PRIVATE
+    "-Wl,--mac-segments,${CMAKE_SOURCE_DIR}/resources/segments.map")
 
 # 1.0 Part B2: the emulator smoke test (tests/run-smoke.sh). With this on,
 # the build runs a scripted test instead of MacMusic; off, the default,

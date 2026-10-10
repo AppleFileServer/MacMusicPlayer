@@ -55,4 +55,8 @@ OSErr Prefs_SaveSettings(const unsigned char *values, short count);
 short Prefs_LoadVolume(void);
 OSErr Prefs_SaveVolume(short level);                    /* keeps the library */
 
+/* 1.1 (N11-16): the prefs file's folder (a working directory refNum, 0
+   if unknown) and name, for its resource fork. */
+short Prefs_FileForResources(Str63 name);
+
 #endif

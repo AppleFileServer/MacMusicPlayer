@@ -50,9 +50,12 @@ resource 'MENU' (128) {
    0x7FFFFF88 clears their bits. Import, Rescan and Library Info are
    enabled at run time once a library is set; Export while the highlight
    is on a song. Stage 8d-2 added Rescan Library and Library Info.... */
+/* 1.1 (N11-15): Page Setup... and Print Library... before Quit, as other
+   Macintosh programs have them; the dividers (items 3, 7 and 10) are
+   disabled. */
 resource 'MENU' (129) {
     129, textMenuProc;
-    0x7FFFFF88, enabled;
+    0x7FFFFB77, enabled;
     "File";
     {
         "Import Song\0xC9", noIcon, noKey, noMark, plain;
@@ -61,6 +64,9 @@ resource 'MENU' (129) {
         "Choose Library\0xC9", noIcon, noKey, noMark, plain;
         "Rescan Library", noIcon, noKey, noMark, plain;
         "Library Info\0xC9", noIcon, noKey, noMark, plain;
+        "-", noIcon, noKey, noMark, plain;
+        "Page Setup\0xC9", noIcon, noKey, noMark, plain;
+        "Print Library\0xC9", noIcon, "P", noMark, plain;
         "-", noIcon, noKey, noMark, plain;
         "Quit", noIcon, "Q", noMark, plain;
     }
@@ -568,5 +574,49 @@ resource 'DITL' (142) {
         { 12, 16, 68, 306 },
         StaticText { disabled, "Delete the playlist \0xD2^0\0xD3? The songs "
                                "in it stay in the library." };
+    }
+};
+
+/* 1.1 (N11-11): Print Library's choice of lists, before the printer's
+   own dialog. Print is the default (item 1, outlined by item 9). */
+resource 'DLOG' (150) {
+    { 90, 96, 266, 416 },
+    dBoxProc,
+    invisible,
+    noGoAway,
+    0,
+    150,
+    "",
+    noAutoCenter
+};
+
+resource 'DITL' (150) {
+    {
+        { 144, 222, 164, 302 },
+        Button { enabled, "Print" };
+
+        { 144, 126, 164, 206 },
+        Button { enabled, "Cancel" };
+
+        { 10, 16, 26, 304 },
+        StaticText { disabled, "Print a list of the library:" };
+
+        { 32, 24, 50, 300 },
+        CheckBox { enabled, "Songs" };
+
+        { 52, 24, 70, 300 },
+        CheckBox { enabled, "Albums" };
+
+        { 72, 44, 90, 300 },
+        CheckBox { enabled, "with each album\0xD5s songs" };
+
+        { 92, 24, 110, 300 },
+        CheckBox { enabled, "Artists" };
+
+        { 112, 44, 130, 300 },
+        CheckBox { enabled, "with each artist\0xD5s albums" };
+
+        { 140, 218, 168, 306 },
+        UserItem { disabled };
     }
 };

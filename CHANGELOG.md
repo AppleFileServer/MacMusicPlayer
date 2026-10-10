@@ -41,6 +41,19 @@ library conversion. The decision codes in brackets are explained in
   artist never left alone at the foot of a page, "Page n of m". Kept
   apart from the Printing Manager, for the host tests (`test_printlayout`).
   Not yet in the app: the menus and printing come next (C2).
+- **Printing (C2; N11-15 to N11-24):** File > Page Setup… and Print
+  Library… (Command-P), dimmed when there are no songs. Print Library
+  asks which lists (Songs; Albums, with their songs or not; Artists,
+  with their albums or not), then prints through the Printing Manager
+  as Inside Macintosh describes it, to the printer chosen in the
+  Chooser: Times 10, the heads in Helvetica bold, the library's name,
+  the list and the date at the top of each page, "Page n of m" at the
+  foot. The first print, with no Page Setup saved, opens Page Setup
+  first; it's kept in the prefs file's resource fork (1.0 reads only
+  the data fork). The music pauses while it prints. The printing code
+  is a code segment of its own (8K), loaded only to print
+  (`resources/segments.map`); the smoke test checks it isn't in memory
+  otherwise.
 
 ## After 1.0
 

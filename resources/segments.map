@@ -1,0 +1,9 @@
+# 1.1 (N11-24): MacMusic's code segments, for Retro68's Elf2Mac
+# (--mac-segments). Printing is a segment of its own, loaded only when
+# Page Setup or Print Library is chosen and unloaded afterwards
+# (main.c, UnloadSeg), so it takes no memory otherwise. Everything else
+# stays in Main, as in 1.0 (the Runtime segment is Retro68's own).
+
+SEGMENT Printing
+*/print.c.obj
+*/printlayout.c.obj

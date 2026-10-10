@@ -335,3 +335,14 @@ OSErr Prefs_SaveSettings(const unsigned char *values, short count)
     prefs.settingCount = count;
     return WritePrefs(&prefs);
 }
+
+/* 1.1 (N11-16): where the prefs file is, for the Page Setup kept in its
+   resource fork (print.c): the System Folder's working directory and the
+   file's name. Its data fork, the rest of the prefs, is all 1.0 reads. */
+short Prefs_FileForResources(Str63 name)
+{
+    short sysFolder = SystemFolder();
+
+    BlockMove(kPrefsName, name, kPrefsName[0] + 1);
+    return sysFolder;
+}

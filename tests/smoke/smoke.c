@@ -9,6 +9,7 @@
 #include <Quickdraw.h>
 #include <TextUtils.h>
 #include <string.h>
+#include <Resources.h>
 
 #include "smoke.h"
 #include "fileopen.h"
@@ -506,6 +507,17 @@ void Smoke_Run(void)
     Check(Playback_State() == kPlayPlaying, "the music plays on");
     Send(kEvtMenu);
     Check(Same(Here()->title, "Extras"), "Menu goes back to Extras");
+
+    /* 1.1 (N11-24): the Printing segment is loaded only to print. */
+    Log("printing segment");
+    {
+        Handle code;
+        SetResLoad(false);
+        code = Get1Resource('CODE', 3);
+        SetResLoad(true);
+        Check(code != nil, "a Printing segment (CODE 3)");
+        Check(code != nil && *code == nil, "not in memory while nothing prints");
+    }
 
     Log("stopping");
     Playback_Stop();

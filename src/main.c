@@ -26,6 +26,8 @@
 #include "smoke.h"
 #endif
 #include "lcd_draw.h"
+#include "print.h"
+#include <SegLoad.h>
 #include "ui_nav.h"
 #include "input.h"
 #include "prefs.h"
@@ -55,7 +57,9 @@ enum
     kItemChooseLibrary = 4,
     kItemRescan = 5,            /* Stage 8d-2; with a library */
     kItemLibraryInfo = 6,       /* Stage 8d-2; with a library */
-    kItemFirstRecent = 8,       /* Stage 8d-3: recent libraries, then a
+    kItemPageSetup = 8,         /* 1.1 (N11-15) */
+    kItemPrint = 9,             /* 1.1; with songs to print */
+    kItemFirstRecent = 11,      /* Stage 8d-3: recent libraries, then a
                                    divider, then Quit; with none, Quit */
 
     kMenuEdit = 130,
@@ -114,6 +118,8 @@ static void PlaylistsChanged(void);
 static void EditSong(void);
 static void RescanLibrary(void);
 static void UseRecentLibrary(short index);
+static void PageSetup(void);
+static void PrintLibrary(void);
 
 /* Recent libraries listed in the File menu (Stage 8d-3). Quit follows
    them (after a divider), so its item number changes with them. */
@@ -165,6 +171,10 @@ static void HandleMenuChoice(long choice)
                 HiliteMenu(0);
                 LibSetup_ShowInfo();
             }
+            else if (menuItem == kItemPageSetup)
+                PageSetup();
+            else if (menuItem == kItemPrint)
+                PrintLibrary();
             else if (menuItem == QuitItem())
                 gQuit = true;
             else if (menuItem >= kItemFirstRecent
@@ -345,6 +355,12 @@ static void UpdateFileMenu(void)
         DisableItem(fileMenu, kItemLibraryInfo);
     }
 
+    /* 1.1: Print Library needs songs to print. */
+    if (LibSetup_HasLibrary() && Library_SongCount() > 0)
+        EnableItem(fileMenu, kItemPrint);
+    else
+        DisableItem(fileMenu, kItemPrint);
+
     /* Plan item 3: Export acts only on a highlighted song. */
     if (LibSetup_HasLibrary() && UI_SelectedSong() != kNone)
         EnableItem(fileMenu, kItemExport);
@@ -442,6 +458,35 @@ static void ImportSong(void)
 /* File > Import Song...: DECISION A5, audio pauses for the import (its
    dialogs and disk copy would starve the ring) and resumes at the same
    song and sample afterwards, found again by its ID. */
+/* 1.1, File > Page Setup... and Print Library... (Part C). The printing
+   code is a segment of its own (N11-24): unloaded after each use, so it
+   takes no memory between. The music pauses while it prints (N11-17):
+   an ImageWriter keeps the Plus too busy to keep the sound fed, as
+   Import does. */
+static void PageSetup(void)
+{
+    HiliteMenu(0);
+    Print_PageSetup();
+    UnloadSeg((Ptr)Print_PageSetup);
+    RedrawWindowNow();          /* the dialog may have covered the window */
+}
+
+static void PrintLibrary(void)
+{
+    Boolean wasPlaying = Playback_State() == kPlayPlaying;
+
+    HiliteMenu(0);
+    if (!LibSetup_HasLibrary() || Library_SongCount() == 0)
+        return;
+    if (wasPlaying)
+        Playback_TogglePause();
+    Print_Library();
+    UnloadSeg((Ptr)Print_Library);
+    if (wasPlaying && Playback_State() == kPlayPaused)
+        Playback_TogglePause();
+    RedrawWindowNow();
+}
+
 static void ImportSongPausingAudio(void)
 {
     Boolean wasPlaying = Playback_State() == kPlayPlaying;

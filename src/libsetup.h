@@ -43,5 +43,7 @@ Boolean LibSetup_UseRecent(short i);
 
 Boolean LibSetup_HasLibrary(void);
 const LibraryFolder *LibSetup_Folder(void);
+/* 1.1: the library folder's name (for printing). */
+void LibSetup_LibraryName(Str31 name);
 
 #endif
