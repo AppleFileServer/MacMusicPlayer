@@ -48,3 +48,100 @@ def page(title, body):
 %s
 </body></html>
 """ % (title, body)
+
+
+# ---- A chapter's pieces (Chapters 2 and 4) --------------------------------
+
+TEXT = 308              # the text column, in points
+TASK = 260              # a task's picture
+
+
+def fig(name, width=TEXT, caption=None):
+    return ('<figure class="window">%s%s</figure>'
+            % (img(name, width), "<figcaption>%s</figcaption>" % caption if caption else ""))
+
+
+def steps(*parts):
+    """"> " a step; "~ " a grey note; "OR"; "* " an item in a list of
+    open squares (consecutive ones make one list); the rest plain."""
+    out, items = [], []
+
+    def flush():
+        if items:
+            out.append('<ul class="boxes">%s</ul>' % "".join("<li>%s</li>" % i for i in items))
+            items.clear()
+    for p in parts:
+        if p.startswith("* "):
+            items.append(p[2:])
+            continue
+        flush()
+        if p == "OR":
+            out.append('<p class="or">OR</p>')
+        elif p.startswith("> "):
+            out.append('<p class="step">%s</p>' % p[2:])
+        elif p.startswith("~ "):
+            out.append('<p class="grey">%s</p>' % p[2:])
+        else:
+            out.append("<p>%s</p>" % p)
+    flush()
+    return "".join(out)
+
+
+class Parts:
+    """A chapter's lessons and reference sections, as they're made, for
+    its contents page."""
+    def __init__(self):
+        self.lessons = []
+        self.sections = []
+
+    def lesson(self, number, title):
+        a = "l%d" % number
+        self.lessons.append((number, title, a))
+        return ('<div class="margin"><div class="lesson-head" id="%s">'
+                '<span class="number">%d</span><span class="title">%s</span></div></div>'
+                % (a, number, title))
+
+    def section(self, title, ident=None):
+        a = ident or "r-" + anchor(title)
+        self.sections.append((title, a))
+        return '<div class="margin"><h2 class="margin-head" id="%s">%s</h2></div>' % (a, title)
+
+
+def head(title, ident):
+    return '<div class="margin"><h2 class="margin-head" id="%s">%s</h2></div>' % (ident, title)
+
+
+def sub(title):
+    return '<div class="margin"><h3 class="margin-sub">%s</h3></div>' % title
+
+
+def cmd(name, *paras):
+    return ('<div class="entry"><div class="margin"><h4 class="cmd" id="c-%s">%s</h4></div>'
+            % (anchor(name), name) + "".join("<p>%s</p>" % p for p in paras) + "</div>")
+
+
+def table(head_, *rows, cls="ref"):
+    h = "".join("<th>%s</th>" % c for c in head_)
+    r = "".join("<tr>%s</tr>" % "".join("<td>%s</td>" % c for c in row) for row in rows)
+    return '<table class="%s"><thead><tr>%s</tr></thead><tbody>%s</tbody></table>' % (cls, h, r)
+
+
+class Topic:
+    def __init__(self, title, intro, tasks):
+        self.title, self.intro, self.tasks = title, intro, tasks
+
+    def html(self):
+        # The topic's head and introduction stay on the page with its first task.
+        first, rest = self.tasks[0][1], "".join(t for _, t in self.tasks[1:])
+        return ('<div class="topic-block">'
+                '<div class="keep"><div class="margin"><h2 class="margin-head" id="%s">%s</h2></div>%s%s</div>%s</div>'
+                % (anchor(self.title), self.title, self.intro, first, rest))
+
+
+def T(title, body, *figures):
+    """A task: its title in the margin, its steps and pictures beside it."""
+    pics = "".join(fig(f, w) for f, w in ((f if isinstance(f, tuple) else (f, TASK)) for f in figures))
+    return (title, '<div class="entry task"><div class="margin"><h3 class="task-head" id="%s">%s</h3></div>%s%s</div>'
+            % (anchor(title), title, body, pics))
+
+

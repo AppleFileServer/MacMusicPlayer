@@ -50,6 +50,8 @@ CONVERTER_B = ((854, 270, 1933, 1533), 36)     # moved, from cv11 on
 OPEN_PANEL = ((528, 262, 2287, 1157), 36)      # the Open dialog
 ALERT = ((1134, 664, 1653, 1139), 56)          # "... already exists"
 ABOUT = ((1124, 344, 1691, 725), 36)           # the About box
+BACKUP = ((408, 212, 2407, 1611), 56)          # the Backup Utility's window (a toolbar window's corners)
+BACKUP_SHEET = ((888, 720, 1927, 1101), 56)    # its "Back up ...?" sheet
 APP_MENU = ((67, 6, 489, 53), ((80, 62, 715, 435), 28))      # its name, then the menu
 WINDOW_MENU = ((658, 6, 815, 53), ((660, 62, 1199, 579), 28))
 
@@ -75,6 +77,18 @@ FIGURES = {
     "cv31": ("converter/cv31", "menu", APP_MENU),
     "cv32": ("converter/cv32", "menu", APP_MENU),
     "cv34": ("converter/cv34", "menu", WINDOW_MENU),
+    # The Macintosh Backup Utility (the owner's screenshots, 2026-10-09).
+    **{"bu%02d" % n: ("backup/bu%02d" % n, "window", BACKUP) for n in (1, 5, 7, 8, 14)},
+    "bu13-sheet": ("backup/bu13", "window", BACKUP_SHEET),
+    # Parts of the Backup Utility's window, cut from its figures (so the
+    # corners are already the page's white): (figure, part).
+    "bu01-status": (None, "partof", ("bu01", (0, 100, 2000, 290))),
+    "bu14-status": (None, "partof", ("bu14", (0, 100, 1160, 280))),
+    "bu05-card": (None, "partof", ("bu05", (0, 250, 920, 720))),
+    "bu05-contents": (None, "partof", ("bu05", (0, 760, 920, 1396))),
+    "bu08-history": (None, "partof", ("bu08", (920, 262, 2000, 820))),
+    "bu08-manifest": (None, "partof", ("bu08", (920, 840, 2000, 1396))),
+    "bu08-toolbar": (None, "partof", ("bu08", (1480, 0, 2000, 104))),
     # Parts, for the task pages.
     "cv06-source": ("converter/cv06", "part", (CONVERTER_A, section(261, 330))),
     "cv06-sound": ("converter/cv06", "part", (CONVERTER_A, section(801, 1125))),
@@ -94,6 +108,7 @@ FIGURES = {
     "cv28-results": ("converter/cv28", "part", (CONVERTER_B, section(927, 1100))),
     # Chapter openers: (window, the part enlarged across the spread).
     "c2-opener": ("converter/cv17", "opener", (CONVERTER_B, (0, 0, 1080, 648))),
+    "c4-opener": ("backup/bu08", "opener", (BACKUP, (0, 0, 2000, 1200))),
 }
 
 # The own edition's openers: a scene from macOS's Macintosh wallpaper for
@@ -218,6 +233,12 @@ def desktop_in_band(crop, m, band=4):
 
 def make(code, entry):
     name, kind, frame = entry
+    if kind == "partof":            # a part of a figure already made
+        figure, (l, t, r, b) = frame
+        part = Image.open(os.path.join(OUT, figure + ".png")).convert("RGB").crop((l, t, r, b))
+        ImageDraw.Draw(part).rectangle((0, 0, part.width - 1, part.height - 1), outline=(GREY,) * 3, width=RULE)
+        part.convert("L").save(os.path.join(OUT, code + ".png"), optimize=True)
+        return part, None
     im = screenshot(name)
     if kind in ("part", "opener"):
         ((wl, wt, _, _), _), (l, t, r, b) = frame

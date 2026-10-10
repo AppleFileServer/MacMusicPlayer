@@ -103,11 +103,24 @@ Decisions UB1-UB10 were approved by the owner on 2026-10-09.
   tinted screen (`ub-cover-screen`) is in the repository for the plain
   edition, as the User's Guide's is.
 
+- **Chapter 4** (Phase 7, drafted 2026-10-10, before Chapters 3 and 1,
+  as the Backup Utility was finished first): written against the Backup
+  Utility 1.0; its figures from the owner's screenshots of earlier builds
+  (`bu01`-`bu14`, kept privately), to be replaced from screenshots of
+  1.0. The window is twice the Converter's, so strips of it (the status)
+  print across the whole page to be readable.
+
 ## Screenshots still wanted
 
 For the Converter (when convenient): the Licences window; a refused
 file and a refused video, with their messages; Show in Finder's result;
 cancelling a conversion; the question when quitting mid-conversion; the
 MP3 re-encode question (Re-encode / WAV Only). For the Transfer
-Utility: all of it (the owner will take them). For the Backup Utility:
-after it exists.
+Utility: all of it (the owner will take them). For the Backup Utility
+(1.0, to replace `bu01`-`bu14`, taken with an earlier build): the window
+waiting for a card, the card connected (with "Registered as" and Eject),
+the backup sheet, progress, the result; the registration sheet; the
+clean-shutdown warning (the test card in `~/MacPlusProjects/backup-work`);
+Verify Backup's result; the Restore… sheet and its conflict question;
+a snapshot's menu and the Delete… question; Restore to a New Card…;
+Settings.

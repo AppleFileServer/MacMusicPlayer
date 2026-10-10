@@ -102,7 +102,7 @@ check (UB7). Figures TU-codes, to be assigned.
   (31 characters, no colons, clashes ignoring case); limits (2 GB, one
   folder level).
 
-## Chapter 4: Backing Up Your Macintosh (about 15-20 pages, CHECK)
+## Chapter 4: Backing Up Your Macintosh (16 pages as drafted, 2026-10-10)
 
 The Macintosh Backup Utility, written after it exists (UB6), in the same
 shape: introduction, a lesson, task pages, reference. Its purpose: it
