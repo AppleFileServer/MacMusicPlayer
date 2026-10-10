@@ -34,6 +34,13 @@ library conversion. The decision codes in brackets are explained in
   logo when MacMusic starts or changes library, and in a band across the
   foot of the screen at Rescan Library. Not shown when every song comes
   from the cache, nor for Import and Export.
+- **Printing, the page layout (C1; N11-11 to N11-14):** `printlayout.c`
+  lays out the Songs, Albums (with each album's songs, if chosen) and
+  Artists (with each artist's albums) lists: columns, text cut to fit
+  with an ellipsis, pages with the column heads on each, an album or
+  artist never left alone at the foot of a page, "Page n of m". Kept
+  apart from the Printing Manager, for the host tests (`test_printlayout`).
+  Not yet in the app: the menus and printing come next (C2).
 
 ## After 1.0
 
