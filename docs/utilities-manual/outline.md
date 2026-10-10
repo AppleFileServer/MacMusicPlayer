@@ -76,7 +76,7 @@ The MacMusic Converter Utility. The title is fixed by the User's Guide.
   - Limits: names of 31 characters at most; one video at a time, no
     playlists; no sign-in; peak normalising, not loudness levelling.
 
-## Chapter 3: Moving Songs to the Macintosh (about 21 pages)
+## Chapter 3: Moving Songs to the Macintosh (16 pages as drafted, 2026-10-10)
 
 The MacMusic Transfer Utility. Waits for its screenshots and the Plus
 check (UB7). Figures TU-codes, to be assigned.

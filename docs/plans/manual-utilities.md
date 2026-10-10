@@ -110,13 +110,25 @@ Decisions UB1-UB10 were approved by the owner on 2026-10-09.
   1.0. The window is twice the Converter's, so strips of it (the status)
   print across the whole page to be readable.
 
+- **Chapter 3** (Phase 4, drafted 2026-10-10): the Transfer Utility 1.0,
+  its figures from the owner's screenshots of 2026-10-10 (`n01`-`n07`,
+  privately; `tuNN`), taken just before its last small changes (sizes the
+  Finder's way, the file list's columns, Keep Building), to be replaced.
+  Chapter 4's opener changed to MacPaint's quit dialog, as its first
+  scene cropped too like Chapter 3's.
+
 ## Screenshots still wanted
 
 For the Converter (when convenient): the Licences window; a refused
 file and a refused video, with their messages; Show in Finder's result;
 cancelling a conversion; the question when quitting mid-conversion; the
 MP3 re-encode question (Re-encode / WAV Only). For the Transfer
-Utility: all of it (the owner will take them). For the Backup Utility
+Utility (beyond `n01`-`n07`): the progress while building; a refused
+song and a renamed one; "How is this worked out?" and "What was
+checked" opened; the ID 0 and "already there" questions; the quit
+question; and, after the latest changes, the file list again. The
+Plus's own screens (the Transfer disk, its WAV Files folder): from Mini
+vMac. For the Backup Utility
 (1.0, to replace `bu01`-`bu14`, taken with an earlier build): the window
 waiting for a card, the card connected (with "Registered as" and Eject),
 the backup sheet, progress, the result; the registration sheet; the

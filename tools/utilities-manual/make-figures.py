@@ -52,6 +52,7 @@ ALERT = ((1134, 664, 1653, 1139), 56)          # "... already exists"
 ABOUT = ((1124, 344, 1691, 725), 36)           # the About box
 BACKUP = ((408, 212, 2407, 1611), 56)          # the Backup Utility's window (a toolbar window's corners)
 BACKUP_SHEET = ((888, 720, 1927, 1101), 56)    # its "Back up ...?" sheet
+TRANSFER = ((648, 192, 2167, 1631), 36)        # the Transfer Utility's window
 APP_MENU = ((67, 6, 489, 53), ((80, 62, 715, 435), 28))      # its name, then the menu
 WINDOW_MENU = ((658, 6, 815, 53), ((660, 62, 1199, 579), 28))
 
@@ -80,6 +81,8 @@ FIGURES = {
     # The Macintosh Backup Utility (the owner's screenshots, 2026-10-09).
     **{"bu%02d" % n: ("backup/bu%02d" % n, "window", BACKUP) for n in (1, 5, 7, 8, 14)},
     "bu13-sheet": ("backup/bu13", "window", BACKUP_SHEET),
+    # The MacMusic Transfer Utility (the owner's screenshots, 2026-10-10).
+    **{"tu%02d" % n: ("new-2026-10-10/n%02d" % n, "window", TRANSFER) for n in (1, 2, 3, 5, 6, 7)},
     # Parts of the Backup Utility's window, cut from its figures (so the
     # corners are already the page's white): (figure, part).
     "bu01-status": (None, "partof", ("bu01", (0, 100, 2000, 290))),
@@ -89,6 +92,14 @@ FIGURES = {
     "bu08-history": (None, "partof", ("bu08", (920, 262, 2000, 820))),
     "bu08-manifest": (None, "partof", ("bu08", (920, 840, 2000, 1396))),
     "bu08-toolbar": (None, "partof", ("bu08", (1480, 0, 2000, 104))),
+    # Parts of the Transfer Utility's window.
+    "tu01-files": (None, "partof", ("tu01", (0, 100, 1520, 690))),
+    "tu01-disk": (None, "partof", ("tu01", (0, 730, 1520, 1260))),
+    "tu03-save-to": (None, "partof", ("tu03", (0, 620, 1520, 790))),
+    "tu03-result": (None, "partof", ("tu03", (0, 950, 1520, 1290))),
+    "tu05-drop": (None, "partof", ("tu05", (0, 100, 1520, 470))),
+    "tu07-advanced": (None, "partof", ("tu07", (0, 1085, 1520, 1290))),
+    "tu01-build": (None, "partof", ("tu01", (0, 1320, 1520, 1436))),
     # Parts, for the task pages.
     "cv06-source": ("converter/cv06", "part", (CONVERTER_A, section(261, 330))),
     "cv06-sound": ("converter/cv06", "part", (CONVERTER_A, section(801, 1125))),
@@ -109,6 +120,7 @@ FIGURES = {
     # Chapter openers: (window, the part enlarged across the spread).
     "c2-opener": ("converter/cv17", "opener", (CONVERTER_B, (0, 0, 1080, 648))),
     "c4-opener": ("backup/bu08", "opener", (BACKUP, (0, 0, 2000, 1200))),
+    "c3-opener": ("new-2026-10-10/n01", "opener", (TRANSFER, (0, 0, 1520, 912))),
 }
 
 # The own edition's openers: a scene from macOS's Macintosh wallpaper for
@@ -121,7 +133,7 @@ SCENES = {
     "c1-opener": "StartupWelcome",      # Getting Started: "Welcome to Macintosh"
     "c2-opener": "AlertSounds",         # Converting Songs: the Sound control panel
     "c3-opener": "FinderWindow",        # Moving Songs to the Macintosh: a disk's window
-    "c4-opener": "FinderTrash",         # Backing Up Your Macintosh: the Finder and the Trash
+    "c4-opener": "QuitDialog",          # Backing Up Your Macintosh: "Save changes before quitting?" (FinderTrash looked too like c3's)
 }
 SCENE_SCALE = 5         # a Macintosh pixel, in the spread's pixels (150 per inch)
 SCENE_GREY = 205        # a black pixel's tone

@@ -84,7 +84,7 @@ Guide's openers show MacMusic's screen:
 | 1, Getting Started | Welcome to Macintosh (StartupWelcome) |
 | 2, Converting Songs | the Sound control panel (AlertSounds) |
 | 3, Moving Songs to the Macintosh | a disk's Finder window (FinderWindow) |
-| 4, Backing Up Your Macintosh | the Finder and the Trash (FinderTrash) |
+| 4, Backing Up Your Macintosh | MacPaint's "Save changes before quitting?" (QuitDialog; changed 2026-10-10 from the Finder and the Trash, which cropped too like Chapter 3's) |
 
 The scenes are Apple's artwork, so they're made only into the private
 assets (`~/MacPlusProjects/manual-assets-private/utilities/figures`)
