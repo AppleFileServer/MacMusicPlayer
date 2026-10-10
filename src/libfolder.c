@@ -457,12 +457,13 @@ short Folder_Choose(LibraryLocation *location, LibraryFolder *folder,
     /* System 6 Standard File cannot select folders, so the Save dialog
        picks the location and the name (DECISION D21: the typed name is
        used; "MacMusic Library" is the default). An existing folder of that
-       name is reused. */
+       name is reused. 1.1 (N11-1): the prompt is short enough for Standard
+       File's Save dialog, which cut "Create new MacMusic Library in:". */
     where.h = 104;
     where.v = 60;
     gPickedExisting = false;
     gInLibrary = false;
-    SFPPutFile(where, P("Create new MacMusic Library in:"), P("MacMusic Library"),
+    SFPPutFile(where, P("New library in:"), P("MacMusic Library"),
                ExistingFolderHook, &reply, putDlgID, Modal_FileFilter);
 
     if (gInLibrary)

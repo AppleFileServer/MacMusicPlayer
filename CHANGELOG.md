@@ -6,6 +6,12 @@ features that keep reading 1.0's libraries, 2.0 for a change needing a
 library conversion. The decision codes in brackets are explained in
 `docs/decisions.md`.
 
+## 1.1 (in progress; docs/plans/release-1.1.md)
+
+- **The Create New Library prompt (N11-1):** the Save dialog's prompt is
+  now "New library in:", which fits; 1.0's "Create new MacMusic Library
+  in:" was cut to "Create new MacMusic". From the issues log, 2026-10-08.
+
 ## After 1.0
 
 No changes to MacMusic itself yet.
