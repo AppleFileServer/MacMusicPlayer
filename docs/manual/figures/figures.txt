@@ -13,7 +13,7 @@ fig-2-12a ~/MacPlus/Screenshots/Volume.png lcd
 # "Chariots of Fire" (MU3); the S-shots show other songs until retaken.
 c1-start        ~/MacPlus/Screenshots/Apple%20Logo.png full
 c1-first-time   ~/MacPlus/Screenshots/First%20time%20message.png box
-c1-create       ~/MacPlus/Screenshots/Create%20New%20Library.png box
+# c1-create: retaken for 1.1, below
 c1-library      ~/MacPlus/Screenshots/Cleaned%20up.png box
 c1-hard-disk    ~/MacPlus/Screenshots/MacMusic%20Library.png box
 c1-window       ~/MacPlus/Screenshots/Screenshot%202026-10-08%20at%2011.43.08.png full
@@ -69,7 +69,7 @@ c2-duplicate       ~/MacPlus/Screenshots/Duplicate%20Audio.png box   # D23
 c2-not-wav         ~/MacPlus/Screenshots/This%20is%20not%20a%20WAV%20file.png box   # D24
 c2-edit-menu       ~/MacPlus/Screenshots/Screenshot%202026-10-08%20at%2011.48.07.png menu   # S38
 c2-edit-song       ~/MacPlus/Screenshots/Screenshot%202026-10-08%20at%2011.48.13.png box   # S39
-c2-export-menu     ~/MacPlus/Screenshots/Export%20Song.png menu   # D17
+# c2-export-menu: retaken for 1.1, below   # D17
 c2-export-save     ~/MacPlus/Screenshots/Export%20Song%20As.png box   nopointer # D18
 c2-add-again       ~/MacPlus/Screenshots/Already%20in%20Playlist.png box   # D20
 c2-rename          ~/MacPlus/Screenshots/Screenshot%202026-10-08%20at%2011.48.32.png menu   # S41
@@ -99,3 +99,12 @@ c3-opener-r     ~/MacPlus/Screenshots/Screenshot%202026-10-08%20at%2011.45.56.pn
 # The cover (SG4, MM1a): Now Playing, the whole screen in the cover's pale
 # blue, as MacDraw's cover prints its screen (S10)
 c0-cover-screen ~/MacPlus/Screenshots/Screenshot%202026-10-08%20at%2011.43.49.png full zoom=6 ink=1e2832 paper=bfdae1 nopointer
+
+# The second edition (MacMusic 1.1, 2026-10-11): Claude's captures of
+# Mini vMac's window (screencapture -l: the screen at 4x below its
+# 64-pixel title bar).
+screen 0 64 4
+c1-create       ~/MacPlus/Screenshots/1.1%20Create%20New%20Library.png box nopointer
+c2-export-menu  ~/MacPlus/Screenshots/1.1%20File%20menu.png menu
+c2-print        ~/MacPlus/Screenshots/1.1%20Print%20Library.png box nopointer
+c2-page-setup   ~/MacPlus/Screenshots/1.1%20Page%20Setup.png box nopointer

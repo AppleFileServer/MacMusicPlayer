@@ -16,7 +16,9 @@ guide):
 - The quietest volume level isn't silent (accepted in Stage 9d: the
   Plus's lowest hardware level, 0, still sounds).
 - A large library is slow to scan: about 1.5-2 minutes for 500 songs at
-  Plus speed (H1; "Fast scanning" below).
+  Plus speed (H1; "Fast scanning" below). **Fixed in 1.1:** a faster
+  sort and the library's cache; 500 songs start in about 7.5 s (12 s the
+  first time, or at Rescan Library).
 - A program that keeps the Mac completely busy for over 6 s can make the
   sound repeat a moment and pause (accepted limitation below).
 - Sound relies on undocumented System 6 Sound Manager state, checked at
@@ -87,7 +89,15 @@ guide):
   averages (title 16, artist 13, album 15, genre 6 characters).
 - **Scanning is slow at Plus speed:** 500 small song files took 94 s
   to scan in Mini vMac at 1x (137 s with every tag 63 characters).
-  See "Fast scanning" in the roadmap.
+  See "Fast scanning" in the roadmap. 1.1's Part 0 found most of it was
+  the title sort and the group search, not the disk; fixed in 1.1.
+- **A 1 MB Plus (measured for 1.1, Part 0; British System 6.0.7 by Easy
+  Install):** 858K free under the Finder alone, 593K under MultiFinder.
+  MacMusic, asking for 640K, is offered 598K there and given about 556K:
+  500 songs with typical names load with about 215K to spare; 500 with
+  every detail 63 characters don't ("There is not enough memory to read
+  the MacMusic Library"), so the largest libraries need the Finder alone.
+  Printing takes 2-3K more (ImageWriter, LaserWriter), given back after.
 
 ## Testing notes
 - Test timing-sensitive changes in Mini vMac at **1x** (Control-S): at
@@ -116,10 +126,8 @@ guide):
   and public systems from 1.1 in American, British and other languages,
   for the Plus and possibly earlier Macs. For later review:
   `docs/plans/future-releases.md`.
-- **Fast scanning:** a library scan opens and reads every song file, so
-  500 songs take about 1.5-2 minutes at Plus speed (H1). A cache of the
-  song details, checked against each file's modification date, would
-  make later scans quicker. Not for 1.0.
+- **Fast scanning:** done in 1.1 (`release-1.1.md`, N11-2 to N11-10 and
+  N11-23).
 - Real Mac Plus results for the 1980 MB Scratch image (2026-10-07: 307
   real songs, the `6436450` app, from before Fixes 1-2): to record here,
   whether the disk mounts, how long the first scan takes and whether
@@ -141,6 +149,9 @@ guide):
   `docs/plans/deferred-on-the-go.md`.
 
 ## Resolved
+- 1.1: slow start-up (H1, the issues log of 2026-10-09): a merge sort,
+  groups noted as they're built, and the library's cache (`d69799c`,
+  `66a3241`); the cut-off Create New Library prompt (`2ed64cf`).
 - Ring ran dry after 20–25 s (stutter): `6e6fcde`.
 - Gap between songs (I5, R5): Stage 5c, gapless stream; sound also
   starts after about 4 s of buffering instead of the whole ring.

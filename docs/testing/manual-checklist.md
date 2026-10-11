@@ -169,6 +169,55 @@ On the Plus, from the BlueSCSI Scratch image (`tools/library-image`).
 - [ ] 9.6 An hour of playing with Shuffle and Repeat All: no stall, no
       crash.
 
+## 10. New in 1.1 (`docs/plans/release-1.1.md`)
+
+Starting and the cache (Part B):
+- [ ] 10.1 With the 500-song test library (or the 307-song Scratch
+      library): the first start shows "Loading the library…" under the
+      logo; record its time: ______
+- [ ] 10.2 Quit and start again: no message, a quicker start; record it:
+      ______. The songs, artists, albums and playlists as before.
+- [ ] 10.3 Rate a song and edit another's details; quit, start: both
+      changes kept, the message shown briefly.
+- [ ] 10.4 File > Rescan Library: the band "Loading the library…" across
+      the foot of the screen; the screen comes back as it was.
+- [ ] 10.5 Change a song file in the Finder (replace it with a copy from
+      another library), start: the new details shown.
+- [ ] 10.6 The library on a locked disk: it opens, every start reads
+      every file, no error.
+- [ ] 10.7 Open a 1.1 library in MacMusic 1.0: all songs, no "skipped"
+      alert. Then in 1.1 again.
+- [ ] 10.8 1.0's MacMusic Prefs opened by 1.1, and 1.1's by 1.0.
+
+Printing (Part C), with the printer chosen in the Chooser:
+- [ ] 10.9 File > Page Setup: the driver's own dialog, A4 offered;
+      chosen paper kept after quitting.
+- [ ] 10.10 With no Page Setup saved (a fresh MacMusic Prefs), Print
+      Library opens Page Setup first.
+- [ ] 10.11 The lists dialog: the sub-boxes dim with their list; Print
+      dims with nothing ticked; the choice kept for the session.
+- [ ] 10.12 Print Songs, Albums (with and without songs) and Artists
+      (with and without albums) on the ImageWriter: columns, cut text,
+      the header and "Page n of m", each list on a new page.
+- [ ] 10.13 Command-period while printing: it stops, nothing more
+      printed.
+- [ ] 10.14 The printer switched off, or not chosen: a plain message,
+      no hang.
+- [ ] 10.15 Printing while a song plays: the music pauses, then carries
+      on.
+- [ ] 10.16 A LaserWriter on AppleTalk, background printing on: printed
+      by PrintMonitor while MacMusic plays (when one is available).
+
+A 1 MB Plus (Mini vMac's 1 MB build with the clean System, or the Plus
+with 1 MB):
+- [ ] 10.17 Under MultiFinder: 500 songs with ordinary details load;
+      play, print.
+- [ ] 10.18 Under the Finder alone: 500 songs with long details load.
+
+The Create New Library prompt (Part A):
+- [ ] 10.19 File > Choose Library > Create New Library: "New library
+      in:" shown whole.
+
 ## Problems found
 
 | Item | What happened | How serious |

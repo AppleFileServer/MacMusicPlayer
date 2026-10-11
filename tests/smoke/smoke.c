@@ -10,6 +10,7 @@
 #include <TextUtils.h>
 #include <string.h>
 #include <Resources.h>
+#include <Menus.h>
 
 #include "smoke.h"
 #include "fileopen.h"
@@ -507,6 +508,17 @@ void Smoke_Run(void)
     Check(Playback_State() == kPlayPlaying, "the music plays on");
     Send(kEvtMenu);
     Check(Same(Here()->title, "Extras"), "Menu goes back to Extras");
+
+    /* 1.1: the File menu's items that are always enabled (an enable
+       flags mistake once dimmed Choose Library and Page Setup). */
+    Log("the File menu");
+    {
+        MenuHandle file = GetMenuHandle(129);
+        Check(file != nil && ((**file).enableFlags & (1L << 4)), "Choose Library... enabled");
+        Check(file != nil && ((**file).enableFlags & (1L << 8)), "Page Setup... enabled");
+        Check(file != nil && !((**file).enableFlags & (1L << 3)), "the first divider disabled");
+        Check(file != nil && !((**file).enableFlags & (1L << 10)), "the divider before Quit disabled");
+    }
 
     /* 1.1 (N11-24): the Printing segment is loaded only to print. */
     Log("printing segment");

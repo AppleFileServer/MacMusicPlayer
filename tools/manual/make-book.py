@@ -28,7 +28,7 @@ PRIVATE = os.environ.get("MANUAL_ASSETS",
 OWN_USE = all(os.path.exists(os.path.join(PRIVATE, f))
               for f in ("cover-macmusic.jpg", "rainbow-logo.png"))
 PDF = os.path.join(ROOT, "build-manual", "MacMusic-Users-Guide%s.pdf" % ("" if OWN_USE else "-plain"))
-EDITION = "MacMusic 1.0 &middot; First edition, October 2026"
+EDITION = "MacMusic 1.1 &middot; Second edition, October 2026"
 
 
 def part(name):
@@ -224,6 +224,8 @@ GLOSSARY = [
     ("click wheel", "The wheel below MacMusic&rsquo;s screen. You turn it by "
      "dragging round it, and click its parts to choose, go back, play and "
      "skip."),
+    ("Chooser", "The desk accessory, in the Apple menu, where you pick the "
+     "printer: an ImageWriter, say, and the port it&rsquo;s connected to."),
     ("Clock", "In Extras: the time and date from the Macintosh&rsquo;s own "
      "clock."),
     ("close box", "The small box at the left of a window&rsquo;s title bar. "
@@ -263,6 +265,8 @@ GLOSSARY = [
     ("MultiFinder", "The part of System 6 that lets several applications be "
      "open at once; MacMusic plays on behind them."),
     ("Now Playing", "The screen showing the song that&rsquo;s playing."),
+    ("Page Setup", "The command, in the File menu, that sets the paper and "
+     "which way up it goes, for the printer chosen in the Chooser."),
     ("playlist", "A list of songs from your library, in the order you choose."),
     ("pointer", "The arrow on the screen that moves as you move the mouse."),
     ("rating", "From one to five stars, given to a song on Now Playing."),
@@ -375,6 +379,16 @@ INDEX = [
     ("Rename Playlist", ["to-rename-a-playlist", "c-rename-name"]),
     ("Repeat", ["to-change-shuffle-or-repeat", "settings-in-detail"]),
     ("Rescan Library", ["to-rescan-a-library", "c-rescan-library"]),
+    ("Page Setup", ["to-choose-the-paper", "c-page-setup"]),
+    ("Print Library", ["to-print-a-list-of-your-library", "c-print-library-p"]),
+    ("printing", ["printing-your-library", "a-printing", "t-nothing-prints"]),
+    ("stopping printing", ["to-print-a-list-of-your-library"]),
+    ("Chooser", ["printing-your-library", "a-printing"]),
+    ("ImageWriter", "printing"),
+    ("LaserWriter", "printing"),
+    ("MacMusic Cache (folder)", ["r-the-macmusic-library", "t-song-details-look-wrong-after-changing-files-in-the-finder"]),
+    ("Loading the library", ["to-rescan-a-library", "t-starting-up-takes-a-while"]),
+    ("clock battery", ["t-the-macintosh-forgets-the-time"]),
     ("Reset All Settings", ["to-reset-all-settings", "c-reset-all-settings"]),
     ("rewind", ["to-fast-forward-or-rewind"]),
     ("scroll bar", ["to-scroll-a-list"]),

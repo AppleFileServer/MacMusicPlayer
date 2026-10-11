@@ -46,16 +46,18 @@ resource 'MENU' (128) {
 };
 
 /* Items 1 (Import Song...), 2 (Export Song...), 5 (Rescan Library), 6
-   (Library Info...) and the dividers (3, 7) start disabled: mask
-   0x7FFFFF88 clears their bits. Import, Rescan and Library Info are
-   enabled at run time once a library is set; Export while the highlight
-   is on a song. Stage 8d-2 added Rescan Library and Library Info.... */
+   (Library Info...) and the dividers start disabled (their bits clear).
+   Import, Rescan and Library Info are enabled at run time once a library
+   is set; Export while the highlight is on a song. Stage 8d-2 added
+   Rescan Library and Library Info.... */
 /* 1.1 (N11-15): Page Setup... and Print Library... before Quit, as other
-   Macintosh programs have them; the dividers (items 3, 7 and 10) are
-   disabled. */
+   Macintosh programs have them. The enable flags give item n as bit n-1:
+   as in 1.0, only Choose Library (4) and Quit are enabled here, now with
+   Page Setup (8) and Print Library (9); the others are set at run time,
+   and the dividers (3, 7, 10) stay disabled. */
 resource 'MENU' (129) {
     129, textMenuProc;
-    0x7FFFFB77, enabled;
+    0x7FFFFD88, enabled;
     "File";
     {
         "Import Song\0xC9", noIcon, noKey, noMark, plain;

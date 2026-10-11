@@ -54,6 +54,18 @@ library conversion. The decision codes in brackets are explained in
   is a code segment of its own (8K), loaded only to print
   (`resources/segments.map`); the smoke test checks it isn't in memory
   otherwise.
+- **Fix to C2:** the File menu's enable flags left Choose Library… and
+  Page Setup… dimmed (found taking the manual's screenshots); the smoke
+  test now checks the File menu's always-enabled items.
+- **Documentation for 1.1:** `docs/user-guide.md` (and so the Read Me)
+  and the *MacMusic User's Guide*, second edition: printing (a new
+  topic in Chapter 2; Page Setup and Print Library in the File menu),
+  starting up and the cache, 1 MB, the clock battery, the printing
+  messages and troubleshooting, the index and glossary; the Quick
+  Reference Card's File menu and printing; `decisions.md` (N11-1 to
+  N11-24), `outstanding-issues.md` and the issues log (the slow start
+  fixed in 1.1); the manual checklist's section 10. Screenshots of 1.1
+  for the manual are listed in `docs/manual/figures.md`.
 
 ## After 1.0
 

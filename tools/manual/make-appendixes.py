@@ -287,6 +287,25 @@ A = "".join([
     msg(q("The song&rsquo;s rating couldn&rsquo;t be saved."),
         "The rating wasn&rsquo;t changed, perhaps because the library&rsquo;s "
         "disk is locked or full."),
+
+    sub("Printing"),
+    msg(q("No printer is chosen. Choose one in the Chooser, from the Apple "
+          "menu."),
+        "Open the Chooser, click your printer&rsquo;s icon (and, for an "
+        "ImageWriter, the printer port), and close it; then print again."),
+    msg(q("The library couldn&rsquo;t be printed. Check that the printer is "
+          "switched on, and chosen in the Chooser."),
+        "The printer didn&rsquo;t answer, or something went wrong while "
+        "printing; the number after the message says what. Check the "
+        "printer, its cable and its paper, and try again."),
+    msg(q("There isn&rsquo;t enough memory to print. Quit other programs, or "
+          "give MacMusic more memory in Get Info."),
+        "Printing needs a little memory of its own. Under MultiFinder, quit "
+        "an application you aren&rsquo;t using, or give MacMusic more memory "
+        "(see Chapter 2)."),
+    msg(q("The Print Library window could not be opened."),
+        "MacMusic is short of memory. Quit other applications, and try "
+        "again."),
 ])
 
 # ---- Appendix B ---------------------------------------------------------
@@ -407,9 +426,29 @@ D = "".join([
             "you aren&rsquo;t using, or give MacMusic less memory with Get Info "
             "(see Chapter 2)."),
     trouble("Starting up takes a while",
-            "MacMusic reads your whole library each time it starts, and when "
-            "you choose Rescan Library: a minute and a half to two minutes for "
-            "500 songs. You&rsquo;ll see the wristwatch while it reads."),
+            "The first time MacMusic opens a library, and when you choose "
+            "Rescan Library, it reads every song file: about 12 seconds for "
+            "500 songs, while the screen says Loading the library. After "
+            "that it reads only songs that are new or have changed, and starts "
+            "in a few seconds."),
+    trouble("Song details look wrong after changing files in the Finder",
+            "MacMusic keeps a note of your songs, and reads a song again when "
+            "its file changes. If a song was changed by another application "
+            "and still shows its old details, choose Rescan Library, which "
+            "reads every song."),
+    trouble("The Macintosh forgets the time",
+            "If the date and time go back each time you switch on, the "
+            "Macintosh&rsquo;s clock battery is flat, and needs replacing. "
+            "MacMusic copes with a clock that has stopped; after songs have "
+            "been changed outside MacMusic, choose Rescan Library."),
+    trouble("Nothing prints",
+            "Check that the printer is switched on, has paper, and is chosen "
+            "in the Chooser; see Appendix A, &ldquo;Printing.&rdquo; If MacMusic "
+            "says there isn&rsquo;t enough memory, quit other applications, or "
+            "give MacMusic more memory with Get Info (Chapter 2). Under "
+            "MultiFinder with background printing on, a LaserWriter&rsquo;s "
+            "pages are printed by PrintMonitor once MacMusic has finished: "
+            "leave the Macintosh switched on until they are."),
     trouble("Songs play a little fast",
             "By about 0.9%, because the Macintosh Plus plays its sound a little "
             "faster than the files were made for. The times shown are right. "

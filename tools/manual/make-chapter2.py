@@ -548,11 +548,12 @@ TOPICS = [
                "~ A library whose disk isn&rsquo;t there is dimmed. Insert the "
                "disk, or switch on the hard disk, and try again."), "c2-recent"),
            T("To Rescan a Library", steps(
-               "MacMusic reads your library each time it starts. To have it "
-               "read the library again:",
+               "MacMusic keeps a note of your songs, so it starts quickly. If "
+               "songs were changed in the Finder or by another application, "
+               "have it read every song again:",
                "> Choose Rescan Library from the File menu.",
-               "~ A large library takes a while: a minute and a half or so for "
-               "500 songs.")),
+               "The screen says Loading the library while it reads.",
+               "~ About 12 seconds for 500 songs.")),
            T("To See Library Info", steps(
                "> Choose Library Info from the File menu.",
                "You see how many songs and playlists the library has, how much "
@@ -569,6 +570,30 @@ TOPICS = [
                "> When MacMusic asks for a library, click Not Now.",
                "MacMusic starts with nothing in it. You can choose a library at "
                "any time with Choose Library in the File menu.")),
+           ]),
+
+    Topic("Printing Your Library",
+          "<p>MacMusic can print a list of your library: every song, every "
+          "album or every artist, on whichever printer is chosen in the "
+          "Chooser.</p>",
+          "The music pauses while MacMusic prints, and carries on afterwards.",
+          [T("To Choose the Paper", steps(
+               "> Choose Page Setup from the File menu.",
+               "> Choose the paper, A4 or US Letter, and which way up, and "
+               "click OK.",
+               "MacMusic remembers it. The first time you print, Page Setup "
+               "comes first.")),
+           T("To Print a List of Your Library", steps(
+               "> Choose Print Library from the File menu (or press "
+               "Command-P).",
+               "> Click the lists you want: Songs, Albums or Artists.",
+               "For each album&rsquo;s songs, or each artist&rsquo;s albums, "
+               "listed under it, click the box below.",
+               "> Click Print, then OK in the printer&rsquo;s Print dialog.",
+               "Each list starts on a new page, with your library&rsquo;s "
+               "name, the list and the date at the top.",
+               "~ To stop printing, hold down the Command key and type a "
+               "period. If nothing prints, see Appendix D."), "c2-print", double=True),
            ]),
 
     Topic("MacMusic and Your Other Applications",

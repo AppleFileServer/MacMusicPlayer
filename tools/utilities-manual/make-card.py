@@ -209,7 +209,9 @@ PAGE_4 = card(
     h2("The menus"),
     rows(("File", "Import Song&hellip;, Export Song&hellip; (gives the song back as a WAV "
           "file, and takes it out of the library), Choose Library&hellip;, Rescan Library, "
-          "Library Info&hellip;, the libraries used before, Quit (" + k("&#8984;", "Q") + ")"),
+          "Library Info&hellip;, Page Setup&hellip;, Print Library&hellip; ("
+          + k("&#8984;", "P") + "), the libraries used before, Quit ("
+          + k("&#8984;", "Q") + ")"),
          ("Edit", "Edit Song&hellip;: the highlighted song&rsquo;s details, or Now "
           "Playing&rsquo;s"),
          ("Playlists", "New Playlist&hellip;, Rename&hellip;, Delete&hellip;, Remove from "
@@ -225,10 +227,17 @@ PAGE_4 = card(
          ("To take a song off", "In the playlist, highlight it, and choose Remove from "
           "Playlist. It stays in the library.")),
 
-    h2("Limits"),
-    rows(("A library", "500 songs, and 10 playlists"),
-         ("Memory", "640K under MultiFinder (it works in 512K)"),
-         ("Songs", "MacMusic WAV files only: mono, 22,050 Hz, 8-bit")),
+    h2("Printing (MacMusic 1.1)"),
+    rows(("To print a list of the library", "Choose Print Library&hellip; ("
+          + k("&#8984;", "P") + "); tick Songs, Albums or Artists (with each "
+          "album&rsquo;s songs, or each artist&rsquo;s albums), click Print, then OK."),
+         ("To choose the paper", "Choose Page Setup&hellip;: A4 or US Letter. The first "
+          "print asks for it."),
+         ("To stop printing", k("&#8984;") + " " + k(".") + ". The music pauses while "
+          "it prints.")),
+
+    '<p class="note"><b>Limits:</b> 500 songs and 10 playlists in a library; 640K under '
+    "MultiFinder (it works in 512K); MacMusic WAV files only, mono, 22,050 Hz, 8-bit.</p>",
     '<p class="foot">See the <i>MacMusic User&rsquo;s Guide</i> for MacMusic, and <i>MacMusic '
     "Utilities</i> for the utilities. &copy; 2026 Jack McAteer. Apple, Macintosh and Mac are "
     "trademarks of Apple Inc.; YouTube is a trademark of Google LLC. For the owner&rsquo;s own "

@@ -232,6 +232,27 @@ Found while studying the second set: the Create New Library dialog's
 prompt is cut off ("Create new MacMusic"). It's logged in
 `docs/issues-found.md` for 1.0.1; the manual shows the dialog as it is.
 
+## For the second edition (MacMusic 1.1)
+
+Screenshots of 1.1 to take in Mini vMac (at 1x, as the others), for the
+User's Guide to show 1.1 as it is:
+
+- **c1-create** (Chapter 1, Lesson 4): the Create New Library dialog,
+  now with the whole prompt, "New library in:".
+- **c2-export-menu** (Chapter 2, "Changing and Removing Songs";
+  Chapter 3, File Menu): the File menu, now with Page Setup… and Print
+  Library….
+- **New, for "Printing Your Library" (Chapter 2):** the Print Library
+  dialog (the lists, with Albums and its sub-box ticked); the
+  ImageWriter's Page Setup dialog with A4.
+- **Optional:** "Loading the library…" under the logo (needs a large
+  library to catch it), and the band at Rescan Library.
+
+Done 2026-10-11 (Claude's captures, in `~/MacPlus/Screenshots/1.1 *.png`):
+c1-create, c2-export-menu, c2-print (Chapter 2, "To Print a List of Your
+Library") and c2-page-setup (Chapter 3, File Menu). The loading message
+isn't pictured.
+
 ## Decisions
 
 **Decided 2026-10-08:** all as recommended; F1, the wrong-kind-of-WAV

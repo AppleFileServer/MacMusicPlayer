@@ -1,4 +1,4 @@
-# MacMusic 1.0 user guide
+# MacMusic 1.1 user guide
 
 MacMusic turns a Macintosh Plus into a 2004 iPod: a window with the
 iPod's screen and click wheel, its menus, and its Now Playing screen.
@@ -9,7 +9,10 @@ Your songs live in a **MacMusic Library**, a folder on any disk.
 ### What you need
 
 - A Macintosh Plus with System 6.0.7 (or Mini vMac emulating one). Under
-  MultiFinder, MacMusic asks for 640K of memory and runs in 512K.
+  MultiFinder, MacMusic asks for 640K of memory and runs in 512K. On a
+  Plus with 1 MB, MultiFinder leaves about 590K: enough for 500 songs
+  with ordinary details. For a library of 500 songs whose every detail
+  is long, use the Finder alone (Set Startup, in the Special menu).
 - Songs as WAV files: **22,050 Hz, 8-bit, mono**. Other WAV formats are
   refused with a message saying what's needed. On a modern Mac,
   `afconvert -f WAVE -d UI8@22050 -c 1 --mix song.mp3 song.wav` makes one.
@@ -146,14 +149,52 @@ line. TeachText can open them.
   first start.
 - The libraries you've used are listed in the **File** menu; choose one
   to switch. One on a disk that isn't there is dimmed.
-- **File > Rescan Library:** reads the library folder again, for
-  example after changing it in the Finder.
+- **File > Rescan Library:** reads every song file in the library
+  again, for example after changing it in the Finder.
 - **File > Library Info...:** the number of songs and playlists, the
   songs' total size, the disk's free space, and any unreadable files.
 
 Only MacMusic should change a library's files. Song files copied in from
 another library may clash: two songs with the same ID can't both be
 used, and the scan reports the one it skipped.
+
+### Starting quickly
+
+MacMusic keeps a note of each song's details in the library, in an
+invisible folder called "MacMusic Cache", so it needn't open every song
+file each time it starts. A song file that has changed, or is new, is
+read again. While songs are being read from their files, the screen
+says **Loading the library…**. The first start with a library, and
+Rescan Library, read every file; later starts take a few seconds.
+
+The cache does no harm to MacMusic 1.0, which opens the library as
+before. If a song was changed outside MacMusic and its details look
+wrong, choose Rescan Library.
+
+## Printing
+
+- **File > Page Setup...:** the paper and its way round, for the printer
+  chosen in the Chooser. MacMusic remembers it.
+- **File > Print Library... (Command-P):** choose which lists to print:
+  - **Songs:** every song by title, with its artist, album and length;
+    the audiobooks follow, under their own heading;
+  - **Albums:** each album's artist, its number of songs and their
+    length; tick "with each album's songs" for its songs below it, in
+    track order;
+  - **Artists:** each artist's number of albums and songs; tick "with
+    each artist's albums" for its albums below it.
+
+  Then click Print, and the printer's own Print dialog appears. Each
+  list starts on a new page, with the library's name, the list and the
+  date at the top, and "Page 3 of 12" at the foot.
+- The first time you print, Page Setup comes first, so you can choose
+  the paper (A4 or US Letter).
+- The music pauses while it prints, and carries on afterwards.
+  **Command-period** stops printing.
+- MacMusic prints on whichever printer is chosen in the Chooser: an
+  ImageWriter on the printer port, or an ImageWriter or LaserWriter on
+  AppleTalk. With background printing on (a LaserWriter, under
+  MultiFinder), PrintMonitor prints while MacMusic plays.
 
 ## Living with other programs
 
@@ -169,8 +210,12 @@ moment repeat, then a pause, before the music carries on by itself.
   runs at 22,254 samples a second. The times shown are right.
 - **The quietest volume isn't silent.** It's the Plus's lowest
   hardware level.
-- **A large library is slow to scan:** about 1.5 to 2 minutes for 500
-  songs, at every start and Rescan.
+- **Reading every song takes a little while:** about 12 seconds for
+  500 songs, the first time and at Rescan Library; later starts, about
+  7 seconds.
+- **The Mac's clock:** if the Plus forgets the time when it's switched
+  off, its clock battery is flat. MacMusic copes, but after a song file
+  has been changed outside MacMusic, choose Rescan Library.
 - **Extras has only the Clock.** The iPod's other extras (contacts,
   calendar, notes, games) are not included.
 - **Ratings are recorded but not yet used** (for example, for smart

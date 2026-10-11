@@ -213,13 +213,24 @@ BODY = "".join([
         "Asks whether to use an existing library or create a new one, "
         "and switches to it."),
     cmd("Rescan Library",
-        "Reads the library&rsquo;s folder again. Dimmed when no library is "
-        "open."),
+        "Reads every song file in the library again, and the library&rsquo;s "
+        "note of them is made afresh. Dimmed when no library is open."),
     cmd("Library Info&hellip;",
         "Shows how many songs the library holds (out of 500) and how many "
         "playlists, how much room the songs take, how much is free on its "
         "disk, and how many files couldn&rsquo;t be read."),
     '<figure class="dialog">%s</figure>' % img("c2-library-info", 193),
+    cmd("Page Setup&hellip;",
+        "The paper, and which way up, for the printer chosen in the "
+        "Chooser. MacMusic remembers it. The dialog is the printer&rsquo;s "
+        "own: the ImageWriter&rsquo;s is shown."),
+    '<figure class="dialog">%s</figure>' % img("c2-page-setup", 300),
+    cmd("Print Library&hellip; &#8984;P",
+        "Asks which lists to print (Songs; Albums, with each album&rsquo;s "
+        "songs or not; Artists, with each artist&rsquo;s albums or not), "
+        "then shows the printer&rsquo;s Print dialog. The first time, Page "
+        "Setup comes first. The music pauses while it prints. Dimmed when "
+        "the library has no songs."),
     cmd("Libraries used before",
         "Up to five, with the one in use checked. Choose one to switch to "
         "it. A library whose disk isn&rsquo;t there is dimmed."),
@@ -287,7 +298,9 @@ BODY = "".join([
     table(("", ""),
           ("Computer", "Macintosh Plus, System 6.0.7, with or without "
            "MultiFinder"),
-          ("Memory", "640K suggested; 512K at least"),
+          ("Memory", "640K suggested; 512K at least. With 1 MB, under "
+           "MultiFinder, 500 songs with ordinary details; under the Finder "
+           "alone, any library"),
           ("Songs in a library", "500, audiobooks included"),
           ("Playlists", "10"),
           ("Songs read from one playlist", "1,000"),
@@ -307,7 +320,10 @@ BODY = "".join([
           ("The scrubber and the rating", "5 seconds"),
           ("Previous starts the song again", "after 3 seconds of it"),
           ("Libraries remembered", "5"),
-          ("Reading a library", "about 1&frac12; to 2 minutes for 500 songs"),
+          ("Reading a library", "about 12 seconds for 500 songs the first "
+           "time and at Rescan Library; a few seconds after that"),
+          ("Printing", "the printer chosen in the Chooser: ImageWriter, "
+           "LaserWriter, on the printer port or AppleTalk"),
           ("Room for music", "about 1.3 MB a minute"),
           cls="ref spec"),
 

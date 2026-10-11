@@ -206,6 +206,36 @@ The click wheel (W: Stage 5c-1)
 | E3 | Hours and minutes only, redrawn on the minute | `ui_nav.c` |
 | E4 | PROVISIONAL: the Clock's layout, in the LCD's font | `lcd_layout.h` |
 
+## 1.1 (`release-1.1.md`)
+
+| Code | Decision | Where |
+|---|---|---|
+| N11-1 | The Create New Library prompt is "New library in:" | `libfolder.c` |
+| N11-2 | A cache of the song details, read at start-up instead of the files | `libcache.c` |
+| N11-3 | Kept in an invisible folder "MacMusic Cache" in the library, file "Song Details" (1.0 skips folders) | `libcache.c` |
+| N11-4 | A file comes from the cache if its name, date and length match; the folder is always listed | `library.c` |
+| N11-5 | Before Edit Song or a rating changes a song file, its cache entry is marked stale (a stopped clock can't mislead) | `library.c`, `editsong.c` |
+| N11-6 | Rescan Library reads every file, and writes a new cache | `libsetup.c`, `main.c` |
+| N11-7 | A damaged, unknown or unreadable cache is ignored and rewritten; a locked disk has none | `libcache.c` |
+| N11-8 | PROVISIONAL: "Loading the library…" when songs are read from their files: under the logo, or across the foot of the screen at Rescan | `main.c`, `lcd_draw.c` |
+| N11-9 | The cache is in memory only during a scan; short of memory, the scan is done without it | `library.c` |
+| N11-10 | The cache's format: a header, then packed entries, big-endian, with a check-sum | `libcache.c` |
+| N11-11 | Print Library: Songs; Albums, with their songs or not; Artists, with their albums or not | `print.c`, `printlayout.c` |
+| N11-12 | PROVISIONAL: each page's header (library, list, date), column heads, "Page n of m" | `printlayout.c`, `print.c` |
+| N11-13 | PROVISIONAL: Times 10 for the lists, Helvetica bold for the heads; Geneva if missing | `print.c` |
+| N11-14 | The columns follow the page's width (A4, Letter, landscape) | `printlayout.c` |
+| N11-15 | File > Page Setup… and Print Library… (Command-P), before Quit | `MacMusic.r`, `main.c` |
+| N11-16 | The first print with no Page Setup saved opens Page Setup; it's kept in the prefs' resource fork | `print.c` |
+| N11-17 | The music pauses while it prints, as for Import | `main.c` |
+| N11-18 | Command-period cancels a print | `print.c` |
+| N11-19 | Printing problems in plain words | `print.c` |
+| N11-20 | Not enough memory to print: said, and nothing else affected | `print.c` |
+| N11-21 | The printer is whichever the Chooser has: ImageWriter, LaserWriter, AppleTalk | `print.c` |
+| N11-22 | MacMusic runs on a 1 MB Plus: MultiFinder for ordinary libraries, the Finder alone for the largest | `MacMusic.r` |
+| N11-23 | A merge sort by title, and each song's group noted as the lists are built | `library.c` |
+| N11-24 | Printing is a code segment of its own, loaded only to print | `segments.map`, `main.c` |
+| — | PROVISIONAL: audiobooks print after the songs under their own heading; an album of several artists shows "Various Artists" | `printlayout.c` |
+
 ## *MacMusic Utilities*, the companion manual (`manual-utilities.md`)
 
 | Code | Decision | Where |
