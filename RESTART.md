@@ -10,6 +10,14 @@ in C, built on this Mac with the **Retro68** cross-compiler and tested
 in the **Mini vMac** emulator and on the real Plus (BlueSCSI). Everything
 about it is in this folder; `README.md` is the overview.
 
+**Work in progress (2026-10-11): MacMusic 1.1** — faster start-up and
+printing. Everything is committed; it waits for the owner's printing
+check on the real Plus, then the version number, the release and the
+tag. Where it stands, and what's left, in order:
+`docs/plans/release-1.1.md`, "Where it stands". Everything outside
+MacMusic (the utilities, the manuals, the issues) is in
+`~/MacPlusProjects/LOOSE-ENDS.md`.
+
 ## 1. Check the tools are still here
 
     tools/check-environment.sh

@@ -466,3 +466,42 @@ reviews all the outstanding issues after 1.1.
 
 Each step: build, both test scripts, your check, then commit only when
 you say.
+
+## Where it stands (2026-10-11, put aside for a few days)
+
+Done and committed, each checked by the owner in Mini vMac:
+
+| Step | Commit |
+|---|---|
+| Part 0, the measurements | `600df6c`, `7282c4b` |
+| Part A, "New library in:" | `2ed64cf` |
+| B1, the merge sort (N11-23) | `d69799c` |
+| B2, the cache, groups noted as built | `66a3241` |
+| B3, "Loading the library…" | `da1877b` |
+| C1, the print layout | `84366ec` |
+| C2, printing (untested on paper) | `2b60185` |
+| The documentation, and the File menu fix | `2d1694f` |
+
+Still to do, in order:
+
+1. **The owner's check on the real Plus** with the test image
+   `~/MacPlusProjects/releases/MacMusic-1.1-test-2d1694f/HD30_512 MacMusic 1.1 Test.hda`
+   (SCSI ID 3; the steps are on the disk, in About This Test): print each
+   list on the ImageWriter; Page Setup; Command-period; the music pausing;
+   "Loading the library…" and the start-up time with the 307-song Scratch
+   library. The manual checklist's section 10 covers it all.
+2. Anything the printed pages or the Plus show: fonts, columns, header
+   and footer are PROVISIONAL (N11-12, N11-13). Correct the guides' times
+   if the Plus differs from Mini vMac's (12 s, then 7.5 s, for 500 songs).
+3. The rest of the manual checklist on the Plus, and a 1 MB check
+   (10.17, 10.18).
+4. The version: `project(MacMusic VERSION 1.1)` in `CMakeLists.txt`, the
+   About box and vers resources follow; the guides' "1.1" is already
+   written.
+5. `tools/make-release.sh` (a clean tree, both tests): the release
+   folder `MacMusic-1.1`, its floppy with the 1.1 Read Me; then tag
+   `v1.1`, and the CHANGELOG's "1.1 (in progress)" given its date.
+6. The User's Guide PDF (`tools/manual/make-book.py`) for the release;
+   remake the environment archive only if the toolchain changed (it
+   didn't: the 1 MB Mini vMac and the British 6.0.7 disks are in the
+   scratchpad only, and could be added to the archive if wanted).
