@@ -133,47 +133,6 @@ static short SongWithID(long id)
     return kNone;
 }
 
-/* The least memory a full read needs (Rescan Library) is found, with the
-   lists growing by exactly what's needed, as before N11-33; with it, a full
-   read still fits (N11-33: the room reserved fails, then exact), a scan
-   from the cache fits, and it gives the same library. */
-extern Boolean gLibraryTestExact;
-
-static void ShortOfMemory(short count)
-{
-    long low = 1000, high = 2000000, limit, mid;
-    Library(count);
-    CHECK(Library_Scan(&gF));               /* a cache, for the next */
-    gLibraryTestExact = true;
-    while (high - low > 64)                 /* the least a full read needs */
-    {
-        mid = (low + high) / 2;
-        TestMem_SetLimit(mid);
-        if (Library_ScanAll(&gF))
-            high = mid;
-        else
-            low = mid;
-        TestMem_SetLimit(0);
-        CHECK(Library_Scan(&gF));           /* the cache, back as it was */
-    }
-    limit = high;
-    gLibraryTestExact = false;
-    TestMem_SetLimit(limit);
-    CHECK(Library_ScanAll(&gF));
-    CHECK_EQ(Library_SongCount(), count);
-    TestMem_SetLimit(0);
-    CHECK(Library_Scan(&gF));               /* the cache, back as it was */
-    TestMem_SetLimit(limit);
-    CHECK(Library_Scan(&gF));
-    CHECK_EQ(Library_SongCount(), count);
-    TestMem_SetLimit(0);
-    FullRead();
-    TestMem_SetLimit(limit);
-    CHECK(Library_Scan(&gF));
-    CHECK_SAME();
-    TestMem_SetLimit(0);
-}
-
 int main(void)
 {
     unsigned long date;
@@ -352,7 +311,32 @@ int main(void)
     CHECK_SAME();
 
     Test("short of memory: whatever a full read fits, a cached scan fits");
-    ShortOfMemory(200);             /* N11-33: at the least, reserving fails, then exact */
+    {
+        long low = 1000, high = 2000000, limit, mid;
+        Library(200);
+        CHECK(Library_Scan(&gF));               /* a cache, for the next */
+        while (high - low > 64)                 /* the least a full read needs */
+        {
+            mid = (low + high) / 2;
+            TestMem_SetLimit(mid);
+            if (Library_ScanAll(&gF))
+                high = mid;
+            else
+                low = mid;
+            TestMem_SetLimit(0);
+            CHECK(Library_Scan(&gF));           /* the cache, back as it was */
+        }
+        limit = high;
+        TestMem_SetLimit(limit);
+        CHECK(Library_Scan(&gF));
+        CHECK_EQ(Library_SongCount(), 200);
+        TestMem_SetLimit(0);
+        FullRead();
+        TestMem_SetLimit(limit);
+        CHECK(Library_Scan(&gF));
+        CHECK_SAME();
+        TestMem_SetLimit(0);
+    }
     CHECK_EQ(TestFS_OpenFiles(), 0);
 
     Test("the loading notice: once when files are read, never from the cache");

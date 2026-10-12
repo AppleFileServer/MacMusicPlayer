@@ -26,15 +26,6 @@ library conversion. The decision codes in brackets are explained in
   binary search in the sorted list. The same groups in the same order
   (`test_sorting` checks them against 1.0's, now with libraries of more
   names than a list holds).
-- **The library's lists sized once (N11-33):** the heap is grown to its
-  full size at start-up (`MaxApplZone`), and a scan sizes the song list,
-  the file details and the string pool once, from the folder's file
-  count and the cache, instead of growing them a song at a time; on the
-  real Plus, with 5.9K free, the song list moved 155 times in a 316-song
-  start (2.4 s, and 1.4 s for the strings). If memory is short, the scan
-  is done again growing each list by just what it needs, so any library
-  the earlier code read still reads (a host test checks this against
-  that code's least memory).
 - **The library's cache (N11-2 to N11-10):** an invisible folder
   "MacMusic Cache" in the library holds "Song Details": each song's file
   name, date and length, and what the scan reads from it. A file that

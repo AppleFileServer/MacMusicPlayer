@@ -40,19 +40,6 @@ static Handle gPoolH;
 static short gSongCount;
 static long gPoolSize;
 
-/* 1.1 (N11-33): the room in each handle, in songs or bytes. A scan sizes
-   them once for the songs it expects, and grows them by a block at a time
-   beyond that, not a song at a time: on the Plus, with the heap nearly
-   full, growing by one moved the song list 155 times in a 316-song scan.
-   If a block won't fit, by just what's needed, as 1.0 did. */
-static short gSongRoom, gStatsRoom;
-static long gPoolRoom;
-#define kSongBlock      32          /* songs */
-#define kPoolBlock      2048        /* bytes */
-#define kPoolPerFile    96          /* bytes expected for a song not in the cache */
-static Boolean gExact;              /* no reserving, no blocks: as 1.0 */
-Boolean gLibraryTestExact;          /* the host tests: every scan exact */
-
 static short gSongsByTitle[kMaxSongs];
 static short gSongsByID[kMaxSongs];     /* for Library_SongForID */
 static NameSet gArtists, gAlbums, gGenres, gComposers;
@@ -245,8 +232,6 @@ void Library_Clear(void)
 
     gSongCount = 0;
     gPoolSize = 0;
-    gSongRoom = gStatsRoom = 0;
-    gPoolRoom = 0;
     gArtists.count = gAlbums.count = gGenres.count = gComposers.count = 0;
     gPlaylistCount = 0;
     gHaveFolder = false;
@@ -256,43 +241,13 @@ void Library_Clear(void)
     gPlaylistsOverLimit = 0;
 }
 
-/* 1.1 (N11-33): makes room in h for need items of size bytes, from its
-   present room: a block more if it fits, else just what's needed. */
-static Boolean MakeRoom(Handle h, long *room, long need, long block, long size)
-{
-    if (need <= *room)
-        return true;
-    if (!gExact)
-    {
-        SetHandleSize(h, (need + block) * size);
-        if (MemError() == noErr)
-        {
-            *room = need + block;
-            return true;
-        }
-    }
-    SetHandleSize(h, need * size);
-    if (MemError() != noErr)
-        return false;
-    *room = need;
-    return true;
-}
-
-static Boolean MakeSongRoom(Handle h, short *room, short need, long size)
-{
-    long r = *room;
-    Boolean ok = MakeRoom(h, &r, need, kSongBlock, size);
-
-    *room = (short)r;
-    return ok;
-}
-
 /* Appends a Pascal string to the pool; returns its offset or -1. */
 static long PoolAdd(ConstStringPtr s)
 {
     long offset = gPoolSize;
 
-    if (!MakeRoom(gPoolH, &gPoolRoom, gPoolSize + s[0] + 1, kPoolBlock, 1))
+    SetHandleSize(gPoolH, gPoolSize + s[0] + 1);
+    if (MemError() != noErr)
         return -1;
     BlockMove(s, *gPoolH + offset, s[0] + 1);
     gPoolSize += s[0] + 1;
@@ -349,9 +304,10 @@ static Boolean AddSongFile(const LibraryFolder *folder, ConstStringPtr fileName,
     song.composerName = offsets[4];
     song.fileName = offsets[5];
 
-    if (!MakeSongRoom(gSongsH, &gSongRoom, gSongCount + 1, sizeof(SongRec))
-        || (gStatsH != nil
-            && !MakeSongRoom(gStatsH, &gStatsRoom, gSongCount + 1, sizeof(FileStat))))
+    SetHandleSize(gSongsH, (long)(gSongCount + 1) * sizeof(SongRec));
+    if (MemError() == noErr && gStatsH != nil)
+        SetHandleSize(gStatsH, (long)(gSongCount + 1) * sizeof(FileStat));
+    if (MemError() != noErr)
     {
         *outOfMemory = true;
         return false;
@@ -575,47 +531,6 @@ static void SaveCache(const LibraryFolder *folder)
             gCacheAt[i] = -1;
 }
 
-/* 1.1 (N11-33): the number of items in the folder (its files, and any
-   folders), as the catalog records it: the most songs a scan can find. */
-static short FolderItems(const LibraryFolder *folder)
-{
-    CInfoPBRec pb;
-
-    pb.dirInfo.ioNamePtr = nil;
-    pb.dirInfo.ioVRefNum = folder->vRefNum;
-    pb.dirInfo.ioFDirIndex = -1;            /* look up by directory ID */
-    pb.dirInfo.ioDrDirID = folder->folderID;
-    if (PBGetCatInfoSync(&pb) != noErr)
-        return 0;
-    return pb.dirInfo.ioDrNmFls < kMaxSongs ? pb.dirInfo.ioDrNmFls : kMaxSongs;
-}
-
-/* 1.1 (N11-33): sizes the songs, their file details and the string pool
-   once, for the songs the folder can hold: the strings from the cache's
-   size, and an allowance for each file not in it. If memory is short,
-   nothing is reserved, and the scan grows them as it goes. */
-static void ReserveRoom(const LibraryFolder *folder)
-{
-    short items = FolderItems(folder);
-    short cached = LibCache_Count();
-    long text = LibCache_TextSize();
-
-    if (items > cached)
-        text += (long)(items - cached) * kPoolPerFile;
-    SetHandleSize(gSongsH, (long)items * sizeof(SongRec));
-    if (MemError() == noErr)
-        gSongRoom = items;
-    if (gStatsH != nil)
-    {
-        SetHandleSize(gStatsH, (long)items * sizeof(FileStat));
-        if (MemError() == noErr)
-            gStatsRoom = items;
-    }
-    SetHandleSize(gPoolH, text);
-    if (MemError() == noErr)
-        gPoolRoom = text;
-}
-
 /* One pass over the folder, with or without the cache. */
 static Boolean ScanOnce(const LibraryFolder *folder, Boolean useCache)
 {
@@ -629,8 +544,6 @@ static Boolean ScanOnce(const LibraryFolder *folder, Boolean useCache)
     gPoolH = NewHandle(0);
     if (gSongsH == nil || gPoolH == nil)
         return false;
-    if (!gExact)
-        ReserveRoom(folder);
     return ScanSongs(folder) && ScanPlaylists(folder);
 }
 
@@ -645,32 +558,18 @@ static Boolean ScanWith(const LibraryFolder *folder, Boolean useCache)
     gNoticed = false;
     useCache = useCache && LibCache_Load(folder);
     gStatsH = NewHandle(0);
-    gExact = gLibraryTestExact;
     ok = ScanOnce(folder, useCache);
-    if (!ok && !gExact)
-    {
-        /* N11-33: short of memory, perhaps from the room reserved: again
-           growing each list by just what it needs. */
-        gExact = true;
-        ok = ScanOnce(folder, useCache);
-    }
     if (!ok && useCache)
     {
         LibCache_Unload();
         ok = ScanOnce(folder, false);
         useCache = false;
     }
-    gExact = false;
 
     /* From here on the handles never grow, so lock them high in the heap
-       and let the UI keep pointers into the pool: trimmed first to what the
-       scan used (N11-33; shrinking never moves them). */
+       and let the UI keep pointers into the pool. */
     if (ok)
     {
-        SetHandleSize(gSongsH, (long)gSongCount * sizeof(SongRec));
-        gSongRoom = gSongCount;
-        SetHandleSize(gPoolH, gPoolSize);
-        gPoolRoom = gPoolSize;
         MoveHHi(gSongsH);
         HLock(gSongsH);
         MoveHHi(gPoolH);

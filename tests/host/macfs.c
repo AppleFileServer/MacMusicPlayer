@@ -465,10 +465,6 @@ OSErr PBGetCatInfoSync(CInfoPBRec *pb)
         pb->dirInfo.ioDrMdDat = gNodes[n].modDate;
         pb->dirInfo.ioDrDirID = gNodes[n].id;
         pb->dirInfo.ioDrParID = gNodes[n].parent;
-        pb->dirInfo.ioDrNmFls = 0;          /* its valence: files and folders */
-        for (dir = 0; dir < gNodeCount; dir++)
-            if (gNodes[dir].used && gNodes[dir].parent == gNodes[n].id && dir != n)
-                pb->dirInfo.ioDrNmFls++;
     }
     else
     {

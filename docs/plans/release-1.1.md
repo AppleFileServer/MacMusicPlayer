@@ -514,25 +514,17 @@ What they show:
   exact match (`EqualString`, as now: the groups don't change). Host
   tests: the same groups and order as the present code, on the test
   libraries and on names that differ only in case or accents.
-- **N11-33. The scan's extra 7 s (from the timings, 2026-10-12).** Found
-  by the second timing run (below): growing the lists a song at a time
-  in a nearly full heap. The fix (agreed 2026-10-12):
-  - **`MaxApplZone` at start-up,** after the stack is reserved: the heap
-    grown to its full size at once, as Apple advises, instead of a piece
-    at a time while the library is read (the Plus showed 5.9K free at the
-    first read, 39-53K at later ones).
-  - **The lists sized once at the start of a scan:** the songs and their
-    file details for the folder's file count, the string pool for the
-    cache's text (or an allowance per file without a cache); when one
-    still fills, it grows by a block of songs or bytes, not by one. The
-    songs and the pool are trimmed to their exact size before they're
-    locked (shrinking never moves anything).
-  - **If memory is short,** each list grows by exactly what's needed, as
-    1.0 does, so any library 1.0 can read, 1.1 still can.
+- **N11-33. The scan's extra 7 s: tried, and reverted (the owner,
+  2026-10-12).** The second timing run (below) found it: growing the
+  lists a song at a time in a nearly full heap. A fix was built
+  (`MaxApplZone` at start-up, the lists sized once per scan; commit
+  `ea550e8`), but on the Plus it made little difference the owner could
+  see. **Reverted,** for simplicity: N11-32's start, about 13 s with the
+  optimised build, is acceptable, and Part D's other work comes first.
 - **A second timing build** on the Plus after N11-32, with the scan
   broken down, its lines long enough to keep every figure (run
-  2026-10-12, the optimised copy; below). A third, after N11-33, decides
-  N11-29 and gives N11-31 its times.
+  2026-10-12, the optimised copy; below). Its figures give N11-31 its
+  times; a third run (with N11-33) is not needed now that it's reverted.
 
 **The second timing run (Optimised, 2026-10-12),** in seconds:
 

@@ -671,7 +671,6 @@ int main(void)
     Rect windowRect;
 
     ReserveStack();                 /* first: before anything is allocated */
-    MaxApplZone();                  /* 1.1 (N11-33): the whole heap at once */
     InitToolbox();
     SetUpMenus();
     qd.randSeed = TickCount();      /* for Shuffle Songs */
