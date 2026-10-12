@@ -5,17 +5,17 @@ minutes to read; about an hour to be fixing bugs.
 
 ## What this is
 
-MacMusic 1.0 (October 2026): a 2004 iPod as a Macintosh Plus program,
+MacMusic 1.1 (October 2026; 1.0 a week before): a 2004 iPod as a
+Macintosh Plus program,
 in C, built on this Mac with the **Retro68** cross-compiler and tested
 in the **Mini vMac** emulator and on the real Plus (BlueSCSI). Everything
 about it is in this folder; `README.md` is the overview.
 
-**Work in progress (2026-10-11): MacMusic 1.1** — faster start-up and
-printing. Everything is committed; it waits for the owner's printing
-check on the real Plus, then the version number, the release and the
-tag. Where it stands, and what's left, in order:
-`docs/plans/release-1.1.md`, "Where it stands". Everything outside
-MacMusic (the utilities, the manuals, the issues) is in
+**The latest release is 1.1** (2026-10-13): faster start-up, printing,
+importing several songs. It was released without the full manual
+checklist, so printing on paper is still to be tried
+(`docs/testing/runs/1.1.md`). Everything outside MacMusic (the
+utilities, the manuals, the issues) is in
 `~/MacPlusProjects/LOOSE-ENDS.md`.
 
 ## 1. Check the tools are still here
@@ -68,13 +68,13 @@ Mini vMac to 1x speed (Control-S, then 1) for realistic timing.
 
 ## 5. Release the fixes
 
-1. Set the version in `CMakeLists.txt` (`project(MacMusic VERSION 1.0.1)`
+1. Set the version in `CMakeLists.txt` (`project(MacMusic VERSION 1.1.1)`
    for fixes; see `docs/plans/release-1.0.md`, Part E).
 2. `tools/make-release.sh --scratch ~/MacPlusProjects/library-work`
    makes a **candidate** in `~/MacPlusProjects/releases/`.
 3. Run `docs/testing/manual-checklist.md` on it (copy it to
    `docs/testing/runs/<version>.md`), in Mini vMac and on the Plus.
-4. Tag it (`git tag -a v1.0.1`) and run `tools/make-release.sh` again
+4. Tag it (`git tag -a v1.1.1`) and run `tools/make-release.sh` again
    for the final files.
 
 ## Where to look

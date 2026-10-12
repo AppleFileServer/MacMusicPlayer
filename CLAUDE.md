@@ -5,7 +5,8 @@
 MacMusic (formerly MacMusicPlayer; the folder keeps the old name) is a
 classic Macintosh 68K application for the Macintosh Plus under System
 6.0.7: a faithful 4th-generation monochrome iPod, with its own music
-library and sound. Version 1.0 was released on 2026-10-08.
+library and sound. Version 1.0 was released on 2026-10-08, and 1.1
+(faster start-up, printing, importing several songs) on 2026-10-13.
 
 It is built with the Retro68 toolchain and tested in Mini vMac (at 1x)
 and on a real Mac Plus. See `README.md` for the layout and tools.
@@ -84,7 +85,7 @@ Changes follow `docs/plans/release-1.0.md`, Part E:
   2.0 for a change needing a library conversion;
 - every change runs the tests, updates `CHANGELOG.md`, and updates the
   issues log if it closes an issue;
-- each release is tagged (`v1.0`, ...).
+- each release is tagged (`v1.0`, `v1.1`, ...).
 
 ## Documents
 
@@ -94,8 +95,8 @@ Changes follow `docs/plans/release-1.0.md`, Part E:
   `~/MacPlusProjects/environment-1.0/` (`tools/make-environment-archive.sh`)
   restores it. Remake the archive after changing the environment.
 - `docs/decisions.md`: the decision codes and where they are decided.
-- `docs/outstanding-issues.md`: open issues, known issues in 1.0,
+- `docs/outstanding-issues.md`: open issues, known issues in 1.1,
   limitations, testing notes and the roadmap.
-- `docs/plans/`: the plans from Stage 6 on, and for 1.0.
+- `docs/plans/`: the plans from Stage 6 on, and for 1.0 and 1.1.
 - `docs/user-guide.md`: the user guide (`tools/make-readme.py` makes the
   TeachText Read Me from it).

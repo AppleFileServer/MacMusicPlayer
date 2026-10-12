@@ -218,9 +218,10 @@ moment repeat, then a pause, before the music carries on by itself.
   runs at 22,254 samples a second. The times shown are right.
 - **The quietest volume isn't silent.** It's the Plus's lowest
   hardware level.
-- **Reading every song takes a little while:** about 12 seconds for
-  500 songs, the first time and at Rescan Library; later starts, about
-  7 seconds.
+- **Starting takes a little while:** on a Macintosh Plus, about 13
+  seconds for a library of 300 songs, and about 13 seconds again after
+  importing. The first start with a library, and Rescan Library, read
+  every song file and take longer.
 - **The Mac's clock:** if the Plus forgets the time when it's switched
   off, its clock battery is flat. MacMusic copes, but after a song file
   has been changed outside MacMusic, choose Rescan Library.

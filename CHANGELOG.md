@@ -6,7 +6,10 @@ features that keep reading 1.0's libraries, 2.0 for a change needing a
 library conversion. The decision codes in brackets are explained in
 `docs/decisions.md`.
 
-## 1.1 (in progress; docs/plans/release-1.1.md)
+## 1.1 (2026-10-13; docs/plans/release-1.1.md)
+
+Released by the owner's choice without the full manual checklist
+(`docs/testing/runs/1.1.md`): printing hasn't yet been tried on paper.
 
 - **The Create New Library prompt (N11-1):** the Save dialog's prompt is
   now "New library in:", which fits; 1.0's "Create new MacMusic Library
@@ -16,13 +19,14 @@ library conversion. The decision codes in brackets are explained in
   composer found by a binary search, instead of 1.0's insertion sort and
   search from the start. The same lists in the same order (a new host
   test, `test_sorting`, checks them against 1.0's way); a full read of
-  500 songs at Plus speed takes 12 s instead of 49 s. Each song's group
+  500 songs in Mini vMac takes 12 s instead of 49 s. Each song's group
   is noted as the lists are built, with no string comparisons beyond
   1.0's.
 - **Importing several songs (N11-25, N11-26):** after each song, Import
   Song asks "Import another song?": Import Another brings the Open dialog
-  back for the next, Done finishes; cancelling a song's window skips it. The library is read once, at the end of the
-  run, instead of after every song (on the Plus, about 13 s each time).
+  back for the next, Done finishes; cancelling a song's window skips it.
+  The library is read once, at the end of the run, instead of after
+  every song (on the Plus, about 13 s each time).
   The duplicate warning and the 500-song limit count the songs imported
   earlier in the run (`importrun.c`, host-tested).
 - **An optimised build (N11-30):** MacMusic is compiled with -O2 (CMake
@@ -50,13 +54,19 @@ library conversion. The decision codes in brackets are explained in
   ignored, and if memory is short the scan is done without it. Before
   Edit Song or a rating changes a song file, its entry is marked stale,
   so a Plus whose clock has stopped can't be misled. Rescan Library
-  reads every file. Starting with 500 songs at Plus speed: 7.5 s. A new
+  reads every file. Starting with 500 songs in Mini vMac: 7.5 s. A new
   host test, `test_cache`.
+- **Start-up times on the real Plus (N11-31):** with the cache, N11-30
+  and N11-32, about 13 s from double-clicking to ready with a 316-song
+  library (1.1's first test build took 32 s). The times above
+  marked "in Mini vMac" were measured there before the Plus showed it
+  can be 2-20 times off.
 - **"Loading the library…" (N11-8, PROVISIONAL):** shown, with the watch
   cursor, when songs have to be read from their files: under the Apple
   logo when MacMusic starts or changes library, and in a band across the
   foot of the screen at Rescan Library. Not shown when every song comes
-  from the cache, nor for Import and Export.
+  from the cache, nor for Import and Export (since N11-29, shown at the
+  start of every read).
 - **Printing, the page layout (C1; N11-11 to N11-14):** `printlayout.c`
   lays out the Songs, Albums (with each album's songs, if chosen) and
   Artists (with each artist's albums) lists: columns, text cut to fit

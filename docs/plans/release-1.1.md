@@ -519,7 +519,7 @@ What they show:
   2026-10-12; built 2026-10-13).** MacMusic 1.1 is built with `-O2` (about 30% faster on
   the Plus), after a full run of the tests and the manual checklist (it
   changes every timing the tests were made with).
-- **N11-31.** Part B's times in the documents (the User's Guide, the Read
+- **N11-31 (done 2026-10-13).** Part B's times in the documents (the User's Guide, the Read
   Me, outstanding-issues.md) replaced with the real Plus's: about 13 s
   from double-clicking to ready for about 300 songs, optimised (the
   second timing run). The User's Guide also explains importing several
@@ -622,6 +622,15 @@ reviews all the outstanding issues after 1.1.
 
 Each step: build, both test scripts, your check, then commit only when
 you say.
+
+## Released (2026-10-13)
+
+**Released as 1.1, tag `v1.1`,** by the owner's choice straight after
+Part D, without the owner's printing check or the rest of the manual
+checklist below (`docs/testing/runs/1.1.md`). Part D's commits:
+`bcca2ca` (N11-32), `98ec906` (N11-28, N11-29), `71cb6bf` (N11-30),
+`52e810f` (N11-25, N11-26), and N11-31 with the release. What's below
+is kept as it was.
 
 ## Where it stands (2026-10-11, put aside for a few days)
 

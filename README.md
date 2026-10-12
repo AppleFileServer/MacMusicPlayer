@@ -8,7 +8,7 @@ sound, gaplessly, while you use other programs.
 
 It is classic 68000 Macintosh software, written in C for System 6.0.7,
 built with the Retro68 cross-compiler and tested in Mini vMac and on a
-real Mac Plus. Version 1.0 (2026).
+real Mac Plus. Version 1.1 (2026).
 
 - **For using MacMusic,** see the [user guide](docs/user-guide.md).
 - **For what changed,** see the [changelog](CHANGELOG.md).
@@ -102,8 +102,8 @@ separate, and the normal build contains none of it.
 - [`docs/user-guide.md`](docs/user-guide.md): how to use MacMusic.
 - [`docs/decisions.md`](docs/decisions.md): every decision code in the
   code (D9, N4, G1...), what it decided and where.
-- [`docs/plans/`](docs/plans/): the plans for Stage 6 onwards, and for
-  1.0 (`release-1.0.md`), with their reasoning.
+- [`docs/plans/`](docs/plans/): the plans for Stage 6 onwards, for 1.0
+  (`release-1.0.md`) and 1.1 (`release-1.1.md`), with their reasoning.
 - [`docs/outstanding-issues.md`](docs/outstanding-issues.md): known
   issues, accepted limitations, testing notes and the roadmap.
 - [`docs/issues-found.md`](docs/issues-found.md): problems found while
@@ -113,8 +113,9 @@ separate, and the normal build contains none of it.
 
 ## Status and legal
 
-MacMusic 1.0 is complete. Changes after 1.0 follow the steps in
-`docs/plans/release-1.0.md` (Part E): fixes as 1.0.x, features as 1.x.
+MacMusic 1.1 is the latest release (1.0 was the first). Changes follow
+the steps in `docs/plans/release-1.0.md` (Part E): fixes as 1.1.x,
+features as 1.x.
 
 MacMusic is an independent project, not affiliated with, endorsed by,
 sponsored by or produced by Apple Inc. Apple, Macintosh, Mac and iPod

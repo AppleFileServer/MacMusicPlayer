@@ -8,7 +8,20 @@ complete; host tests, smoke test and manual checklist in place. Problems
 found while using MacMusic go in `docs/issues-found.md` first, and are
 moved here when they are looked into.
 
-## Known issues in 1.0
+Status at 1.1 (2026-10-13): Parts 0, A-D of `docs/plans/release-1.1.md`
+done; released without the full manual checklist (the owner's choice;
+`docs/testing/runs/1.1.md`).
+
+## Known issues in 1.1
+
+- **Printing hasn't been tried on paper** (Part C): checked in Mini vMac
+  only, which has no printer. The page's fonts, columns, header and
+  footer are PROVISIONAL (N11-12, N11-13).
+- The time of a first start, or Rescan Library, on the real Plus isn't
+  recorded (every song file read); later starts, about 13 s for 316
+  songs.
+
+## Known issues in 1.0 (and still in 1.1)
 
 What a user may notice, in short (details below; also in the user
 guide):
@@ -17,8 +30,9 @@ guide):
   Plus's lowest hardware level, 0, still sounds).
 - A large library is slow to scan: about 1.5-2 minutes for 500 songs at
   Plus speed (H1; "Fast scanning" below). **Fixed in 1.1:** a faster
-  sort and the library's cache; 500 songs start in about 7.5 s (12 s the
-  first time, or at Rescan Library).
+  sort, faster grouping, the library's cache and an optimised build; on
+  the real Plus a 316-song library starts in about 13 s (N11-31; the
+  first start, or Rescan Library, longer).
 - A program that keeps the Mac completely busy for over 6 s can make the
   sound repeat a moment and pause (accepted limitation below).
 - Sound relies on undocumented System 6 Sound Manager state, checked at

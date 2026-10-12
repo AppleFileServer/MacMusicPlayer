@@ -13,6 +13,7 @@
 #include <Menus.h>
 
 #include "smoke.h"
+#include "version.h"
 #include "fileopen.h"
 #include "songfile.h"
 #include "library.h"
@@ -410,7 +411,9 @@ void Smoke_Run(void)
     Choose("Settings");
     Check(Choose("About") && Here()->kind == kScreenAbout, "About");
     Check(Same(UIList_ItemValue(Here(), 0), "7 of 500"), "About: 7 of 500 songs");
-    Check(Same(UIList_ItemValue(Here(), 2), "1.0"), "About: version 1.0");
+    Check(EqualString(UIList_ItemValue(Here(), 2), (ConstStringPtr)kMacMusicVersionP,
+                      true, true),
+          "About: the version, as CMakeLists.txt sets it");
     Send(kEvtMenu);
     Choose("Shuffle");
     Check(Same(UIList_ItemValue(Here(), RowNamed("Shuffle")), "Songs"), "Shuffle: Songs");
