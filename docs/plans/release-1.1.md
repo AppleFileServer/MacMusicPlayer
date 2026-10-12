@@ -515,12 +515,40 @@ What they show:
   tests: the same groups and order as the present code, on the test
   libraries and on names that differ only in case or accents.
 - **N11-33. The scan's extra 7 s (from the timings, 2026-10-12).** Found
-  first (a host count of the work per file, then one timing run on the
-  Plus if needed), then fixed in the same way if it's a search that can
-  be avoided; brought back to the owner if the fix is larger.
-- **A second timing build** on the Plus after N11-30, N11-32 and N11-33,
-  its lines long enough to keep every figure; it decides N11-29 and gives
-  N11-31 its times.
+  by the second timing run (below): growing the lists a song at a time
+  in a nearly full heap. The fix (agreed 2026-10-12):
+  - **`MaxApplZone` at start-up,** after the stack is reserved: the heap
+    grown to its full size at once, as Apple advises, instead of a piece
+    at a time while the library is read (the Plus showed 5.9K free at the
+    first read, 39-53K at later ones).
+  - **The lists sized once at the start of a scan:** the songs and their
+    file details for the folder's file count, the string pool for the
+    cache's text (or an allowance per file without a cache); when one
+    still fills, it grows by a block of songs or bytes, not by one. The
+    songs and the pool are trimmed to their exact size before they're
+    locked (shrinking never moves anything).
+  - **If memory is short,** each list grows by exactly what's needed, as
+    1.0 does, so any library 1.0 can read, 1.1 still can.
+- **A second timing build** on the Plus after N11-32, with the scan
+  broken down, its lines long enough to keep every figure (run
+  2026-10-12, the optimised copy; below). A third, after N11-33, decides
+  N11-29 and gives N11-31 its times.
+
+**The second timing run (Optimised, 2026-10-12),** in seconds:
+
+| | First run | With N11-32 |
+|---|---|---|
+| Reading the cache | 0.5 | 0.5 |
+| The scan | 6.6 | 6.6 |
+| Grouping | 15.1 | **2.5** |
+| The sorts | 0.9 | 0.9 |
+| The read | 23 | **10.5** |
+
+From launch to ready: 14.4 s (the owner: the import took about 12 s,
+against 28 s). The scan, at the start: catalog calls 1.6 s; cache
+lookups 0.65 s (the next entry every time); the duplicate check 0.4 s;
+adding the strings 1.4 s; **growing the song lists 2.4 s, the song list
+moving 155 times with 5.9K free.**
 
 ## Not in 1.1 (agreed)
 

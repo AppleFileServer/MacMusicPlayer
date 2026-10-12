@@ -235,6 +235,7 @@ The click wheel (W: Stage 5c-1)
 | N11-23 | A merge sort by title, and each song's group noted as the lists are built | `library.c` |
 | N11-24 | Printing is a code segment of its own, loaded only to print | `segments.map`, `main.c` |
 | N11-32 | Each name's place in the group lists found by binary search, then checked for an identical name among those comparing equal | `library.c` |
+| N11-33 | `MaxApplZone` at start-up; a scan sizes its lists once from the folder's count and the cache, growing by blocks beyond; short of memory, done again growing exactly | `main.c`, `library.c`, `libcache.c` |
 | — | PROVISIONAL: audiobooks print after the songs under their own heading; an album of several artists shows "Various Artists" | `printlayout.c` |
 
 ## *MacMusic Utilities*, the companion manual (`manual-utilities.md`)

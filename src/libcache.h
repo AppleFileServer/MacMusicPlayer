@@ -29,6 +29,7 @@ void LibCache_Unload(void);
 
 /* The loaded cache's song count (0 if none is loaded). */
 short LibCache_Count(void);
+long LibCache_TextSize(void);
 
 /* The entry for this file, if its name, date and length all match: fills
    in what a scan reads (ID, flags, track, seconds, audio offset and

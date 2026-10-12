@@ -195,6 +195,13 @@ short LibCache_Count(void)
     return gCacheH != nil ? gCacheCount : 0;
 }
 
+/* 1.1 (N11-33): the bytes of the entries' strings, the file's name and the
+   five tags: what a scan from the cache adds to the library's string pool. */
+long LibCache_TextSize(void)
+{
+    return gCacheH != nil ? gCacheSize - kHeaderSize - (long)gCacheCount * kFixedSize : 0;
+}
+
 static Boolean Matches(const unsigned char *e, ConstStringPtr name,
                        unsigned long modDate, long length)
 {
