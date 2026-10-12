@@ -407,6 +407,75 @@ dialogs, no reading or writing of the print record's private fields.
 Printing from the Now Playing screen, cover pages, PostScript tricks,
 and choosing fonts or columns.
 
+## Part D: importing several songs, and the real Plus's start-up (added 2026-10-12)
+
+From the owner's check of the 1.1 test build on the real Plus (the issues
+log, 2026-10-12): a plain start takes 32 s with the 307-song Scratch
+library; an import takes 28 s, because every import ends with a full
+library read; and MacMusic's window stays behind the Finder's until the
+library has loaded. Part B's timings (12 s, then 7.5 s for 500 songs)
+came from Mini vMac, which the Pokémon project has shown to be 2 to 20
+times off the Plus. **Added to 1.1 by the owner, as 1.1 is still in
+pre-release.**
+
+### First: where the time goes (D0)
+
+A throwaway timing build (`releases/MacMusic-1.1-timing/`, two copies:
+as shipped, and compiled with optimisation, M2) writes the time of each
+part of a library read to a "Timings" file, on the real Plus: listing
+the folder, the cache, the scan, grouping, the title sort, the ID sort,
+writing the cache. Its figures decide N11-27 to N11-30.
+
+### Decisions
+
+- **N11-25. Importing one song after another (agreed, the owner's
+  option 1).** File > Import Song… works as now for the first song; after
+  its details window, **the Open dialog comes back for the next song**.
+  Each song is chosen by the owner, one at a time (no whole-folder
+  import: the owner wants control of exactly which songs). Cancel in the
+  Open dialog ends the run.
+  - **Cancel in a song's details window skips that song** and brings the
+    Open dialog back for the next; only Cancel in the Open dialog ends the
+    run (agreed, 2026-10-12).
+  - Each song is moved or copied into the library at once, as now, so a
+    song already imported stays imported if a later one fails or the run
+    is cancelled.
+  - The music pauses for the whole run (as A5), and carries on after.
+- **N11-26. One library read at the end of the run,** not one per song:
+  only if anything was imported (and see N11-27).
+- **Two things a run must get right** (found in the code, 2026-10-12):
+  - **Duplicates:** the "already in the library" check looks in the
+    library in memory, which won't hold songs imported earlier in the
+    same run; the run keeps its own list of the songs it has imported
+    (audio length and fingerprint) and checks that too.
+  - **The 500-song limit:** counted with the songs already imported in
+    the run, so the run stops, with the usual message, when the library
+    is full.
+  - (The songs' IDs are already safe: each import records the next ID in
+    the library's marker file, and the next import reads it.)
+- **N11-27. (Depending on the timings, the owner's option 3.)** Instead of
+  a library read at the end, the new songs added straight to the library
+  in memory, then sorted and grouped again, as Edit Song already updates
+  a song in place; the cache updated to match. Worth it if listing the
+  folder and the cache are most of the read; not if the sorting and
+  grouping are (it would cost nearly as much again).
+- **N11-28. MacMusic comes to the front first (agreed: a fix).** Under
+  MultiFinder a program comes fully to the front only once it calls the
+  event routines; MacMusic reads its library before its first. It will
+  call `EventAvail` a few times at start-up, before the library is read
+  (the usual remedy of the time), so its window and logo are in front
+  while it loads.
+- **N11-29. "Loading the library…" (depending on the timings).** Shown
+  from the start of any read expected to take more than a few seconds
+  (a plain start included), not only once a song file is read, which on
+  the Plus came late in the wait.
+- **N11-30. Compiler optimisation (M2; depending on the timings).** If the
+  optimised timing build is markedly faster on the Plus, MacMusic 1.1 is
+  built optimised, after a full run of the tests and the manual
+  checklist (it changes every timing the tests were made with).
+- **N11-31.** Part B's times in the documents (the User's Guide, the Read
+  Me, outstanding-issues.md) replaced with the real Plus's.
+
 ## Not in 1.1 (agreed)
 
 No other issue is fixed in 1.1: I4 (0.9% fast), I6 (opening a library
@@ -481,6 +550,12 @@ Done and committed, each checked by the owner in Mini vMac:
 | C1, the print layout | `84366ec` |
 | C2, printing (untested on paper) | `2b60185` |
 | The documentation, and the File menu fix | `2d1694f` |
+
+Still to do, in order (Part D added 2026-10-12, before these):
+
+0. **Part D:** the owner runs the timing build on the Plus; N11-27 to
+   N11-30 decided from it; then Part D built, tested in Mini vMac, and
+   checked on the Plus with a new test image.
 
 Still to do, in order:
 
