@@ -179,35 +179,29 @@ static void SortSongsByTrack(short *songs, short count)
     }
 }
 
-/* Inserts a pool string into a sorted offset list, unless an identical
-   name is already there. Returns false if the list is full. */
-static Boolean InsertName(long *names, short *count, short max, long offset,
-                          long *group)
+/* 1.1 (N11-32): finds a name in a sorted offset list by binary search.
+   Returns the index of the identical name, or -1 if there's none; *at is
+   where the name would go (after any that compare equal to it, as 1.0's
+   InsertName put it). On the Plus, 1.0's walk along the whole list, a ROM
+   call for each name, was two-thirds of a start-up's 33 s. */
+static short FindPlace(const long *names, short count, ConstStringPtr name, short *at)
 {
-    ConstStringPtr name = PoolString(offset);
-    short i, j;
+    short low = 0, high = count, mid, i;
 
-    /* 1.1 (N11-23): *group is the name the song is grouped under (the
-       one already there, or this one), or -1 if the list is full. */
-    *group = -1;
-    for (i = 0; i < *count; i++)
+    while (low < high)
+    {
+        mid = (short)((low + high) >> 1);
+        if (CompareNames(PoolString(names[mid]), name) <= 0)
+            low = mid + 1;
+        else
+            high = mid;
+    }
+    *at = low;
+    /* An identical name compares equal, so it's among those just before. */
+    for (i = low - 1; i >= 0 && CompareNames(PoolString(names[i]), name) == 0; i--)
         if (EqualString(PoolString(names[i]), name, true, true))
-        {
-            *group = names[i];
-            return true;
-        }
-
-    if (*count >= max)
-        return false;
-    *group = offset;
-
-    for (i = 0; i < *count && CompareNames(PoolString(names[i]), name) <= 0; i++)
-        ;
-    for (j = *count; j > i; j--)
-        names[j] = names[j - 1];
-    names[i] = offset;
-    (*count)++;
-    return true;
+            return i;
+    return -1;
 }
 
 static short FindNameString(const NameSet *set, ConstStringPtr name)
@@ -424,37 +418,50 @@ static short *GroupOf(SongRec *song, short kind)
          : kind == kGenre ? &song->genre : &song->composer;
 }
 
-/* 1.1 (N11-23): one kind of group. Each song's group is noted as the list
-   is built (InsertName says which name it went under), then numbered by
-   that name's place in the finished list: the group 1.0 found by
-   searching the list for each song, without comparing names again (each
-   comparison is a call to the ROM, and 1.0's search made thousands). */
-static long gGroupName[kMaxSongs];
+/* 1.1 (N11-23, N11-32): one kind of group. Each song notes the song whose
+   name it's grouped under (itself, if its name is new) as the list is
+   built; once the list is finished, those songs take their names' places
+   and the others copy them, without comparing names again (each
+   comparison is a call to the ROM). */
+static short gNameSong[kMaxGroups];     /* the song each name came from */
+static short gUnder[kMaxSongs];         /* the song whose name each is under */
 
 static void GroupSongs(NameSet *set, short kind)
 {
-    short i, j;
+    short i, j, k, at;
     SongRec *song;
+    long name;
 
     for (i = 0; i < gSongCount; i++)
     {
         song = &Songs()[i];
-        gGroupName[i] = -1;
-        if (!(song->flags & kSongFlagAudiobook) && PoolString(*GroupField(song, kind))[0] != 0)
-            InsertName(set->names, &set->count, kMaxGroups, *GroupField(song, kind),
-                       &gGroupName[i]);
+        gUnder[i] = -1;
+        name = *GroupField(song, kind);
+        if ((song->flags & kSongFlagAudiobook) || PoolString(name)[0] == 0)
+            continue;
+        k = FindPlace(set->names, set->count, PoolString(name), &at);
+        if (k >= 0)
+            gUnder[i] = gNameSong[k];
+        else if (set->count < kMaxGroups)       /* D20: a full table leaves it out */
+        {
+            for (j = set->count; j > at; j--)
+            {
+                set->names[j] = set->names[j - 1];
+                gNameSong[j] = gNameSong[j - 1];
+            }
+            set->names[at] = name;
+            gNameSong[at] = i;
+            set->count++;
+            gUnder[i] = i;
+        }
     }
     for (i = 0; i < gSongCount; i++)
-    {
-        song = &Songs()[i];
-        *GroupOf(song, kind) = kNone;
-        for (j = 0; gGroupName[i] >= 0 && j < set->count; j++)
-            if (set->names[j] == gGroupName[i])
-            {
-                *GroupOf(song, kind) = j;
-                break;
-            }
-    }
+        *GroupOf(&Songs()[i], kind) = kNone;
+    for (j = 0; j < set->count; j++)
+        *GroupOf(&Songs()[gNameSong[j]], kind) = j;
+    for (i = 0; i < gSongCount; i++)
+        if (gUnder[i] >= 0 && gUnder[i] != i)
+            *GroupOf(&Songs()[i], kind) = *GroupOf(&Songs()[gUnder[i]], kind);
 }
 
 /* Groups songs into artists, albums, genres and composers. Runs once the

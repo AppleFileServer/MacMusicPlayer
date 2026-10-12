@@ -7,6 +7,8 @@
    for libraries full of ties: names equal but for capitals, a leading
    "The", accents, and repeated titles. */
 
+#include <ctype.h>
+#include <stdio.h>
 #include <string.h>
 
 #include "hosttest.h"
@@ -127,6 +129,27 @@ static const char *kComposers[] = {
 
 #define N(a) ((int)(sizeof(a) / sizeof((a)[0])))
 
+/* 1.1 (N11-32): with gManyNames, each song's names are made from a number
+   of up to 400, in random case, some with "The " or an accent: more names
+   than a group table holds (kMaxGroups), so the full table is tested, and
+   long lists for the binary search. */
+static Boolean gManyNames;
+static char gMade[5][kMaxSongs + 1][32];
+
+static const char *ManyName(int kind, short song)
+{
+    char *out = gMade[kind][song];
+    const char *stem = kind == 0 ? "Artist" : kind == 1 ? "album" : kind == 2 ? "Genre" : "Composer";
+    int n = Pick(400), c;
+
+    snprintf(out, sizeof gMade[0][0], "%s%s %d%s", Pick(4) == 0 ? "The " : "", stem, n,
+             Pick(6) == 0 ? " Caf\x8E" : Pick(6) == 0 ? " Cafe" : "");
+    if (Pick(3) == 0)
+        for (c = 0; out[c]; c++)
+            out[c] = (char)toupper((unsigned char)out[c]);
+    return Pick(30) == 0 ? "" : out;
+}
+
 static void MakeLibrary(unsigned long seed, short count)
 {
     short i;
@@ -143,6 +166,13 @@ static void MakeLibrary(unsigned long seed, short count)
         s.album = kAlbums[Pick(N(kAlbums))];
         s.genre = kGenres[Pick(N(kGenres))];
         s.composer = kComposers[Pick(N(kComposers))];
+        if (gManyNames)
+        {
+            s.artist = ManyName(0, i);
+            s.album = ManyName(1, i);
+            s.genre = ManyName(2, i);
+            s.composer = ManyName(3, i);
+        }
         s.track = (short)Pick(12);
         s.flags = Pick(25) == 0 ? kSongFlagAudiobook : 0;
         s.samples = 16;
@@ -289,5 +319,9 @@ int main(void)
     CheckLibrary("1.0's order: 500 songs, many ties", 10, kMaxSongs);
     CheckLibrary("1.0's order: 500 songs, another mix", 11, kMaxSongs);
     CheckLibrary("1.0's order: 499 songs", 12, kMaxSongs - 1);
+    gManyNames = true;
+    CheckLibrary("1.0's groups: 500 songs, more names than fit", 13, kMaxSongs);
+    CheckLibrary("1.0's groups: 200 songs, many names", 14, 200);
+    gManyNames = false;
     return TestsDone("test_sorting");
 }

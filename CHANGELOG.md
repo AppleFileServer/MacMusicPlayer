@@ -19,6 +19,13 @@ library conversion. The decision codes in brackets are explained in
   500 songs at Plus speed takes 12 s instead of 49 s. Each song's group
   is noted as the lists are built, with no string comparisons beyond
   1.0's.
+- **Grouping by binary search (N11-32):** building the lists of
+  artists, albums, genres and composers compared each song's name with
+  every name already listed, a ROM call each; on the real Plus that was
+  22 s of a 33 s start with 316 songs. Each name's place is now found by
+  binary search in the sorted list. The same groups in the same order
+  (`test_sorting` checks them against 1.0's, now with libraries of more
+  names than a list holds).
 - **The library's cache (N11-2 to N11-10):** an invisible folder
   "MacMusic Cache" in the library holds "Song Details": each song's file
   name, date and length, and what the scan reads from it. A file that
