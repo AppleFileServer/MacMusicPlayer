@@ -339,7 +339,7 @@ int main(void)
     }
     CHECK_EQ(TestFS_OpenFiles(), 0);
 
-    Test("the loading notice: once when files are read, never from the cache");
+    Test("the loading notice: once at the start of every scan (N11-29)");
     Library(20);
     Library_SetReadingNotice(Notice);
     gNotices = 0;
@@ -347,15 +347,22 @@ int main(void)
     CHECK_EQ(gNotices, 1);
     gNotices = 0;
     CHECK(Library_Scan(&gF));                   /* all from the cache */
-    CHECK_EQ(gNotices, 0);
+    CHECK_EQ(gNotices, 1);
+    gNotices = 0;
     ChangeOutside(7, "Changed");
     CHECK(Library_Scan(&gF));                   /* one file read */
     CHECK_EQ(gNotices, 1);
     gNotices = 0;
     TestFS_WriteFile(gF.folderID, "Notes", 'TEXT', 'ttxt', "hello", 5);
     CHECK(Library_Scan(&gF));                   /* a file that isn't a song */
-    CHECK_EQ(gNotices, 0);
+    CHECK_EQ(gNotices, 1);
+    gNotices = 0;
     CHECK(Library_ScanAll(&gF));                /* Rescan Library */
+    CHECK_EQ(gNotices, 1);
+    gNotices = 0;
+    TestMem_SetLimit(1000);                     /* a scan that fails and retries */
+    CHECK(!Library_Scan(&gF));
+    TestMem_SetLimit(0);
     CHECK_EQ(gNotices, 1);
     Library_SetReadingNotice(nil);
     gNotices = 0;

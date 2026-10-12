@@ -373,8 +373,8 @@ static void UpdateFileMenu(void)
    keeps the logo up for at least kLogoTicks, discards clicks and keys
    made meanwhile, and shows the main menu. Rescanning invalidates list
    positions, so every restart returns to the main menu (D26). */
-/* 1.1 (N11-8): the scan's notice that it has to read songs from their
-   files: "Loading the library..." under the logo (a start or a change of
+/* 1.1 (N11-8, N11-29): the scan's notice, as it begins: "Loading the
+   library..." under the logo (a start, an import, or a change of
    library), or across the foot of the screen (Rescan Library). */
 static void ShowLoading(Boolean withLogo)
 {
@@ -705,6 +705,17 @@ int main(void)
         true,
         0
     );
+
+    /* 1.1 (N11-28): under MultiFinder a program's windows come in front of
+       the Finder's only once it asks for events, and the library is read
+       before the event loop. A few calls to EventAvail first, as Apple
+       advised for a program with work to do at start-up. */
+    {
+        short i;
+
+        for (i = 0; i < 3; i++)
+            EventAvail(everyEvent, &event);
+    }
 
     /* Start-up is an iPod start: the logo is shown while the library is
        found (asking for one if needed) and scanned. */

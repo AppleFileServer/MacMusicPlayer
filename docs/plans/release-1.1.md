@@ -472,8 +472,19 @@ What they show:
     song already imported stays imported if a later one fails or the run
     is cancelled.
   - The music pauses for the whole run (as A5), and carries on after.
+  - **The rest of a run (agreed, 2026-10-13):** "Don't Import" in the
+    duplicate alert and Cancel in the other-disk alert skip the song, as
+    Cancel in its details window does. **Move or Copy is asked for each
+    song,** as in 1.0. A song that can't be read gets its message, then
+    the Open dialog comes back. **"Disk full" and "library full" end the
+    run** (every later song would fail the same way).
+  - **The Open dialog keeps System 6's Cancel** (agreed, 2026-10-13): a
+    "Done" button would need our own copy of the standard dialog. The
+    User's Guide says the songs already imported stay.
+  - The run's list of what it has imported is a small portable module,
+    host-tested.
 - **N11-26. One library read at the end of the run,** not one per song:
-  only if anything was imported (and see N11-27).
+  only if anything was imported.
 - **Two things a run must get right** (found in the code, 2026-10-12):
   - **Duplicates:** the "already in the library" check looks in the
     library in memory, which won't hold songs imported earlier in the
@@ -487,24 +498,30 @@ What they show:
 - **N11-27. Not done (decided from the timings, the owner,
   2026-10-12).** Adding the new songs in memory instead of a read at the
   end would still need the grouping and sorting again, which were most
-  of the read; with N11-32 and N11-33 one read at the end should take a
-  few seconds.
-- **N11-28. MacMusic comes to the front first (agreed: a fix).** Under
+  of the read.
+- **N11-28. MacMusic comes to the front first (agreed: a fix; built
+  2026-10-13).** Under
   MultiFinder a program comes fully to the front only once it calls the
   event routines; MacMusic reads its library before its first. It will
   call `EventAvail` a few times at start-up, before the library is read
   (the usual remedy of the time), so its window and logo are in front
   while it loads.
-- **N11-29. "Loading the library…" (depending on the timings).** Shown
-  from the start of any read expected to take more than a few seconds
-  (a plain start included), not only once a song file is read, which on
-  the Plus came late in the wait.
+- **N11-29. "Loading the library…" from the start of every read (agreed,
+  2026-10-13; built).** At a start, after an import run and on a change
+  of library, under the logo; for Rescan Library across the foot of the
+  screen, as before. Not only once a song file has to be read: on the
+  Plus a read from the cache takes about 10 s, with nothing said.
 - **N11-30. Compiler optimisation (M2; agreed from the timings,
   2026-10-12).** MacMusic 1.1 is built with `-O2` (about 30% faster on
   the Plus), after a full run of the tests and the manual checklist (it
   changes every timing the tests were made with).
 - **N11-31.** Part B's times in the documents (the User's Guide, the Read
-  Me, outstanding-issues.md) replaced with the real Plus's.
+  Me, outstanding-issues.md) replaced with the real Plus's: about 13 s
+  from double-clicking to ready for about 300 songs, optimised (the
+  second timing run). The User's Guide also explains importing several
+  songs.
+- **Nothing else in 1.1** (agreed, 2026-10-13): the issues log has nothing
+  else open.
 
 - **N11-32. Grouping by binary search (from the timings, 2026-10-12).**
   The name lists are already sorted, so `InsertName` finds a name's
@@ -619,11 +636,12 @@ Done and committed, each checked by the owner in Mini vMac:
 
 Still to do, in order (Part D added 2026-10-12, before these):
 
-0. **Part D:** the timing build's figures are in (2026-10-12, above):
-   N11-27 dropped, N11-30 agreed, N11-32 and N11-33 added. Next: N11-32,
-   N11-33 and N11-30; a second timing run on the Plus (N11-29, N11-31);
-   then N11-25, N11-26 and N11-28 built, tested in Mini vMac, and checked
-   on the Plus with a new test image.
+0. **Part D** (the owner, 2026-10-13: N11-32's start of about 13 s is
+   acceptable; no more chasing seconds). Done: N11-32 (`bcca2ca`);
+   N11-33 tried and reverted (`ea550e8`, `65a0d83`). In order:
+   N11-28 and N11-29 (built); N11-30 (`-O2`); N11-25 and N11-26, the
+   import run, in steps; N11-31 and the User's Guide; then a new test
+   image for the Plus.
 
 Still to do, in order:
 

@@ -19,6 +19,13 @@ library conversion. The decision codes in brackets are explained in
   500 songs at Plus speed takes 12 s instead of 49 s. Each song's group
   is noted as the lists are built, with no string comparisons beyond
   1.0's.
+- **MacMusic in front at start-up (N11-28):** under MultiFinder its window
+  stayed behind the Finder's until the library had loaded; it now asks
+  for events once before reading the library, so MultiFinder brings it
+  forward. From the issues log, 2026-10-12.
+- **"Loading the library…" from the start (N11-29):** shown at the start
+  of every library read, not only once a song file has to be read; on
+  the Plus a read from the cache takes about 10 s.
 - **Grouping by binary search (N11-32):** building the lists of
   artists, albums, genres and composers compared each song's name with
   every name already listed, a ROM call each; on the real Plus that was

@@ -163,9 +163,10 @@ used, and the scan reports the one it skipped.
 MacMusic keeps a note of each song's details in the library, in an
 invisible folder called "MacMusic Cache", so it needn't open every song
 file each time it starts. A song file that has changed, or is new, is
-read again. While songs are being read from their files, the screen
-says **Loading the library…**. The first start with a library, and
-Rescan Library, read every file; later starts take a few seconds.
+read again. While the library is being read, the screen says **Loading
+the library…**. The first start with a library, and Rescan Library,
+read every file; later starts read only the new or changed ones, and
+are quicker.
 
 The cache does no harm to MacMusic 1.0, which opens the library as
 before. If a song was changed outside MacMusic and its details look

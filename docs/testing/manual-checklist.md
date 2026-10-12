@@ -175,10 +175,11 @@ Starting and the cache (Part B):
 - [ ] 10.1 With the 500-song test library (or the 307-song Scratch
       library): the first start shows "Loading the library…" under the
       logo; record its time: ______
-- [ ] 10.2 Quit and start again: no message, a quicker start; record it:
-      ______. The songs, artists, albums and playlists as before.
+- [ ] 10.2 Quit and start again: the message from the start (N11-29), a
+      quicker start; record it: ______. The songs, artists, albums and
+      playlists as before.
 - [ ] 10.3 Rate a song and edit another's details; quit, start: both
-      changes kept, the message shown briefly.
+      changes kept, the message shown.
 - [ ] 10.4 File > Rescan Library: the band "Loading the library…" across
       the foot of the screen; the screen comes back as it was.
 - [ ] 10.5 Change a song file in the Finder (replace it with a copy from
@@ -217,6 +218,11 @@ with 1 MB):
 The Create New Library prompt (Part A):
 - [ ] 10.19 File > Choose Library > Create New Library: "New library
       in:" shown whole.
+
+Starting and importing (Part D):
+- [ ] 10.20 Under MultiFinder, with a Finder window where MacMusic's
+      opens: MacMusic's window and logo come in front at once, before the
+      library is read (N11-28).
 
 ## Problems found
 
