@@ -234,6 +234,8 @@ The click wheel (W: Stage 5c-1)
 | N11-22 | MacMusic runs on a 1 MB Plus: MultiFinder for ordinary libraries, the Finder alone for the largest | `MacMusic.r` |
 | N11-23 | A merge sort by title, and each song's group noted as the lists are built | `library.c` |
 | N11-24 | Printing is a code segment of its own, loaded only to print | `segments.map`, `main.c` |
+| N11-25 | Import Song repeats: after each song "Import another song?" (Import Another, Done), then the Open dialog again; cancelling a song skips it; disk or library full ends the run; Move or Copy asked for each song; System 6's Cancel kept | `import.c` |
+| N11-26 | The library read once, after the whole run; the run keeps its own list for the duplicate warning and the limit | `importrun.c`, `main.c` |
 | N11-28 | `EventAvail` three times at start-up, before the library is read, so MultiFinder brings MacMusic's window in front | `main.c` |
 | N11-29 | "Loading the library…" at the start of every library read, not only once a song file is read | `library.c`, `main.c` |
 | N11-30 | Built with -O2 by default (the Release build type) | `CMakeLists.txt` |

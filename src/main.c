@@ -448,7 +448,8 @@ static void ImportSong(void)
     if (!LibSetup_HasLibrary() || !Import_Run(LibSetup_Folder()))
         return;
 
-    /* Same library, rescanned: the queue (song IDs) carries on. */
+    /* Same library, rescanned once after the whole run (1.1, N11-26): the
+       queue (song IDs) carries on. */
     BeginRestart();
     LibSetup_Rescan();
     Playback_LibraryChanged();

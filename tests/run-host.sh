@@ -16,13 +16,14 @@ FLAGS="-std=c99 -fpascal-strings -Wall -Wextra -Wno-multichar
        -Itests/host -Isrc"
 HARNESS="tests/host/macfs.c tests/host/mactoolbox.c tests/host/hosttest.c"
 MODULES="src/songfile.c src/library.c src/libcache.c src/libfolder.c src/fileops.c
-         src/prefs.c src/settings.c src/shuffle.c src/printlayout.c"
+         src/prefs.c src/settings.c src/shuffle.c src/printlayout.c
+         src/importrun.c"
 
 failed=0
 # test name, then any arguments it is run with ("-" for none)
 for run in "songfile -" "library -" "playlists -" "marker -" "prefs -" \
            "prefs locked-old" "prefs both" "shuffle -" \
-           "sorting -" "cache -" "printlayout -"; do
+           "sorting -" "cache -" "printlayout -" "importrun -"; do
     set -- $run
     name=$1
     exe="$OUT/test_$name"

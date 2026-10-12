@@ -386,6 +386,33 @@ resource 'DITL' (135) {
     }
 };
 
+/* 1.1 (N11-25): after each song of an import run, whether to choose
+   another (the default) or finish. */
+resource 'ALRT' (143) {
+    { 116, 106, 202, 406 },
+    143,
+    {
+        OK, visible, silent;
+        OK, visible, silent;
+        OK, visible, silent;
+        OK, visible, silent;
+    },
+    noAutoCenter
+};
+
+resource 'DITL' (143) {
+    {
+        { 54, 166, 74, 286 },
+        Button { enabled, "Import Another" };
+
+        { 54, 76, 74, 156 },
+        Button { enabled, "Done" };
+
+        { 12, 16, 44, 286 },
+        StaticText { disabled, "Import another song?" };
+    }
+};
+
 /* Move (OK, the default) or copy the chosen file into the library. */
 resource 'ALRT' (136) {
     { 104, 86, 226, 426 },

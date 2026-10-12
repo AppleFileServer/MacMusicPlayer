@@ -223,6 +223,17 @@ Starting and importing (Part D):
 - [ ] 10.20 Under MultiFinder, with a Finder window where MacMusic's
       opens: MacMusic's window and logo come in front at once, before the
       library is read (N11-28).
+- [ ] 10.21 Import Song: import a song; "Import another song?": Import
+      Another; import two more; Done. All three in the library, read once
+      (one "Loading the library…") (N11-25, N11-26). Again, with Cancel
+      in the Open dialog instead of Done: the same.
+- [ ] 10.22 In a run, Cancel in a song's window: that song skipped, the
+      question asked; "Don't Import" at the duplicate warning, the same.
+- [ ] 10.23 In a run, import a song, then the same WAV again (a copy):
+      the duplicate warning names the song imported earlier in the run.
+- [ ] 10.24 In a run, a file that isn't a WAV: its message, then the
+      question. With the library at 499 songs: one more imported, then
+      "The MacMusic Library is full" (no question), and the run ends.
 
 ## Problems found
 

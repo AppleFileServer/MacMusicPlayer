@@ -19,6 +19,12 @@ library conversion. The decision codes in brackets are explained in
   500 songs at Plus speed takes 12 s instead of 49 s. Each song's group
   is noted as the lists are built, with no string comparisons beyond
   1.0's.
+- **Importing several songs (N11-25, N11-26):** after each song, Import
+  Song asks "Import another song?": Import Another brings the Open dialog
+  back for the next, Done finishes; cancelling a song's window skips it. The library is read once, at the end of the
+  run, instead of after every song (on the Plus, about 13 s each time).
+  The duplicate warning and the 500-song limit count the songs imported
+  earlier in the run (`importrun.c`, host-tested).
 - **An optimised build (N11-30):** MacMusic is compiled with -O2 (CMake
   set no build type, so GCC optimised nothing); on the real Plus the
   library reads about 30% faster.

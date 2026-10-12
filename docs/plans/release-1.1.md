@@ -481,6 +481,10 @@ What they show:
   - **The Open dialog keeps System 6's Cancel** (agreed, 2026-10-13): a
     "Done" button would need our own copy of the standard dialog. The
     User's Guide says the songs already imported stay.
+  - **"Import another song?" before the Open dialog comes back** (the
+    owner, 2026-10-13, after trying the run): an alert after each song,
+    imported or skipped, with Import Another (the default) and Done. Not
+    asked once the library is full: its message, and the run ends.
   - The run's list of what it has imported is a small portable module,
     host-tested.
 - **N11-26. One library read at the end of the run,** not one per song:
@@ -639,9 +643,9 @@ Still to do, in order (Part D added 2026-10-12, before these):
 0. **Part D** (the owner, 2026-10-13: N11-32's start of about 13 s is
    acceptable; no more chasing seconds). Done: N11-32 (`bcca2ca`);
    N11-33 tried and reverted (`ea550e8`, `65a0d83`). In order:
-   N11-28 and N11-29 (built); N11-30 (`-O2`); N11-25 and N11-26, the
-   import run, in steps; N11-31 and the User's Guide; then a new test
-   image for the Plus.
+   N11-28 and N11-29 (`98ec906`); N11-30, `-O2` (`71cb6bf`); N11-25 and
+   N11-26, the import run (built 2026-10-13); then N11-31 and the User's
+   Guide's times; then a new test image for the Plus.
 
 Still to do, in order:
 

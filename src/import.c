@@ -8,6 +8,7 @@
 
 #include "modal.h"
 #include "import.h"
+#include "importrun.h"
 #include "bytes.h"
 #include "fileopen.h"
 #include "library.h"
@@ -36,6 +37,21 @@ enum
     kItemJustCopy = 2,
     kCantMoveAlert = 138,
     kItemCopyInstead = 1
+};
+
+/* 1.1 (N11-25): how one song of a run ended. */
+typedef enum
+{
+    kImported,      /* in the library: on to the next */
+    kSkipped,       /* not imported (cancelled, or a problem): on to the next */
+    kEndRun         /* the Open dialog cancelled, or nothing more can go in */
+} ImportOutcome;
+
+/* 1.1 (N11-25): after each song of a run, "Import another song?" (143). */
+enum
+{
+    kAnotherAlert = 143,
+    kItemImportAnother = 1
 };
 
 /* Copy buffer: larger transfers are much faster than 8 KB ones; at least
@@ -312,13 +328,19 @@ static OSErr CopyIntoLibrary(const LibraryFolder *folder, const Source *src,
 /* ---- Import Song... --------------------------------------------------- */
 
 /* E4: the file can't be moved; offers to copy it instead. */
+static void ShowLibraryFull(void)
+{
+    Message_Show(P("The MacMusic Library is full (500 songs). Export a song "
+                   "to make room."), noErr);
+}
+
 static Boolean AskToCopyInstead(ConstStringPtr reason)
 {
     ParamText(reason, P(""), P(""), P(""));
     return Alert(kCantMoveAlert, Modal_DialogFilter) == kItemCopyInstead;
 }
 
-Boolean Import_Run(const LibraryFolder *folder)
+static ImportOutcome ImportOne(const LibraryFolder *folder)
 {
     SFReply reply;
     Source src;
@@ -331,17 +353,16 @@ Boolean Import_Run(const LibraryFolder *folder)
     Ptr buffer;
     long bufferSize = kCopyBufferSize, id;
     unsigned long fingerprint;
-    short match;
-    Boolean sameDisk, move, imported = false;
+    Boolean sameDisk, move;
     DialogPtr working;
     OSErr err;
 
-    /* Stage 8d (M3): a full library is refused before anything happens. */
-    if (Library_SongCount() >= kMaxSongs || Library_OverLimitCount() > 0)
+    /* Stage 8d (M3): a full library is refused before anything happens;
+       1.1 (N11-25): counting the songs imported earlier in the run. */
+    if (ImportRun_LibraryFull())
     {
-        Message_Show(P("The MacMusic Library is full (500 songs). Export a song "
-                       "to make room."), noErr);
-        return false;
+        ShowLibraryFull();
+        return kEndRun;
     }
 
     /* Any file can be chosen: WAVs are recognised by their contents. */
@@ -350,12 +371,12 @@ Boolean Import_Run(const LibraryFolder *folder)
     SFPGetFile(where, P(""), nil, -1, nil, nil, &reply, getDlgID,
                Modal_FileFilter);
     if (!reply.good)
-        return false;
+        return kEndRun;
 
     if (ResolveWD(reply.vRefNum, &src.vRefNum, &src.dirID) != noErr)
     {
         Message_Show(P("The file could not be found."), noErr);
-        return false;
+        return kSkipped;
     }
     BlockMove(reply.fName, src.name, reply.fName[0] + 1);
 
@@ -364,13 +385,13 @@ Boolean Import_Run(const LibraryFolder *folder)
     {
         Message_Show(P("This file is already inside the MacMusic Library folder."),
                      noErr);
-        return false;
+        return kSkipped;
     }
 
     if (!Wav_Read(src.vRefNum, src.dirID, src.name, &wav, problem))
     {
         Message_Show(problem, noErr);
-        return false;
+        return kSkipped;
     }
 
     buffer = NewPtr(bufferSize);
@@ -382,10 +403,11 @@ Boolean Import_Run(const LibraryFolder *folder)
     if (buffer == nil)
     {
         Message_Show(P("There is not enough memory to import a song."), noErr);
-        return false;
+        return kEndRun;
     }
 
-    /* DECISION D31: warn if the same audio is already in the library. */
+    /* DECISION D31: warn if the same audio is already in the library (1.1,
+       N11-25: or was imported earlier in the run). */
     err = ReadSource(&src, &wav);
     if (err == noErr)
         err = FingerprintSource(&src, &wav, buffer, &fingerprint);
@@ -393,17 +415,16 @@ Boolean Import_Run(const LibraryFolder *folder)
     {
         DisposePtr(buffer);
         Message_Show(P("The WAV file could not be read."), err);
-        return false;
+        return kSkipped;
     }
 
-    match = Library_FindAudioMatch(wav.dataLength, fingerprint);
-    if (match != kNone)
+    if (ImportRun_FindDuplicate(wav.dataLength, fingerprint, problem))
     {
-        ParamText(Library_SongTitle(match), P(""), P(""), P(""));
+        ParamText(problem, P(""), P(""), P(""));
         if (Alert(kDuplicateAlert, Modal_DialogFilter) != kItemImportAnyway)
         {
             DisposePtr(buffer);
-            return false;
+            return kSkipped;
         }
     }
 
@@ -414,7 +435,7 @@ Boolean Import_Run(const LibraryFolder *folder)
     if (!sameDisk && Alert(kOtherDiskAlert, Modal_DialogFilter) != kItemOtherDiskImport)
     {
         DisposePtr(buffer);
-        return false;
+        return kSkipped;
     }
     move = Alert(kMoveAlert, Modal_DialogFilter) == kItemMove;
 
@@ -423,7 +444,7 @@ Boolean Import_Run(const LibraryFolder *folder)
         if (!AskToCopyInstead(P("This file is locked, so it can\xD5t be moved.")))
         {
             DisposePtr(buffer);
-            return false;
+            return kSkipped;
         }
         move = false;
     }
@@ -431,7 +452,7 @@ Boolean Import_Run(const LibraryFolder *folder)
     if (!AskForDetails(src.name, &wav, &details))
     {
         DisposePtr(buffer);
-        return false;
+        return kSkipped;
     }
 
     working = Message_BeginWorking(P("Importing\xC9"));
@@ -460,7 +481,7 @@ Boolean Import_Run(const LibraryFolder *folder)
     else if (move && sameDisk && IsCantChangeError(err))
     {
         DisposePtr(buffer);
-        return false;
+        return kSkipped;
     }
 
     DisposePtr(buffer);
@@ -468,14 +489,14 @@ Boolean Import_Run(const LibraryFolder *folder)
     {
         Message_Show(P("There is not enough space on the MacMusic Library\xD5s "
                        "disk for this song."), noErr);
-        return false;
+        return kEndRun;
     }
     if (err != noErr)
     {
         Message_Show(P("The song could not be imported."), err);
-        return false;
+        return kSkipped;
     }
-    imported = true;
+    ImportRun_Add(wav.dataLength, fingerprint, details.text[0]);
     Folder_WriteNextID(folder, id + 1);
 
     /* From another disk, "move" = copy, then delete the original (E4: if
@@ -488,5 +509,31 @@ Boolean Import_Run(const LibraryFolder *folder)
     else if (move && !sameDisk)
         FlushVol(nil, src.vRefNum);
 
-    return imported;
+    return kImported;
+}
+
+/* 1.1 (N11-25): songs imported one after another, each chosen in the Open
+   dialog. After each, imported or skipped (Cancel in its details window,
+   or one of the alerts), "Import another song?": Done, or Cancel in the
+   Open dialog, ends the run, as does a full library or disk. Each song is
+   in the library as soon as it's imported. DECISION (the owner,
+   2026-10-13): the question is asked before the Open dialog comes back. */
+Boolean Import_Run(const LibraryFolder *folder)
+{
+    short imported;
+
+    ImportRun_Begin();
+    while (ImportOne(folder) != kEndRun)
+    {
+        if (ImportRun_LibraryFull())
+        {
+            ShowLibraryFull();          /* no question: nothing more fits */
+            break;
+        }
+        if (Alert(kAnotherAlert, Modal_DialogFilter) != kItemImportAnother)
+            break;
+    }
+    imported = ImportRun_Count();
+    ImportRun_End();
+    return imported > 0;
 }

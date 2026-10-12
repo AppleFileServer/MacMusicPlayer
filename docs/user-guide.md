@@ -119,6 +119,13 @@ All of this is in the Mac's menu bar, above the iPod.
   (Just Copy leaves the original where it is); from another disk it is
   copied, and the original deleted after the copy. Importing audio
   that's already in the library asks first.
+
+  Then MacMusic asks **Import another song?** Click **Import Another**
+  to choose the next one, so several can be imported one after another,
+  or **Done** when you've finished. Each song is in the library as soon
+  as it's imported, so Done (or Cancel in the Open dialog) keeps every
+  song imported so far. Cancel in a song's window skips just that song.
+  The library is read once, at the end.
 - **Edit > Edit Song...:** the same window for the highlighted song, or
   the one playing on Now Playing. Saving keeps you on the same screen.
 - **File > Export Song...:** gives the highlighted song back as its
