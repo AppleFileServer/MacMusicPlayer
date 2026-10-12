@@ -6,17 +6,26 @@ minutes to read; about an hour to be fixing bugs.
 ## What this is
 
 MacMusic 1.1 (October 2026; 1.0 a week before): a 2004 iPod as a
-Macintosh Plus program,
-in C, built on this Mac with the **Retro68** cross-compiler and tested
+Macintosh Plus program, in C, built on this Mac with the **Retro68** cross-compiler and tested
 in the **Mini vMac** emulator and on the real Plus (BlueSCSI). Everything
 about it is in this folder; `README.md` is the overview.
 
-**The latest release is 1.1** (2026-10-13): faster start-up, printing,
-importing several songs. It was released without the full manual
-checklist, so printing on paper is still to be tried
-(`docs/testing/runs/1.1.md`). Everything outside MacMusic (the
-utilities, the manuals, the issues) is in
-`~/MacPlusProjects/LOOSE-ENDS.md`.
+**The latest release is 1.1** (2026-10-13, tag `v1.1`): faster start-up,
+printing, importing several songs. Its files, manuals included, are in
+`~/MacPlusProjects/releases/MacMusic-1.1/`. Where it was left
+(2026-10-13, put aside):
+
+- **Not yet checked on the real Plus** (it was released without the
+  full manual checklist, `docs/testing/runs/1.1.md`): printing on the
+  ImageWriter, the time of a first start or Rescan Library, a 1 MB Plus.
+  Anything found goes in `docs/issues-found.md`, for 1.1.1.
+- **Open issues, for review after 1.1:** I4, I6, I8 and I9 in
+  `docs/outstanding-issues.md`. The issues log has nothing open.
+- **On the BlueSCSI card:** `HD60_512 MacMusic Timing 3.hda`, a timing
+  image no longer needed, can be deleted (it shares SCSI ID 6 with the
+  Pokémon project's disk).
+- Everything outside MacMusic (the utilities, their manual, their
+  issues) is in `~/MacPlusProjects/LOOSE-ENDS.md`.
 
 ## 1. Check the tools are still here
 
@@ -76,6 +85,19 @@ Mini vMac to 1x speed (Control-S, then 1) for realistic timing.
    `docs/testing/runs/<version>.md`), in Mini vMac and on the Plus.
 4. Tag it (`git tag -a v1.1.1`) and run `tools/make-release.sh` again
    for the final files.
+5. **What `make-release.sh` doesn't make** (1.1 added them by hand):
+   - `HD40_512 MacMusic.hda`, a 20 MB BlueSCSI disk with the release's
+     app and Read Me: the template's first 96 blocks, then an HFS volume,
+     as `tools/library-image` makes the Scratch image (a throwaway
+     script did it for 1.0 and 1.1);
+   - the manuals' PDFs, if they changed: `tools/manual/make-book.py`
+     (the guide, then again with `MANUAL_ASSETS=/nonexistent` for the
+     plain edition, then once more so `docs/manual/book.html` is the
+     own-use one), `tools/utilities-manual/make-card.py`, and for a
+     version with changes a user would notice, an update card like
+     `make-update-card.py` (MD10 in `docs/plans/manual-1.1-part-d.md`);
+     each built with `tools/utilities-manual/build-pdf.sh`;
+   - then `shasum -a 256` of each into the release's `SHA256SUMS`.
 
 ## Where to look
 
