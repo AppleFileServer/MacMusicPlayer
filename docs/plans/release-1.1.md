@@ -512,7 +512,7 @@ What they show:
   screen, as before. Not only once a song file has to be read: on the
   Plus a read from the cache takes about 10 s, with nothing said.
 - **N11-30. Compiler optimisation (M2; agreed from the timings,
-  2026-10-12).** MacMusic 1.1 is built with `-O2` (about 30% faster on
+  2026-10-12; built 2026-10-13).** MacMusic 1.1 is built with `-O2` (about 30% faster on
   the Plus), after a full run of the tests and the manual checklist (it
   changes every timing the tests were made with).
 - **N11-31.** Part B's times in the documents (the User's Guide, the Read

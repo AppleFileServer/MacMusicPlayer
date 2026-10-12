@@ -2,6 +2,14 @@ cmake_minimum_required(VERSION 3.15)
 
 project(MacMusic VERSION 1.0)
 
+# 1.1 (N11-30, M2): optimised by default. With no build type CMake gives
+# GCC no -O flag, and on the real Plus the optimised build read the
+# library about 30% faster. -O2 alone (no -DNDEBUG: nothing depends on it).
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Release)
+endif()
+set(CMAKE_C_FLAGS_RELEASE "-O2")
+
 # 1.0 Part A: the version is set only above. CMake writes it into
 # version.h (for the code: the About box and Settings > About) and
 # version.r (the vers resources and the signature resource), both in the

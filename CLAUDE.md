@@ -31,7 +31,7 @@ From the project directory:
 The results are `build/MacMusic.APPL` (for LaunchAPPL) and
 `build/MacMusic.bin` (MacBinary, with the "has bundle" flag set). The
 version is set only by `project(MacMusic VERSION ...)` in
-`CMakeLists.txt`. Builds are reproducible apart from the MacBinary dates
+`CMakeLists.txt`. Since 1.1 it's optimised (-O2) by default. Builds are reproducible apart from the MacBinary dates
 and header CRC.
 
 ## Run

@@ -236,6 +236,7 @@ The click wheel (W: Stage 5c-1)
 | N11-24 | Printing is a code segment of its own, loaded only to print | `segments.map`, `main.c` |
 | N11-28 | `EventAvail` three times at start-up, before the library is read, so MultiFinder brings MacMusic's window in front | `main.c` |
 | N11-29 | "Loading the library…" at the start of every library read, not only once a song file is read | `library.c`, `main.c` |
+| N11-30 | Built with -O2 by default (the Release build type) | `CMakeLists.txt` |
 | N11-32 | Each name's place in the group lists found by binary search, then checked for an identical name among those comparing equal | `library.c` |
 | — | PROVISIONAL: audiobooks print after the songs under their own heading; an album of several artists shows "Various Artists" | `printlayout.c` |
 

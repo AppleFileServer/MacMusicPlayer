@@ -19,6 +19,9 @@ library conversion. The decision codes in brackets are explained in
   500 songs at Plus speed takes 12 s instead of 49 s. Each song's group
   is noted as the lists are built, with no string comparisons beyond
   1.0's.
+- **An optimised build (N11-30):** MacMusic is compiled with -O2 (CMake
+  set no build type, so GCC optimised nothing); on the real Plus the
+  library reads about 30% faster.
 - **MacMusic in front at start-up (N11-28):** under MultiFinder its window
   stayed behind the Finder's until the library had loaded; it now asks
   for events once before reading the library, so MultiFinder brings it
