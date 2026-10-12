@@ -225,7 +225,10 @@ TOPICS = [
                "folder, to see the songs.",
                "> In MacMusic, choose Import Song from the File menu, and open the "
                "WAV Files folder (<i>MacMusic User&rsquo;s Guide</i>, &ldquo;Adding "
-               "Songs&rdquo;).")),
+               "Songs&rdquo;).",
+               "~ After each song, MacMusic asks whether to import another: "
+               "click Import Another to bring in the next from the disk, or "
+               "Done.")),
            T("If the Disk Doesn&rsquo;t Appear", steps(
                "See Appendix C, &ldquo;The disk doesn&rsquo;t appear.&rdquo; Most often another "
                "image on the card has the same SCSI ID, or the image went into a "

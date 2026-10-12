@@ -202,9 +202,10 @@ BODY = "".join([
     "into it, what comes out, and which library you&rsquo;re using.</p>",
     '<figure class="beside">%s</figure>' % img("c2-export-menu", 170),
     cmd("Import Song&hellip;",
-        "Asks for a WAV file and imports it into the library; see "
-        "&ldquo;Adding Songs&rdquo; in Chapter 2. Dimmed when no library is "
-        "open."),
+        "Asks for a WAV file and imports it into the library, then asks "
+        "whether to import another, so you can add several songs one after "
+        "another; see &ldquo;Adding Songs&rdquo; in Chapter 2. Dimmed when no "
+        "library is open."),
     cmd("Export Song&hellip;",
         "Gives the highlighted song back as its original WAV file, and "
         "removes it from the library and from every playlist. Dimmed "
@@ -320,8 +321,8 @@ BODY = "".join([
           ("The scrubber and the rating", "5 seconds"),
           ("Previous starts the song again", "after 3 seconds of it"),
           ("Libraries remembered", "5"),
-          ("Reading a library", "about 12 seconds for 500 songs the first "
-           "time and at Rescan Library; a few seconds after that"),
+          ("Reading a library", "about 13 seconds for 300 songs on a "
+           "Macintosh Plus; longer the first time, and at Rescan Library"),
           ("Printing", "the printer chosen in the Chooser: ImageWriter, "
            "LaserWriter, on the printer port or AppleTalk"),
           ("Room for music", "about 1.3 MB a minute"),

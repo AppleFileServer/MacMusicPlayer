@@ -318,7 +318,12 @@ LESSON_7
   separate manual, explains how.</p>
   <p class="step">Click Import.</p>
   <p>For a moment you see &ldquo;Importing&hellip;&rdquo;, and the song
-  is in your library.</p>
+  is in your library. MacMusic asks whether you&rsquo;d like to import
+  another song; with more to add, you&rsquo;d click Import Another and
+  choose the next one (Chapter 2 explains).</p>
+  <p class="step">Click Done.</p>
+  <p>MacMusic reads your library again, saying &ldquo;Loading the
+  library&hellip;&rdquo;, and shows its main menu.</p>
 
 LESSON_8
   <p class="step">Turn the wheel to highlight Music, and click the centre

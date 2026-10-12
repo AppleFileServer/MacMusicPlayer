@@ -253,6 +253,13 @@ c1-create, c2-export-menu, c2-print (Chapter 2, "To Print a List of Your
 Library") and c2-page-setup (Chapter 3, File Menu). The loading message
 isn't pictured.
 
+For 1.1's Part D (2026-10-13): **c2-import-another**, the "Import another
+song?" alert (Chapter 2, "To Import Several Songs"; Appendix A). Taken
+without the mouse: a throwaway build showed the alert over the main
+menu and logged the screen's bits while it was up
+(`~/MacPlus/Screenshots/1.1 Import Another.png`, at 1x), cropped to the
+box's thick frame as the other alerts are.
+
 ## Decisions
 
 **Decided 2026-10-08:** all as recommended; F1, the wrong-kind-of-WAV

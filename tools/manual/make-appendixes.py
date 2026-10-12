@@ -147,6 +147,10 @@ A = "".join([
         "don&rsquo;t want, then choose Rescan Library."),
 
     sub("Importing Songs"),
+    msg(q("Import another song?"),
+        "After each song you import. Click Import Another to choose the "
+        "next, or Done when you&rsquo;ve finished; every song imported so far "
+        "is in your library.", ("c2-import-another", 310)),
     msg(q("Importing from another disk will take some time. Do you still "
           "want to import?"),
         "The file is on a floppy disk or another hard disk, so it has to be "
@@ -164,8 +168,9 @@ A = "".join([
         "Cancel."),
     msg(q("This WAV file&rsquo;s audio is already in the MacMusic Library as "
           "&lsquo;<i>title</i>&rsquo;. Import it again?"),
-        "The song is already in your library, perhaps under another name. "
-        "Click Cancel, or Import Anyway to have it twice.", ("c2-duplicate", 350)),
+        "The song is already in your library, perhaps under another name, "
+        "or you imported it a moment ago. Click Cancel to leave it out, or "
+        "Import Anyway to have it twice.", ("c2-duplicate", 350)),
     msg(q("This is not a WAV file."),
         "MacMusic can import only WAV sound files. Click OK.", ("c2-not-wav", 336)),
     msg(q("Only mono, 22050 Hz, 8-bit PCM WAV files can be imported. This "
@@ -193,7 +198,9 @@ A = "".join([
         "library."),
     msg(q("The MacMusic Library is full (500 songs). Export a song to make "
           "room."),
-        "Export a song you no longer want, or start another library."),
+        "Export a song you no longer want, or start another library. If "
+        "you were importing several songs, the import ends; those already "
+        "imported stay."),
     msg(q("There is not enough memory to import a song."),
         "Quit other applications, or give MacMusic more memory."),
     msg(q("There is not enough space on the MacMusic Library&rsquo;s disk for "
@@ -426,11 +433,12 @@ D = "".join([
             "you aren&rsquo;t using, or give MacMusic less memory with Get Info "
             "(see Chapter 2)."),
     trouble("Starting up takes a while",
-            "The first time MacMusic opens a library, and when you choose "
-            "Rescan Library, it reads every song file: about 12 seconds for "
-            "500 songs, while the screen says Loading the library. After "
-            "that it reads only songs that are new or have changed, and starts "
-            "in a few seconds."),
+            "MacMusic reads your library each time it starts, and after you "
+            "import songs, while the screen says Loading the library. It "
+            "keeps a note of your songs, so on a Macintosh Plus this takes "
+            "about 13 seconds for a library of 300 songs. The first time it "
+            "opens a library, and when you choose Rescan Library, it reads "
+            "every song file, which takes longer."),
     trouble("Song details look wrong after changing files in the Finder",
             "MacMusic keeps a note of your songs, and reads a song again when "
             "its file changes. If a song was changed by another application "

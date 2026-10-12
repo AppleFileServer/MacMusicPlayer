@@ -395,7 +395,22 @@ TOPICS = [
                "A dialog box shows the song&rsquo;s details, filled in from the "
                "file where MacMusic can.",
                "> Type or change any of the details, and click Import.",
-               "~ Each detail can be up to 63 characters long.")),
+               "~ Each detail can be up to 63 characters long.",
+               "MacMusic asks whether to import another song.",
+               "> Click Done.",
+               "MacMusic reads your library again, while the screen says "
+               "Loading the library.")),
+           T("To Import Several Songs", steps(
+               "After each song, MacMusic asks: &ldquo;Import another "
+               "song?&rdquo;",
+               "> Click Import Another, and choose the next song.",
+               "Import it as before. Each song is in your library as soon as "
+               "it&rsquo;s imported.",
+               "> When you&rsquo;ve finished, click Done.",
+               "MacMusic reads your library once, at the end.",
+               "~ Cancel in a song&rsquo;s details skips just that song. "
+               "Cancel in the Open dialog box finishes, as Done does, keeping "
+               "every song imported so far."), ("c2-import-another", 150)),
            T("To Import From a Floppy Disk or Another Hard Disk", steps(
                "MacMusic first asks: &ldquo;Importing from another disk will "
                "take some time. Do you still want to import?&rdquo;",
@@ -417,8 +432,10 @@ TOPICS = [
                "MacMusic recognises a song by its sound, even under another "
                "name. If you import one that&rsquo;s already in your library, "
                "it tells you, and names the song.",
-               "> Click Cancel to stop, or Import Anyway to have it "
-               "twice.")),
+               "> Click Cancel to leave it out, or Import Anyway to have it "
+               "twice.",
+               "MacMusic knows the songs you&rsquo;ve just imported, too, if "
+               "you&rsquo;re importing several.")),
            T("If the File Isn&rsquo;t the Right Kind", steps(
                "If the file isn&rsquo;t a WAV file, MacMusic says so. If "
                "it&rsquo;s a WAV file of another kind, it says what the file is, "
@@ -427,21 +444,21 @@ TOPICS = [
                "> Click OK.",
                "To prepare files MacMusic can play, see <i>MacMusic "
                "Utilities</i>.")),
-           T("If the Library Is Full", steps(
+           T("If the Library or Its Disk Is Full", steps(
                "When your library holds 500 songs, MacMusic says &ldquo;The "
                "MacMusic Library is full (500 songs). Export a song to make "
                "room.&rdquo;",
                "> Click OK.",
                "To make room, export songs you no longer want (see "
                "&ldquo;Changing and Removing Songs&rdquo;), or start another "
-               "library.")),
-           T("If There Isn&rsquo;t Room on the Disk", steps(
-               "Music takes room: about 1.3 MB for each minute. If the "
-               "library&rsquo;s disk is too full for a song, MacMusic says "
-               "so.",
+               "library.",
+               "Music takes room on the disk, too: about 1.3 MB for each "
+               "minute. If the library&rsquo;s disk is too full for a song, "
+               "MacMusic says so.",
                "> Click OK, make room on the disk, and import the song "
                "again.",
-               "~ Settings, About shows how much room is left.")),
+               "~ Either one ends an import of several songs. Settings, About "
+               "shows how much room is left.")),
            ]),
 
     Topic("Changing and Removing Songs",
@@ -553,7 +570,7 @@ TOPICS = [
                "have it read every song again:",
                "> Choose Rescan Library from the File menu.",
                "The screen says Loading the library while it reads.",
-               "~ About 12 seconds for 500 songs.")),
+               "~ This takes longer than starting up.")),
            T("To See Library Info", steps(
                "> Choose Library Info from the File menu.",
                "You see how many songs and playlists the library has, how much "

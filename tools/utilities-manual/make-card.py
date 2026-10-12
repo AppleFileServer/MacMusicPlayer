@@ -204,7 +204,9 @@ PAGE_4 = card(
          ("&ldquo;The file will be moved&rdquo;", "Click OK to move it into your library, or "
           "Just Copy to leave it on the Transfer disk too."),
          ("The song&rsquo;s details", "Type or change them (63 characters each), and click "
-          "Import.")),
+          "Import."),
+         ("&ldquo;Import another song?&rdquo;", "Click Import Another for the next song, or "
+          "Done when you&rsquo;ve finished.")),
 
     h2("The menus"),
     rows(("File", "Import Song&hellip;, Export Song&hellip; (gives the song back as a WAV "

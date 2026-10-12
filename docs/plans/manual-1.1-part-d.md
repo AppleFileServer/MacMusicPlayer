@@ -1,6 +1,7 @@
 # The User's Guide for 1.1's Part D, and the 1.1 Update Card: plan
 
-Status: **proposed, 2026-10-13**, for the owner's approval. Decisions are
+Status: **approved and done, 2026-10-13** (the owner approved the
+documents the same day). Decisions are
 numbered (MD1 and so on); **(R)** marks a recommendation.
 
 The *MacMusic User's Guide*, second edition (`tools/manual/`, built to

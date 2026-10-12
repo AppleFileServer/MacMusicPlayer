@@ -108,3 +108,8 @@ c1-create       ~/MacPlus/Screenshots/1.1%20Create%20New%20Library.png box nopoi
 c2-export-menu  ~/MacPlus/Screenshots/1.1%20File%20menu.png menu
 c2-print        ~/MacPlus/Screenshots/1.1%20Print%20Library.png box nopointer
 c2-page-setup   ~/MacPlus/Screenshots/1.1%20Page%20Setup.png box nopointer
+
+# 1.1's Part D (2026-10-13): Claude's capture of the screen's own bits,
+# logged by a throwaway build while the alert was up (1x, no window).
+screen 0 0 1
+c2-import-another ~/MacPlus/Screenshots/1.1%20Import%20Another.png 101,111,310,96

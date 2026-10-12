@@ -90,6 +90,11 @@ Released by the owner's choice without the full manual checklist
 - **Fix to C2:** the File menu's enable flags left Choose Library… and
   Page Setup… dimmed (found taking the manual's screenshots); the smoke
   test now checks the File menu's always-enabled items.
+- **The manuals for Part D (2026-10-13, `docs/plans/manual-1.1-part-d.md`):**
+  the *MacMusic User's Guide* (importing several songs, "Import another
+  song?" in Chapter 2 and Appendix A, the Plus's start-up times), the
+  Quick Reference Card, a note in *MacMusic Utilities*, and a new card,
+  the *MacMusic 1.1 Update* (`tools/utilities-manual/make-update-card.py`).
 - **Documentation for 1.1:** `docs/user-guide.md` (and so the Read Me)
   and the *MacMusic User's Guide*, second edition: printing (a new
   topic in Chapter 2; Page Setup and Print Library in the File menu),

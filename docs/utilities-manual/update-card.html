@@ -1,0 +1,42 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<title>MacMusic 1.1 Update</title>
+<link rel="stylesheet" href="manual.css">
+<link rel="stylesheet" href="utilities.css">
+<script>window.PagedConfig = { after: () => { window.__pagedDone = true; } };</script>
+<script src="paged.polyfill.js"></script>
+</head><body>
+<style>
+@page card { margin: 30pt 40pt 34pt 40pt; }
+.card { page: card; font: 9pt/11pt var(--serif); }
+.card .top { border-top: 2.2pt solid var(--red); padding-top: 9pt; margin-bottom: 4pt; }
+.card .title { font: 19pt/22pt var(--serif); margin: 0 0 1pt 0; }
+.card .title .apple { color: var(--red); font-family: var(--sans); }
+.card .where { font: 9pt/11pt var(--serif); font-style: italic; color: #555; margin: 0 0 4pt 0; }
+.card h2 { font: bold 10pt/12pt var(--serif); margin: 10pt 0 3pt 0; padding-left: 13pt; position: relative;
+           break-after: avoid; }
+.card h2::before { content: ""; position: absolute; left: 0; top: 2.5pt; width: 6.5pt; height: 6.5pt;
+                   background: var(--red); }
+.card h3 { font: italic bold 8.5pt/10pt var(--serif); margin: 4pt 0 1pt 0; }
+.card table { width: 100%; border-collapse: collapse; break-inside: avoid; }
+.card td { vertical-align: top; padding: 2pt 0 2.5pt 0; border-bottom: 0.5pt solid #777; }
+.card td:first-child { width: 42%; padding-right: 10pt; }
+.card table.three td:first-child { width: 36%; }
+.card table.three td:nth-child(2) { width: 34%; padding-right: 8pt; }
+.card th { font: italic bold 8.5pt/10pt var(--serif); text-align: left; padding: 0 0 2pt 0; }
+.card ul { margin: 1pt 0 0 0; padding-left: 10pt; }
+.card li { margin: 0; list-style: square; }
+.card .note { font: 8pt/10pt var(--serif); color: #555; margin: 3pt 0 0 0; }
+.card ol.journey { margin: 2pt 0 0 0; padding-left: 14pt; }
+.card ol.journey li { list-style: decimal; margin: 0 0 1.5pt 0; }
+.card kbd { font-size: 7.5pt; line-height: 9.5pt; }
+.card .foot { font: 7.5pt/9.5pt var(--serif); color: #555; margin-top: 14pt; }
+</style>
+<style>
+.card .title .logo { height: 17pt; width: auto; vertical-align: -2pt; margin-right: 5pt; }
+.card .intro { font: 9.5pt/12pt var(--serif); margin: 4pt 0 2pt 0; }
+</style>
+<div class="card"><div class="top"><p class="title"><img class="logo" src="private/rainbow-logo.png">MacMusic 1.1 Update</p><p class="where">What&rsquo;s new since MacMusic 1.0</p></div><p class="intro">MacMusic 1.1 starts more quickly, prints your library, and imports several songs one after another. Everything else works as before.</p><h2>Starting faster</h2><table class=""><tr><td>A note of your songs</td><td>MacMusic keeps a note of each song in your library, so it needn&rsquo;t open every song file each time it starts. On a Macintosh Plus a library of 300 songs starts in about 13 seconds. <i>Guide</i>, page 47.</td></tr><tr><td>&ldquo;Loading the library&hellip;&rdquo;</td><td>Shown under the Apple logo while MacMusic reads your library, each time it starts and after you import songs. <i>Guide</i>, page 72.</td></tr><tr><td>The first start, and Rescan Library</td><td>Read every song file, and take longer. MacMusic reads a song again by itself whenever its file has changed. <i>Guide</i>, page 40.</td></tr></table><h2>Printing your library</h2><table class=""><tr><td>Print Library&hellip; (<kbd>&#8984;</kbd><kbd>P</kbd>)</td><td>Prints a list of your songs, your albums (with their songs, if you like) or your artists (with their albums), with the library&rsquo;s name and the date at the top of each page. <i>Guide</i>, page 41.</td></tr><tr><td>Page Setup&hellip;</td><td>Chooses the paper: A4 to begin with, or US Letter. The first print asks for it. <i>Guide</i>, page 41.</td></tr><tr><td>Printers</td><td>Whichever the Chooser has: an ImageWriter or a LaserWriter, on the printer port or AppleTalk. The music pauses while it prints; <kbd>&#8984;</kbd> <kbd>.</kbd> stops. <i>Guide</i>, page 41.</td></tr></table><h2>Importing several songs</h2><table class=""><tr><td>&ldquo;Import another song?&rdquo;</td><td>Asked after each song you import. Click Import Another to choose the next, or Done when you&rsquo;ve finished. <i>Guide</i>, page 34.</td></tr><tr><td>Each song</td><td>Is in your library as soon as it&rsquo;s imported; the library is read once, at the end. Cancel in a song&rsquo;s details skips just that song.</td></tr></table><h2>Smaller changes</h2><table class=""><tr><td>Under MultiFinder</td><td>MacMusic&rsquo;s window comes to the front as soon as it starts, instead of staying behind the Finder&rsquo;s while the library loads.</td></tr><tr><td>Create New Library</td><td>The Save dialog box&rsquo;s prompt, &ldquo;New library in:&rdquo;, is shown whole.</td></tr></table></div>
+<div class="card page-break"><div class="top"><p class="title">Moving up from MacMusic 1.0</p><p class="where">Your songs, playlists and settings come with you</p></div><h2>Installing MacMusic 1.1</h2><table class=""><tr><td>To install it</td><td>Quit MacMusic. Drag the new MacMusic from its disk to where the old one is on your hard disk, and click OK when the Finder asks to replace it.</td></tr><tr><td>Your libraries</td><td>Stay as they are: songs, playlists, ratings and the libraries MacMusic remembers. So do your settings.</td></tr><tr><td>The first start</td><td>MacMusic reads every song in the library once, to make its note: an invisible folder called MacMusic Cache, inside the library. After that it starts more quickly. <i>Guide</i>, page 47.</td></tr><tr><td>Memory</td><td>As 1.0: 640K under MultiFinder, at least 512K.</td></tr></table><h2>Going back to 1.0</h2><table class=""><tr><td>A library used by 1.1</td><td>Opens in MacMusic 1.0 as before; 1.0 doesn&rsquo;t notice the MacMusic Cache folder.</td></tr><tr><td>Your song files</td><td>Are the same in both versions, so songs can go back and forth between them.</td></tr></table><h2>What hasn&rsquo;t changed</h2><table class=""><tr><td>The iPod</td><td>Its screens, the click wheel, Now Playing, Shuffle and Repeat, the Clock.</td></tr><tr><td>The library</td><td>500 songs and 10 playlists at most; MacMusic WAV files, mono, 22,050 Hz, 8-bit.</td></tr><tr><td>The utilities</td><td>The MacMusic Converter, Transfer and Backup Utilities work with 1.1 as with 1.0.</td></tr></table><p class="foot">Everything in MacMusic 1.1 is described in the <i>MacMusic User&rsquo;s Guide</i>, second edition (October 2026), and in brief in the MacMusic Read Me on its disk. &copy; 2026 Jack McAteer. Apple, Macintosh and Mac are trademarks of Apple Inc. For the owner&rsquo;s own use.</p></div>
+
+</body></html>
