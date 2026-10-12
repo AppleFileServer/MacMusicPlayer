@@ -426,6 +426,37 @@ part of a library read to a "Timings" file, on the real Plus: listing
 the folder, the cache, the scan, grouping, the title sort, the ID sort,
 writing the cache. Its figures decide N11-27 to N11-30.
 
+**The Plus's figures (2026-10-12),** the 316-song Scratch library, in
+seconds (ticks / 60). The Timings lines were cut short by the timing
+build's line buffer, losing "this whole read" and "since launch"; the
+parts add up to the owner's stopwatch (32 s).
+
+| Part of a plain start | As shipped (-O0) | Optimised (-O2) |
+|---|---|---|
+| Reading the cache | 1.5 | 0.5 |
+| The scan (no song files read) | 8.6 | 6.6 |
+| **Grouping** (artists, albums, genres, composers) | **21.9** | **15.1** |
+| The title sort | 1.1 | 0.9 |
+| The ID sort | 0.0 | 0.0 |
+| **The whole read** | **≈ 33** | **≈ 23** |
+
+Listing the folder alone (the timing build's extra pass, not part of a
+read) took 1.5 s. After an import (one song read from its file), writing
+the cache took another 3.4 s (2.1 s optimised).
+
+What they show:
+- **Grouping is two-thirds of the start.** For each song and each of the
+  four kinds, `InsertName` compares the name with every name so far
+  (`EqualString`, a ROM call each), then walks the list again for the
+  place to insert it: tens of thousands of ROM calls. Mini vMac ran them
+  fast enough to hide this.
+- **The scan takes 7 s more than listing the folder,** with nothing read
+  from the song files: matching the files to the cache, or something
+  else per file; not yet found.
+- **Optimisation alone saves about 30%** (33 s to 23 s): worth having, not
+  enough alone.
+- Sorting is no longer a cost (B1's merge sort, N11-23).
+
 ### Decisions
 
 - **N11-25. Importing one song after another (agreed, the owner's
@@ -453,12 +484,11 @@ writing the cache. Its figures decide N11-27 to N11-30.
     is full.
   - (The songs' IDs are already safe: each import records the next ID in
     the library's marker file, and the next import reads it.)
-- **N11-27. (Depending on the timings, the owner's option 3.)** Instead of
-  a library read at the end, the new songs added straight to the library
-  in memory, then sorted and grouped again, as Edit Song already updates
-  a song in place; the cache updated to match. Worth it if listing the
-  folder and the cache are most of the read; not if the sorting and
-  grouping are (it would cost nearly as much again).
+- **N11-27. Not done (decided from the timings, the owner,
+  2026-10-12).** Adding the new songs in memory instead of a read at the
+  end would still need the grouping and sorting again, which were most
+  of the read; with N11-32 and N11-33 one read at the end should take a
+  few seconds.
 - **N11-28. MacMusic comes to the front first (agreed: a fix).** Under
   MultiFinder a program comes fully to the front only once it calls the
   event routines; MacMusic reads its library before its first. It will
@@ -469,12 +499,28 @@ writing the cache. Its figures decide N11-27 to N11-30.
   from the start of any read expected to take more than a few seconds
   (a plain start included), not only once a song file is read, which on
   the Plus came late in the wait.
-- **N11-30. Compiler optimisation (M2; depending on the timings).** If the
-  optimised timing build is markedly faster on the Plus, MacMusic 1.1 is
-  built optimised, after a full run of the tests and the manual
-  checklist (it changes every timing the tests were made with).
+- **N11-30. Compiler optimisation (M2; agreed from the timings,
+  2026-10-12).** MacMusic 1.1 is built with `-O2` (about 30% faster on
+  the Plus), after a full run of the tests and the manual checklist (it
+  changes every timing the tests were made with).
 - **N11-31.** Part B's times in the documents (the User's Guide, the Read
   Me, outstanding-issues.md) replaced with the real Plus's.
+
+- **N11-32. Grouping by binary search (from the timings, 2026-10-12).**
+  The name lists are already sorted, so `InsertName` finds a name's
+  place by binary search with `CompareNames` (about 8 comparisons for
+  300 names, instead of up to a few hundred `EqualString` calls and a
+  second walk), then checks the names that compare equal there for an
+  exact match (`EqualString`, as now: the groups don't change). Host
+  tests: the same groups and order as the present code, on the test
+  libraries and on names that differ only in case or accents.
+- **N11-33. The scan's extra 7 s (from the timings, 2026-10-12).** Found
+  first (a host count of the work per file, then one timing run on the
+  Plus if needed), then fixed in the same way if it's a search that can
+  be avoided; brought back to the owner if the fix is larger.
+- **A second timing build** on the Plus after N11-30, N11-32 and N11-33,
+  its lines long enough to keep every figure; it decides N11-29 and gives
+  N11-31 its times.
 
 ## Not in 1.1 (agreed)
 
@@ -553,9 +599,11 @@ Done and committed, each checked by the owner in Mini vMac:
 
 Still to do, in order (Part D added 2026-10-12, before these):
 
-0. **Part D:** the owner runs the timing build on the Plus; N11-27 to
-   N11-30 decided from it; then Part D built, tested in Mini vMac, and
-   checked on the Plus with a new test image.
+0. **Part D:** the timing build's figures are in (2026-10-12, above):
+   N11-27 dropped, N11-30 agreed, N11-32 and N11-33 added. Next: N11-32,
+   N11-33 and N11-30; a second timing run on the Plus (N11-29, N11-31);
+   then N11-25, N11-26 and N11-28 built, tested in Mini vMac, and checked
+   on the Plus with a new test image.
 
 Still to do, in order:
 
