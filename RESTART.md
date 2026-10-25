@@ -12,8 +12,9 @@ about it is in this folder; `README.md` is the overview.
 
 **The latest release is 1.1** (2026-10-13, tag `v1.1`): faster start-up,
 printing, importing several songs. Its files, manuals included, are in
-`~/MacPlusProjects/releases/MacMusic-1.1/`. Where it was left
-(2026-10-13, put aside):
+`~/MacPlusProjects/releases/MacMusic-1.1/` (checked against its
+`SHA256SUMS` on 2026-10-25). Where it was left (2026-10-13, put aside;
+looked at again 2026-10-25):
 
 - **Not yet checked on the real Plus** (it was released without the
   full manual checklist, `docs/testing/runs/1.1.md`): printing on the
@@ -24,6 +25,9 @@ printing, importing several songs. Its files, manuals included, are in
 - **On the BlueSCSI card:** `HD60_512 MacMusic Timing 3.hda`, a timing
   image no longer needed, can be deleted (it shares SCSI ID 6 with the
   Pokémon project's disk).
+- **The manuals stay 7½ x 9 in.** An A5 edition of the User's Guide was
+  planned and proofed both ways on 2026-10-25, then not pursued:
+  `docs/plans/manual-a5.md` says how, if it's ever wanted.
 - Everything outside MacMusic (the utilities, their manual, their
   issues) is in `~/MacPlusProjects/LOOSE-ENDS.md`.
 
