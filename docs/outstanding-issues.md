@@ -153,6 +153,17 @@ guide):
 - Move a song between libraries with its details: today that means export
   then import, and export strips the iPod details and rating. A "Move to
   Library…" command that keeps them (noted in Stage 8a, not planned).
+- **Removing a library from the File menu's list** (the owner,
+  2026-11-11; a 1.x feature): today the list (8d-3, `kMaxRecent` 5)
+  can't be edited. A library whose folder is deleted stays listed,
+  dimmed, and only throwing away MacMusic Prefs clears the list, which
+  also resets the Settings. Proposed: choosing a library that can't be
+  found (`LibSetup_UseRecent`) asks "Remove it from the list?" (Remove /
+  Keep). To remove a test library, delete its folder in the Finder,
+  then choose it once and click Remove. A library on a floppy that
+  isn't inserted stays unless the user says so. Considered instead:
+  File > Clear Library List (keeps the current library). Either keeps
+  the prefs format, so 1.0 and 1.1 still read it. Not planned yet.
 - Ratings (7d) are recorded but not used for anything else yet. Ideas
   for later, not planned now: use them in Shuffle Songs, or to create
   playlists (e.g. songs rated 4 stars or more).
