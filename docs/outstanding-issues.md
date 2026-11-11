@@ -17,9 +17,12 @@ done; released without the full manual checklist (the owner's choice;
 - **Printing hasn't been tried on paper** (Part C): checked in Mini vMac
   only, which has no printer. The page's fonts, columns, header and
   footer are PROVISIONAL (N11-12, N11-13).
-- The time of a first start, or Rescan Library, on the real Plus isn't
-  recorded (every song file read); later starts, about 13 s for 316
-  songs.
+- **On the owner's 4 MB Plus** (2026-11-11): the first start and
+  Rescan Library, which read every song file, are fast enough; their
+  times weren't recorded. Later starts take about 13 s for 316 songs.
+- **A 1 MB Plus can't be tested:** the owner's Plus is the only one, and
+  taking its SIMMs out isn't wanted. 1.1's Part 0 measured a 1 MB
+  configuration in Mini vMac instead ("Accepted limitations" below).
 
 ## Known issues in 1.0 (and still in 1.1)
 
@@ -48,6 +51,10 @@ guide):
   the progress bar are kept in song time, so they stay correct.
 - **Fix (if wanted):** repeat one sample in every 108 while filling the
   ring. Accepted as-is for now.
+- **1.2 (`docs/plans/release-1.2.md`, step D):** MacMusic will accept
+  songs made at 22,254 Hz, the Plus's own rate, as the MacMusic
+  Converter 1.1 makes them; they play at true speed. I4 is then closed:
+  accepted for 22,050 Hz songs, fixed for 22,254 Hz ones.
 
 ### I6. Open a library from the Finder (L4, deferred from 5b-3)
 - Double-clicking "MacMusic Library Info" could launch the app with that

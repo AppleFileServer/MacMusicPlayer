@@ -6,6 +6,10 @@ features that keep reading 1.0's libraries, 2.0 for a change needing a
 library conversion. The decision codes in brackets are explained in
 `docs/decisions.md`.
 
+## 1.2 (in progress; docs/plans/release-1.2.md)
+
+No changes to MacMusic itself yet.
+
 ## 1.1 (2026-10-13; docs/plans/release-1.1.md)
 
 Released by the owner's choice without the full manual checklist
