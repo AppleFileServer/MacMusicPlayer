@@ -239,7 +239,8 @@ short UIList_RowSongs(const Screen *s, short index,
         case kScreenGenres:
         case kScreenComposers:
             /* DECISION N3: the songs the row leads to, in the order the
-               screens show them (album: track order; otherwise D14). */
+               screens show them (album: track order; Albums > All: by
+               album, then track, N12-3; otherwise D14). */
             return Library_ListSongs(&next.filter, out, max);
         default:
             return 0;
@@ -310,7 +311,12 @@ Boolean UIList_ItemTarget(const Screen *s, short index, Screen *next)
         case kScreenAlbums:
             next->kind = kScreenSongs;
             if (item == kAllItem)
+            {
+                /* N12-3 (PROVISIONAL): by album, then track; Music >
+                   Songs, with the same (empty) filter, stays by title. */
+                next->filter.byAlbum = true;
                 next->title = kSongsTitle;
+            }
             else
             {
                 next->filter.album = item;

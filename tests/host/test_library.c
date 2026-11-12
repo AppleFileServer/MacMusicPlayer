@@ -174,6 +174,45 @@ int main(void)
     CHECK_LIST(Names(Library_ArtistName, gList, n),
                "The Beatles/the beatles/Eagles");
 
+    Test("Albums > All (N12-3): by album, then track; no album last");
+    SmallLibrary();
+    Library_Scan(&gF);
+    LibFilter_Clear(&f);
+    f.byAlbum = true;
+    n = Library_ListSongs(&f, gList, kMaxSongs);
+    /* Abbey Road, The Long Run ("The " ignored: L), Revolver in track
+       order, then the songs with no album by title; no audiobook. */
+    CHECK_LIST(Titles(gList, n), "Something/the Long Run/Taxman/"
+               "Eleanor Rigby/Yellow Submarine/Abba Song/No Artist");
+    n = Library_ListSongs(&gAll, gList, kMaxSongs);     /* Music > Songs */
+    CHECK_LIST(Titles(gList, n), "Abba Song/Eleanor Rigby/the Long Run/"
+               "No Artist/Something/Taxman/Yellow Submarine");
+    f.artist = Library_FindArtist(PS("The Beatles"));   /* an artist's All */
+    n = Library_ListSongs(&f, gList, kMaxSongs);
+    CHECK_LIST(Titles(gList, n), "Taxman/Eleanor Rigby/Yellow Submarine");
+    LibFilter_Clear(&f);
+    f.byAlbum = true;
+    f.genre = Library_FindGenre(PS("Rock"));            /* a genre's All */
+    n = Library_ListSongs(&f, gList, kMaxSongs);
+    CHECK_LIST(Titles(gList, n), "Something/the Long Run/Taxman/"
+               "Eleanor Rigby/Yellow Submarine");
+
+    Test("Albums > All: equal tracks keep title order; track 0 first");
+    gF = NewLibrary();
+    Song(1, "Zeta", "A", "One", "", 2);
+    Song(2, "Alpha", "A", "One", "", 2);
+    Song(3, "Middle", "A", "One", "", 0);
+    Song(4, "First", "A", "One", "", 1);
+    Song(5, "Other", "A", "Two", "", 1);
+    Library_Scan(&gF);
+    LibFilter_Clear(&f);
+    f.byAlbum = true;
+    n = Library_ListSongs(&f, gList, kMaxSongs);
+    CHECK_LIST(Titles(gList, n), "Middle/First/Alpha/Zeta/Other");
+    f.album = Library_SongAlbum(gList[0]);              /* the album's own */
+    n = Library_ListSongs(&f, gList, kMaxSongs);        /* screen: the same */
+    CHECK_LIST(Titles(gList, n), "Middle/First/Alpha/Zeta");
+
     Test("unreadable files and duplicate IDs are skipped");
     SmallLibrary();
     TestFS_WriteFile(gF.folderID, "Read Me", 'TEXT', 'ttxt', "hello", 5);

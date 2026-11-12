@@ -52,7 +52,8 @@ Playing; elsewhere a held button is just a press.
 - **Music:** Playlists, Artists, Albums, Songs, Genres, Composers,
   Audiobooks. Artists, Albums and Genres start with an **All** row.
   Songs are listed by title (ignoring a leading "The "); an album's songs
-  are in track order. Audiobooks appear only under Audiobooks.
+  are in track order, and **All** in an Albums list gives the songs album
+  by album, each in track order. Audiobooks appear only under Audiobooks.
 - **Extras:** the **Clock**, showing the Mac's date and time.
 - **Settings:** About, Shuffle, Repeat, Legal, Reset All Settings.
 - **Shuffle Songs:** plays every song (not audiobooks) in random order.

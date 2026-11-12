@@ -24,6 +24,8 @@ typedef struct
     short album;
     short composer;
     short playlist;
+    Boolean byAlbum;    /* 1.2 (N12-3): no album chosen, but listed by
+                           album, then track (Albums > All) */
 } LibFilter;
 
 void LibFilter_Clear(LibFilter *filter);

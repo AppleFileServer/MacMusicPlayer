@@ -14,6 +14,11 @@ library conversion. The decision codes in brackets are explained in
   the frame, so a click near the frame's edge went nowhere and the typing
   stayed in the field before (the owner clicked Genre and kept typing in
   Composer). A new host test, `test_fieldclick`.
+- **Albums › All in album order (N12-3, PROVISIONAL):** the songs that
+  All leads to in an Albums list (all albums, or an artist's or a genre's)
+  are listed, and played, album by album, each album in track order; songs
+  with no album come last. Before, they were by title, as Music › Songs
+  still is. From the owner, 2026-11-11.
 
 ## 1.1 (2026-10-13; docs/plans/release-1.1.md)
 

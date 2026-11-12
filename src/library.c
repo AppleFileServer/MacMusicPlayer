@@ -91,6 +91,7 @@ void LibFilter_Clear(LibFilter *filter)
     filter->album = kNone;
     filter->composer = kNone;
     filter->playlist = kNone;
+    filter->byAlbum = false;
 }
 
 /* ---- Sorting ---------------------------------------------------------- */
@@ -1149,6 +1150,36 @@ short Library_ListAlbums(const LibFilter *filter, short *out, short max)
     return n;
 }
 
+/* 1.2 (N12-3, PROVISIONAL): an "All" row's songs by album (in the albums'
+   order, D14; songs with no album last), then track (as D13), with a
+   stable merge sort, so songs that tie keep their title order (D14). */
+static long AlbumTrackKey(short song)
+{
+    const SongRec *r = &Songs()[song];
+
+    return ((long)(r->album == kNone ? kMaxGroups : r->album) << 16)
+         | (unsigned short)r->track;
+}
+
+static void SortSongsByAlbum(short *songs, short count)
+{
+    short half, i, j, k;
+
+    if (count < 2)
+        return;
+    half = count / 2;
+    SortSongsByAlbum(songs, half);
+    SortSongsByAlbum(songs + half, count - half);
+    for (i = 0, j = half, k = 0; i < half && j < count; )
+        gMergeWork[k++] = AlbumTrackKey(songs[i]) <= AlbumTrackKey(songs[j])
+                          ? songs[i++] : songs[j++];
+    while (i < half)
+        gMergeWork[k++] = songs[i++];
+    while (j < count)
+        gMergeWork[k++] = songs[j++];
+    BlockMove(gMergeWork, songs, (long)count * sizeof(short));
+}
+
 short Library_ListSongs(const LibFilter *filter, short *out, short max)
 {
     short i, s, n = 0;
@@ -1165,6 +1196,8 @@ short Library_ListSongs(const LibFilter *filter, short *out, short max)
 
     if (filter->album != kNone)
         SortSongsByTrack(out, n);
+    else if (filter->byAlbum)
+        SortSongsByAlbum(out, n);
 
     return n;
 }

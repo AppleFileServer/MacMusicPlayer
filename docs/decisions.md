@@ -248,6 +248,7 @@ The click wheel (W: Stage 5c-1)
 |---|---|---|
 | N12-1 | A click between a text field's frame and its text (the 3-pixel margin the Dialog Manager ignores) is moved inside the field, so that field is selected | `fieldclick.c`, `songdialog.c` |
 | N12-2 | N12-1 in the song details window only (DITL 131), whose fields stand in a column | `songdialog.c` |
+| N12-3 | PROVISIONAL: Albums > All lists its songs by album (D14 order, no album last), then track (D13), then title; Music > Songs and Composers stay by title. Playing from the list follows it (N3) | `library.c`, `ui_lists.c` |
 
 ## *MacMusic Utilities*, the companion manual (`manual-utilities.md`)
 
