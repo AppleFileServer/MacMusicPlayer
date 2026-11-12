@@ -36,6 +36,32 @@ TAG_KEYS = ['kMDItemTitle', 'kMDItemAuthors', 'kMDItemAlbum',
             'kMDItemMusicalGenre', 'kMDItemComposer',
             'kMDItemAudioTrackNumber', 'kMDItemDurationSeconds']
 
+def read_tags_ffprobe(path, music, ffprobe):
+    """A song's details read from its own tags with ffprobe (1.2): track
+    numbers and composers, which Spotlight often lacks; the folder layout
+    and file name where a tag is missing."""
+    r = subprocess.run([ffprobe, '-v', 'error', '-print_format', 'json',
+                        '-show_entries', 'format=duration:format_tags', path],
+                       capture_output=True, text=True)
+    try:
+        f = json.loads(r.stdout).get('format', {})
+    except ValueError:
+        f = {}
+    tags = {k.lower(): v.strip() for k, v in (f.get('tags') or {}).items()
+            if isinstance(v, str)}
+    rel = os.path.relpath(path, music).split(os.sep)
+    folder_artist = rel[0] if len(rel) >= 3 else ''
+    folder_album = rel[1] if len(rel) >= 3 else ''
+    m = re.match(r'\s*(\d+)', tags.get('track', ''))
+    return dict(path=path, seconds=float(f.get('duration') or 0),
+                title=tags.get('title') or os.path.splitext(rel[-1])[0],
+                artist=tags.get('artist') or tags.get('album_artist') or folder_artist,
+                album=tags.get('album') or folder_album,
+                genre=tags.get('genre', ''),
+                composer=tags.get('composer', ''),
+                track=int(m.group(1)) if m else 0,
+                notes=[])
+
 def read_tags(path, music):
     """A song's details from Spotlight, falling back to the folder layout
     (Artist/Album/Song) and the file name."""
@@ -133,11 +159,24 @@ def step_pick(a):
             if n.lower().endswith(('.mp3', '.m4a', '.aac', '.wav', '.aif', '.aiff')):
                 files.append(os.path.join(root, n))
     files.sort()
-    songs = [read_tags(p, a.music) for p in files]
+    if a.ffprobe:
+        songs = [read_tags_ffprobe(p, a.music, a.ffprobe) for p in files]
+    else:
+        songs = [read_tags(p, a.music) for p in files]
     songs = [s for s in songs if 0 < s['seconds'] < a.max_seconds]
     for s in songs:
         tidy(s)
     merge_artists(songs)
+    # 1.2: a song in the library twice (the same artist, album, track and
+    # title, perhaps as an MP3 and an M4A): the first, by file name, kept.
+    seen, kept = set(), []
+    for s in songs:
+        if song_key(s) in seen:
+            print('duplicate left out:', os.path.relpath(s['path'], a.music))
+            continue
+        seen.add(song_key(s))
+        kept.append(s)
+    songs = kept
     if a.count and a.count < len(songs):
         # Spread evenly across the artists, A to Z: each artist's first
         # song (album and track order).
@@ -189,12 +228,31 @@ def step_convert(a):
     os.makedirs(out_dir, exist_ok=True)
     for i, s in enumerate(songs):
         out = os.path.join(out_dir, '%03d.wav' % (i + 1))
-        r = subprocess.run(['afconvert', '-f', 'WAVE', '-d', 'UI8@%d' % SAMPLE_RATE,
-                            '-c', '1', '--mix', s['path'], out],
-                           capture_output=True, text=True)
+        if a.converter:
+            # 1.2: the MacMusic Converter's own engine (mmc-convert): 22,254
+            # Hz, levelled to -16 LUFS as the Converter 1.1 makes them.
+            if os.path.exists(out):
+                os.remove(out)
+            args = [a.converter, s['path'], out_dir, '--name', '%03d' % (i + 1),
+                    '--loudness', '-16', '--wav']
+            if a.trim:
+                args += ['--trim', str(a.trim)]
+            env = dict(os.environ)
+            if a.tools_bin:
+                env['MMC_TOOLS_BIN'] = a.tools_bin
+            r = subprocess.run(args, capture_output=True, text=True, env=env)
+            err = r.stdout[-400:] + r.stderr[-400:]
+        else:
+            r = subprocess.run(['afconvert', '-f', 'WAVE', '-d', 'UI8@%d' % SAMPLE_RATE,
+                                '-c', '1', '--mix', s['path'], out],
+                               capture_output=True, text=True)
+            err = r.stderr
         if r.returncode or not os.path.exists(out):
-            sys.exit('could not convert %s: %s' % (s['path'], r.stderr))
-    print('converted %d songs to 8-bit mono %d Hz WAV' % (len(songs), SAMPLE_RATE))
+            sys.exit('could not convert %s: %s' % (s['path'], err))
+        print('%3d/%d %s' % (i + 1, len(songs), os.path.basename(s['path'])), flush=True)
+    print('converted %d songs to 8-bit mono %d Hz WAV%s' % (
+        len(songs), 22254 if a.converter else SAMPLE_RATE,
+        ', levelled to -16 LUFS (mmc-convert)' if a.converter else ''))
 
 
 # ---- songs ----------------------------------------------------------------
@@ -418,6 +476,12 @@ def main():
     ap.add_argument('--out', help='the .hda to write (image)')
     ap.add_argument('--size-mib', type=int, default=1980, help='image size (default 1980)')
     ap.add_argument('--volume-name', default='Scratch')
+    ap.add_argument('--ffprobe', help='read tags with this ffprobe (pick), not Spotlight')
+    ap.add_argument('--converter', help='convert with this mmc-convert, the MacMusic '
+                    'Converter\'s engine (22254 Hz, levelled to -16 LUFS), not afconvert')
+    ap.add_argument('--tools-bin', help='the folder of ffmpeg and ffprobe for --converter')
+    ap.add_argument('--trim', type=int, choices=(0, 2, 3), default=0,
+                    help='with --converter: trim silence longer than 2 or 3 s at the ends')
     ap.add_argument('--rate', type=int, choices=RATES, default=22254,
                     help='the songs\' sample rate (convert; default 22254, '
                          'which MacMusic 1.2 needs; 22050 for 1.0 and 1.1)')
