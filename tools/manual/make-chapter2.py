@@ -127,7 +127,9 @@ TOPICS = [
                "> Choose All at the top of the list.",
                "All gathers up everything the list leads to: All in Genres "
                "lists every artist; All in Artists, every album; and All in "
-               "an artist&rsquo;s albums, every song by that artist.",
+               "an artist&rsquo;s albums, every song by that artist, album by "
+               "album, each in track order. All in Albums lists every song "
+               "the same way.",
                "~ The Composers list has no All."), "c2-genres"),
            T("To Find Songs by Genre or Composer", steps(
                "> Choose Genres from the Music screen, and then a genre.",
@@ -382,8 +384,8 @@ TOPICS = [
 
     Topic("Adding Songs",
           "<p>Songs come into your library by importing them. MacMusic plays "
-          "WAV sound files of one particular kind: mono, 22,050 samples a "
-          "second, 8 bits. To make them from your own music, see "
+          "WAV sound files of one particular kind: mono, 22,254 or 22,050 "
+          "samples a second, 8 bits. To make them from your own music, see "
           "<i>MacMusic Utilities</i>.</p>",
           "A library can hold as many as 500 songs.",
           [T("To Import a Song", steps(
@@ -439,8 +441,8 @@ TOPICS = [
            T("If the File Isn&rsquo;t the Right Kind", steps(
                "If the file isn&rsquo;t a WAV file, MacMusic says so. If "
                "it&rsquo;s a WAV file of another kind, it says what the file is, "
-               "and what&rsquo;s needed: &ldquo;Only mono, 22050 Hz, 8-bit PCM "
-               "WAV files can be imported.&rdquo;",
+               "and what&rsquo;s needed: &ldquo;Only mono, 8-bit PCM WAV files "
+               "at 22050 or 22254 Hz can be imported.&rdquo;",
                "> Click OK.",
                "To prepare files MacMusic can play, see <i>MacMusic "
                "Utilities</i>.")),

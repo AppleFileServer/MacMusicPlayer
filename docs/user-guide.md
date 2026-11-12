@@ -1,4 +1,4 @@
-# MacMusic 1.1 user guide
+# MacMusic 1.2 user guide
 
 MacMusic turns a Macintosh Plus into a 2004 iPod: a window with the
 iPod's screen and click wheel, its menus, and its Now Playing screen.
@@ -13,9 +13,12 @@ Your songs live in a **MacMusic Library**, a folder on any disk.
   Plus with 1 MB, MultiFinder leaves about 590K: enough for 500 songs
   with ordinary details. For a library of 500 songs whose every detail
   is long, use the Finder alone (Set Startup, in the Special menu).
-- Songs as WAV files: **22,050 Hz, 8-bit, mono**. Other WAV formats are
-  refused with a message saying what's needed. On a modern Mac,
-  `afconvert -f WAVE -d UI8@22050 -c 1 --mix song.mp3 song.wav` makes one.
+- Songs as WAV files: **8-bit, mono, at 22,254 Hz or 22,050 Hz**.
+  22,254 Hz is the Plus's own rate, which the MacMusic Converter 1.1
+  makes: those songs play at their true speed and pitch. Other WAV
+  formats are refused with a message saying what's needed. On a modern
+  Mac, `afconvert -f WAVE -d UI8@22254 -c 1 --mix song.mp3 song.wav`
+  makes one.
 
 ### The first time
 
@@ -176,9 +179,14 @@ the library…**. The first start with a library, and Rescan Library,
 read every file; later starts read only the new or changed ones, and
 are quicker.
 
-The cache does no harm to MacMusic 1.0, which opens the library as
-before. If a song was changed outside MacMusic and its details look
-wrong, choose Rescan Library.
+The cache does no harm to MacMusic 1.0 or 1.1, which open the library as
+before; starting 1.1 again after 1.2 reads every file once. If a song was
+changed outside MacMusic and its details look wrong, choose Rescan
+Library.
+
+MacMusic 1.0 and 1.1 can't play songs at 22,254 Hz: they leave them out,
+saying some files were not recognised. The files aren't changed, and the
+songs are back the next time MacMusic 1.2 opens the library.
 
 ## Printing
 
@@ -215,8 +223,10 @@ moment repeat, then a pause, before the music carries on by itself.
 ## Limits and known issues
 
 - **8-bit mono sound at 22 kHz,** the Plus's own sound.
-- **Songs play about 0.9% fast,** because the Plus's sound hardware
-  runs at 22,254 samples a second. The times shown are right.
+- **Songs at 22,050 Hz play about 0.9% fast,** because the Plus's sound
+  hardware runs at 22,254 samples a second. The times shown are right.
+  Songs at 22,254 Hz, as the MacMusic Converter 1.1 makes them, play at
+  their true speed.
 - **The quietest volume isn't silent.** It's the Plus's lowest
   hardware level.
 - **Starting takes a little while:** on a Macintosh Plus, about 13

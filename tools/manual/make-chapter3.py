@@ -136,7 +136,8 @@ BODY = "".join([
           ("Playlists", "your playlists, then a playlist&rsquo;s songs, in "
            "their order"),
           ("Artists", "All and the artists, then albums, then songs"),
-          ("Albums", "All and the albums, then songs, in track order"),
+          ("Albums", "All and the albums, then songs, in track order; All: "
+           "album by album"),
           ("Songs", "every song, by title (a leading &ldquo;The&rdquo; "
            "ignored)"),
           ("Genres", "All and the genres, then artists, albums and songs"),
@@ -308,11 +309,13 @@ BODY = "".join([
           ("Song details", "63 characters each"),
           ("Playlist names", "31 characters, no colon"),
           ("Track numbers", "1 to 9,999, or none"),
-          ("Sound files", "WAV: mono, 22,050 samples a second, 8 bits"),
+          ("Sound files", "WAV: mono, 22,254 or 22,050 samples a second, "
+           "8 bits"),
           ("Sound output", "mono, through the built-in speaker or the sound "
            "output port"),
-          ("Playing speed", "about 0.9% fast, as the Macintosh Plus plays "
-           "22,254 samples a second; the times shown are right"),
+          ("Playing speed", "true speed at 22,254 samples a second, the "
+           "Macintosh Plus&rsquo;s own rate; about 0.9% fast at 22,050; the "
+           "times shown are right"),
           ("Volume", "8 levels; the softest isn&rsquo;t silent"),
           ("Fast-forward and rewind", "4 times normal speed, then 16 times "
            "after 2 seconds"),

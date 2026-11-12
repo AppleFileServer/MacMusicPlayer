@@ -35,6 +35,12 @@ library conversion. The decision codes in brackets are explained in
   check, and plays a 22,254 Hz song on from a 22,050 one.
   `tools/library-image` has `--rate` (22,254 by default; 22,050 for a
   library 1.0 and 1.1 can read).
+- **The User's Guide for 1.2 (step E1):** `docs/user-guide.md` (and so
+  the TeachText Read Me) and the printed guide, now its third edition
+  (November 2026): the two rates and the `afconvert` example; "0.9% fast"
+  only for 22,050 Hz songs; All in an Albums list, album by album; what
+  1.0 and 1.1 do with a 1.2 library (a new troubleshooting entry, "An
+  earlier MacMusic leaves songs out"); the import refusal's new wording.
 
 ## 1.1 (2026-10-13; docs/plans/release-1.1.md)
 

@@ -173,8 +173,8 @@ A = "".join([
         "Import Anyway to have it twice.", ("c2-duplicate", 350)),
     msg(q("This is not a WAV file."),
         "MacMusic can import only WAV sound files. Click OK.", ("c2-not-wav", 336)),
-    msg(q("Only mono, 22050 Hz, 8-bit PCM WAV files can be imported. This "
-          "file is stereo, 44100 Hz, 16-bit."),
+    msg(q("Only mono, 8-bit PCM WAV files at 22050 or 22254 Hz can be "
+          "imported. This file is stereo, 44100 Hz, 16-bit."),
         "The file is a WAV file of another kind; the message says what it "
         "is. It has to be made into the kind MacMusic plays: see Appendix B, "
         "and <i>MacMusic Utilities</i>."),
@@ -321,7 +321,7 @@ B = "".join([
     sub("The Files MacMusic Plays"),
     "<p>MacMusic plays <b>WAV</b> sound files of one kind:</p>",
     boxes("<b>mono:</b> one channel of sound;",
-          "<b>22,050 samples a second;</b>",
+          "<b>22,254 or 22,050 samples a second;</b>",
           "<b>8 bits</b> to each sample, uncompressed (&ldquo;PCM&rdquo;)."),
     "<p>That&rsquo;s the Macintosh Plus&rsquo;s own sound. Its sound "
     "hardware plays 8-bit samples, about 22,000 a second, through one "
@@ -332,14 +332,16 @@ B = "".join([
     "is mono, through the speaker and the sound output port alike. A "
     "stereo recording is mixed into one channel when its file is "
     "made.</p>",
-    "<p>The Macintosh Plus actually plays 22,254 samples a second, so songs "
-    "play about 0.9% faster than they were recorded: a four-minute song "
-    "ends two seconds early. Few ears can tell, and the times MacMusic "
-    "shows are right.</p>",
+    "<p>The Macintosh Plus plays exactly 22,254 samples a second, and a "
+    "file made at that rate, as the MacMusic Converter makes them, plays "
+    "at its true speed and pitch. A file made at 22,050 samples a second, "
+    "the rate of earlier versions of MacMusic, plays about 0.9% fast: a "
+    "four-minute song ends two seconds early. Few ears can tell, and the "
+    "times MacMusic shows are right either way.</p>",
 
     sub("How Much Room Music Takes"),
-    "<p>At 22,050 bytes a second, music takes about 1.3 MB of disk space "
-    "for each minute. So:</p>",
+    "<p>At about 22,000 bytes a second, music takes about 1.3 MB of disk "
+    "space for each minute. So:</p>",
     table(("On", "There&rsquo;s room for about"),
           ("An 800K floppy disk", "30 seconds, beside MacMusic itself"),
           ("A 20 MB hard disk, such as the Apple Hard Disk 20SC",
@@ -458,9 +460,17 @@ D = "".join([
             "pages are printed by PrintMonitor once MacMusic has finished: "
             "leave the Macintosh switched on until they are."),
     trouble("Songs play a little fast",
-            "By about 0.9%, because the Macintosh Plus plays its sound a little "
-            "faster than the files were made for. The times shown are right. "
-            "See Appendix B."),
+            "Songs made at 22,050 samples a second play about 0.9% fast, "
+            "because the Macintosh Plus plays its sound a little faster than "
+            "they were made for. The times shown are right. Songs made again "
+            "with the MacMusic Converter play at their true speed. See "
+            "Appendix B."),
+    trouble("An earlier MacMusic leaves songs out",
+            "MacMusic 1.0 and 1.1 can play only songs made at 22,050 samples "
+            "a second. Opening the library, they say that some files were not "
+            "recognised, and leave those songs out. Nothing is changed: the "
+            "songs are all there again when this version opens the "
+            "library."),
     trouble("The softest volume isn&rsquo;t silent",
             "It&rsquo;s the Macintosh Plus&rsquo;s lowest sound level. To "
             "silence the music, pause it."),

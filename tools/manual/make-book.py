@@ -28,7 +28,7 @@ PRIVATE = os.environ.get("MANUAL_ASSETS",
 OWN_USE = all(os.path.exists(os.path.join(PRIVATE, f))
               for f in ("cover-macmusic.jpg", "rainbow-logo.png"))
 PDF = os.path.join(ROOT, "build-manual", "MacMusic-Users-Guide%s.pdf" % ("" if OWN_USE else "-plain"))
-EDITION = "MacMusic 1.1 &middot; Second edition, October 2026"
+EDITION = "MacMusic 1.2 &middot; Third edition, November 2026"
 
 
 def part(name):
@@ -291,7 +291,7 @@ GLOSSARY = [
     ("track number", "A song&rsquo;s place on its album; an album&rsquo;s songs "
      "are listed in track order."),
     ("WAV file", "A kind of sound file. MacMusic plays WAV files that are mono, "
-     "with 22,050 8-bit samples a second."),
+     "with 22,254 or 22,050 8-bit samples a second."),
     ("window", "An area of the screen with a title bar, that shows a "
      "document, a disk&rsquo;s contents or, in MacMusic&rsquo;s case, the "
      "player."),
