@@ -136,6 +136,19 @@ The Converter now makes WAVs at 22,254 Hz, the Plus's rate (its 5a3acc7,
   - **figures:** any screenshot showing the Normalise setting needs retaking
     from Converter 1.1. These are the owner's screenshots (UB4), so the
     owner is asked for them.
+- **The new captures (2026-11-11, Claude's, with the owner's leave):**
+  Converter 1.1 (45c037b, built in the scratchpad), each window captured
+  alone at 1080 x 1264, in
+  `manual-assets-private/utilities-screenshots/taken-2026-11-11/`:
+  cv06, cv15 (from a copy in /Applications, so the FFmpeg line reads
+  `/Applications/…1.1.app`), cv16, cv17, cv20, cv22, cv23, cv27, cv28,
+  cv-reencode, cv-wav-only. The Save To folder is the owner's "Music
+  Downloads". The YouTube video is the owner's own "MacMusic" (4:02),
+  so the text's "Chill Dreamy" example and cv18's shortened title need
+  rewriting; 1.1 has no "Analysing the sound" stage. The Version row and
+  cv30 still read 1.0 (cv30 left as it is: the owner, 2026-11-11).
+  `make-figures.py` needs these as `whole(36)` entries and new part
+  rectangles (the layout moved).
 - An update card like 1.1's (MD10), since users would notice the change:
   made, as 1.2 is a version with changes a user would notice.
 

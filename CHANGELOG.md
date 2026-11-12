@@ -8,7 +8,12 @@ library conversion. The decision codes in brackets are explained in
 
 ## 1.2 (in progress; docs/plans/release-1.2.md)
 
-No changes to MacMusic itself yet.
+- **Clicking a field in the song details window (N12-1, N12-2):** a
+  click anywhere inside a field's drawn box now selects that field. The
+  Dialog Manager takes clicks only inside the text area, 3 pixels in from
+  the frame, so a click near the frame's edge went nowhere and the typing
+  stayed in the field before (the owner clicked Genre and kept typing in
+  Composer). A new host test, `test_fieldclick`.
 
 ## 1.1 (2026-10-13; docs/plans/release-1.1.md)
 

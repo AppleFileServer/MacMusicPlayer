@@ -3,6 +3,7 @@
 #include <ToolUtils.h>
 
 #include "songdialog.h"
+#include "fieldclick.h"
 #include "message.h"
 #include "modal.h"
 #include "pstr.h"
@@ -23,6 +24,41 @@ static ConstStringPtr const kFieldNames[kSongTagCount] = {
     P("The title"), P("The artist"), P("The album"), P("The genre"),
     P("The composer")
 };
+
+/* 1.2 (N12-1, N12-2): the song window's filter. Modal_DialogFilter's
+   work first; then a click on the margin between a field's frame and its
+   text is moved inside the field, so ModalDialog selects that field (and
+   places the insertion point) as for a click on the text. Only this
+   window, whose fields stand in a column (N12-2). */
+static pascal Boolean SongFilter(DialogPtr dialog, EventRecord *event,
+                                 short *item)
+{
+    Rect fields[kItemTrack - kItemTitle + 1];
+    short i, type;
+    Handle handle;
+    Point pt;
+    GrafPtr savePort;
+
+    if (Modal_DialogFilter(dialog, event, item))
+        return true;
+    if (event->what != mouseDown)
+        return false;
+
+    for (i = 0; i <= kItemTrack - kItemTitle; i++)
+        GetDialogItem(dialog, kItemTitle + i, &type, &handle, &fields[i]);
+
+    GetPort(&savePort);
+    SetPort(dialog);
+    pt = event->where;
+    GlobalToLocal(&pt);
+    if (FieldClick_Adjust(fields, kItemTrack - kItemTitle + 1, &pt))
+    {
+        LocalToGlobal(&pt);
+        event->where = pt;
+    }
+    SetPort(savePort);
+    return false;
+}
 
 /* "m:ss" for a number of seconds. */
 static void FormatDuration(long seconds, Str255 out)
@@ -132,7 +168,7 @@ Boolean SongDialog_Run(ConstStringPtr okTitle, ConstStringPtr fileName,
 
     for (;;)
     {
-        ModalDialog(Modal_DialogFilter, &item);
+        ModalDialog(SongFilter, &item);
 
         if (item == kItemOK)
         {

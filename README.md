@@ -72,7 +72,7 @@ separate, and the normal build contains none of it.
 | `src/ui_nav.c`, `ui_lists.c`, `ui_menus.c` | The iPod's screens: menus, lists, Now Playing, Settings, the Clock |
 | `src/library.c`, `songfile.c`, `song_format.h` | The library: song files (a WAV with an "iPod" chunk), scanning, lists, playlists |
 | `src/libfolder.c`, `libsetup.c`, `prefs.c`, `settings.c` | Finding and remembering libraries; the prefs file; Settings |
-| `src/import.c`, `export.c`, `editsong.c`, `songdialog.c`, `wav.c`, `fileops.c` | Import, Export and Edit Song |
+| `src/import.c`, `export.c`, `editsong.c`, `songdialog.c`, `fieldclick.c`, `wav.c`, `fileops.c` | Import, Export and Edit Song |
 | `src/playlists.c` | The Playlists menu |
 | `src/playback.c`, `audio.c`, `shuffle.c`, `volume.c` | The play queue, the Sound Manager ring buffer, shuffle, the Plus's volume |
 | `src/modal.c`, `message.c` | Keeping the sound fed in dialogs and menus; alerts |

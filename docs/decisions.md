@@ -242,6 +242,13 @@ The click wheel (W: Stage 5c-1)
 | N11-32 | Each name's place in the group lists found by binary search, then checked for an identical name among those comparing equal | `library.c` |
 | — | PROVISIONAL: audiobooks print after the songs under their own heading; an album of several artists shows "Various Artists" | `printlayout.c` |
 
+## 1.2 (`release-1.2.md`)
+
+| Code | Decision | Where |
+|---|---|---|
+| N12-1 | A click between a text field's frame and its text (the 3-pixel margin the Dialog Manager ignores) is moved inside the field, so that field is selected | `fieldclick.c`, `songdialog.c` |
+| N12-2 | N12-1 in the song details window only (DITL 131), whose fields stand in a column | `songdialog.c` |
+
 ## *MacMusic Utilities*, the companion manual (`manual-utilities.md`)
 
 | Code | Decision | Where |
