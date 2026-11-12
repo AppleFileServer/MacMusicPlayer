@@ -226,6 +226,12 @@ logo (see its README), and `cover-macmusic.jpg`, which `make-cover.py`
 makes from them. Without that folder, `make-book.py` builds the plain
 edition, `MacMusic-Users-Guide-plain.pdf`, with MacMusic's own icon.
 
+The release floppy's "Sample Song" (1.2, N12-10) is
+`~/MacPlusProjects/manual-assets-private/macmusic-release/Sample Song.wav`
+(or `MACMUSIC_SAMPLE`): 28 s of a commercial recording, so never in the
+repository. Without it, `tools/make-release.sh` makes the floppy with
+MacMusic and the Read Me only, and says so.
+
 ## 11. The MacMusic Converter Utility
 
 A separate project, in `~/MacPlusProjects/MacMusicConverter/` (its own

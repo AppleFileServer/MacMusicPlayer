@@ -3,7 +3,8 @@
 # builds it afresh from `git archive`, runs both test scripts, then writes
 #
 #   MacMusic-<v>.bin              the app as MacBinary ("has bundle" set)
-#   MacMusic-<v>.dsk              an 800K floppy: MacMusic and its Read Me
+#   MacMusic-<v>.dsk              an 800K floppy: MacMusic, its Read Me and,
+#                                 since 1.2, "Sample Song" (N12-10)
 #   MacMusic-<v>-source.zip       the source (git archive)
 #   HD50_512 Scratch 1980 MB.hda  with --scratch: a BlueSCSI disk holding
 #                                 MacMusic and a library of real songs
@@ -22,6 +23,12 @@
 #   --out DIR        where to write (default as above)
 # Mini vMac must be closed (for the smoke test). The working tree must be
 # clean: the release is exactly a commit.
+#
+# 1.2 (N12-10): "Sample Song", a MacMusic WAV to try importing, goes on
+# the floppy from outside the repository (it's a commercial recording,
+# for the owner's own floppies): MACMUSIC_SAMPLE, by default
+# ~/MacPlusProjects/manual-assets-private/macmusic-release/Sample Song.wav.
+# Without it the floppy has MacMusic and the Read Me only, with a warning.
 
 set -eu
 cd "$(dirname "$0")/.."
@@ -34,6 +41,7 @@ TEMPLATE=$HOME/MacPlusProjects/environment-1.0/bluescsi-template.hda
 [ -f "$TEMPLATE" ] || \
     TEMPLATE="$HOME/MacPlusProjects/releases/MacMusic-1.0/HD50_512 Scratch 1980 MB.hda"
 OUT=
+SAMPLE=${MACMUSIC_SAMPLE:-$HOME/MacPlusProjects/manual-assets-private/macmusic-release/Sample Song.wav}
 
 while [ $# -gt 0 ]; do
     case $1 in
@@ -101,6 +109,21 @@ dd if=/dev/zero of="$FLOPPY" bs=1024 count=800 2>/dev/null
 "$HFS/hcopy" -m "$APP" ":MacMusic"
 "$HFS/hcopy" -r "$WORK/readme.txt" ":MacMusic Read Me"
 "$HFS/hattrib" -t TEXT -c ttxt ":MacMusic Read Me"
+if [ -f "$SAMPLE" ]; then
+    # Only a MacMusic WAV: PCM, mono, 8-bit, at 22,050 or 22,254 Hz (N12-4).
+    python3 - "$SAMPLE" <<'PYEOF'
+import struct, sys
+b = open(sys.argv[1], "rb").read(4096)
+i = b.find(b"fmt ")
+tag, ch, rate, brate, align, bits = struct.unpack("<HHIIHH", b[i+8:i+24])
+ok = b[:4] == b"RIFF" and (tag, ch, align, bits) == (1, 1, 1, 8) and rate == brate in (22050, 22254)
+sys.exit(0 if ok else "Sample Song isn't a MacMusic WAV: " + sys.argv[1])
+PYEOF
+    "$HFS/hcopy" -r "$SAMPLE" ":Sample Song"
+    "$HFS/hattrib" -t WAVE -c TVOD ":Sample Song"
+else
+    echo "warning: no Sample Song ($SAMPLE): the floppy has MacMusic and the Read Me only" >&2
+fi
 "$HFS/hls" -l
 "$HFS/humount" > /dev/null
 

@@ -156,6 +156,9 @@ The Converter now makes WAVs at 22,254 Hz, the Plus's rate (its 5a3acc7,
   made, as 1.2 is a version with changes a user would notice.
 
 ### F. Release
+(Added 2026-11-12, the owner: the release floppy carries "Sample Song",
+28 s of "Chariots of Fire" at 22,254 Hz, from the private assets, N12-10.)
+
 Version in `CMakeLists.txt`, `CHANGELOG.md`, the issues log, and
 `tools/make-release.sh`. Then the manual checklist's new items, in Mini vMac
 and on the Plus. Then the tag, followed by the hand-made extras that

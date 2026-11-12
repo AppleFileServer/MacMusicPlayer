@@ -44,6 +44,12 @@ library conversion. The decision codes in brackets are explained in
   albums left 16 out of the Albums list (their songs were still under
   Songs and All). Now as many as songs, 500. New host tests in
   `test_library` (300 albums) and `test_sorting` (500 names).
+- **A Sample Song on the release floppy (N12-10):** beside MacMusic and
+  its Read Me, a 28-second MacMusic WAV at 22,254 Hz to try Import Song
+  with (from "Chariots of Fire"). It's kept with the private assets, not
+  in the repository or the source, being a commercial recording; the
+  owner's own floppies only. The User's Guide and the Read Me say how to
+  import it ("The first time").
 - **The User's Guide for 1.2 (step E1):** `docs/user-guide.md` (and so
   the TeachText Read Me) and the printed guide, now its third edition
   (November 2026): the two rates and the `afconvert` example; "0.9% fast"

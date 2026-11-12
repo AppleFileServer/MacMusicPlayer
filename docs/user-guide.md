@@ -31,6 +31,11 @@ Double-click MacMusic. After the Apple logo, it asks for a library:
   song or playlist) inside a library you already have.
 - **Not Now**: carry on with no library.
 
+To hear MacMusic straight away, import the **Sample Song** from the
+MacMusic floppy, if yours has one: choose File > Import Song..., open
+Sample Song, and click Import. It's 28 seconds of music, at the Plus's
+own rate.
+
 MacMusic remembers the library and opens it next time. Its preferences
 are in "MacMusic Prefs" in the System Folder.
 
