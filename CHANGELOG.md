@@ -26,8 +26,15 @@ library conversion. The decision codes in brackets are explained in
   keep each song's rate (they always wrote 22,050). The library's cache
   is version 2, with each song's rate; 1.1's cache is still used, so the
   first start of 1.2 reads no song file. 1.1 ignores 1.2's cache, and
-  skips 22,254 Hz songs. Importing them comes next (step D2). New host
-  tests in `test_songfile` and `test_cache`.
+  skips 22,254 Hz songs. New host tests in `test_songfile` and
+  `test_cache`.
+- **Importing 22,254 Hz songs (N12-4):** Import Song takes a WAV at
+  22,254 Hz as well as 22,050 (any other rate, 22,255 included, is
+  refused, with "Only mono, 8-bit PCM WAV files at 22050 or 22254 Hz can
+  be imported"); the song keeps its rate. The smoke test checks the WAV
+  check, and plays a 22,254 Hz song on from a 22,050 one.
+  `tools/library-image` has `--rate` (22,254 by default; 22,050 for a
+  library 1.0 and 1.1 can read).
 
 ## 1.1 (2026-10-13; docs/plans/release-1.1.md)
 

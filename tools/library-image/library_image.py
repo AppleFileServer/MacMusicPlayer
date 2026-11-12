@@ -5,7 +5,9 @@ a real Macintosh Plus. See README.md.
 
 Steps (each can be run on its own; "all" runs them in order):
   pick     choose songs and tidy their tags   -> WORK/pick.json, song-list.txt
-  convert  8-bit mono 22050 Hz WAVs           -> WORK/wav/NNN.wav
+  convert  8-bit mono WAVs at --rate          -> WORK/wav/NNN.wav
+           (22254 Hz by default, the Plus's own and the Converter 1.1's;
+           22050 for songs as MacMusic 1.0 and 1.1 take them)
   songs    MacMusic song files (song_format.h) -> WORK/songs/IPODnnnn
   check    MacMusic's own library scan, built for this Mac (check/)
   image    the HFS volume and the .hda        -> WORK/volume.dsk, --out
@@ -20,7 +22,8 @@ from collections import Counter
 HERE = os.path.dirname(os.path.abspath(__file__))
 PROJECT = os.path.dirname(os.path.dirname(HERE))
 
-SAMPLE_RATE = 22050
+SAMPLE_RATE = 22254                     # set from --rate in main()
+RATES = (22050, 22254)                  # song_format.h (1.2, N12-4)
 FINGERPRINT_SAMPLE = 8192               # song_format.h, D31
 MAX_STRING = 63                         # song_format.h: a text field
 MAX_FILE_NAME = 31                      # HFS
@@ -223,19 +226,20 @@ def data_chunk(wav):
         cid = wav[at:at + 4]
         size = struct.unpack('<I', wav[at + 4:at + 8])[0]
         if cid == b'fmt ':
-            tag, channels, rate = struct.unpack('<HHI', wav[at + 8:at + 16])
+            tag, channels, rate, byte_rate = struct.unpack('<HHII', wav[at + 8:at + 20])
             bits = struct.unpack('<H', wav[at + 22:at + 24])[0]
-            if (tag, channels, rate, bits) != (1, 1, SAMPLE_RATE, 8):
-                raise ValueError('not 8-bit mono %d Hz PCM' % SAMPLE_RATE)
+            if (tag, channels, bits) != (1, 1, 8) or rate not in RATES \
+                    or byte_rate != rate:
+                raise ValueError('not 8-bit mono PCM at 22050 or 22254 Hz')
         if cid == b'data':
-            return at + 8, size
+            return at + 8, size, rate
         at += 8 + size + (size & 1)
     raise ValueError('no data chunk')
 
 def song_file(song_id, wav, s):
     """The WAV with MacMusic's "iPod" chunk added at the end, exactly as
     SongFile_AddChunk writes it (song_format.h, version 2)."""
-    offset, length = data_chunk(wav)
+    offset, length, rate = data_chunk(wav)
     audio = wav[offset:offset + length]
     original_length = len(wav)
     original_riff = struct.unpack('<I', wav[4:8])[0]
@@ -246,8 +250,8 @@ def song_file(song_id, wav, s):
     track = s['track'] if 0 <= s['track'] <= 9999 else 0
     p = bytearray()
     p += struct.pack('>HIHHI', 1, song_id, 0, track,
-                     (length + SAMPLE_RATE // 2) // SAMPLE_RATE)
-    p += b'PCMu' + struct.pack('>IHH', SAMPLE_RATE, 8, 1)
+                     (length + rate // 2) // rate)
+    p += b'PCMu' + struct.pack('>IHH', rate, 8, 1)
     p += struct.pack('>IIIII', offset, length, fingerprint(audio),
                      original_length, original_riff)
     p += b'WAVE????'                    # the original Finder type, creator
@@ -414,11 +418,16 @@ def main():
     ap.add_argument('--out', help='the .hda to write (image)')
     ap.add_argument('--size-mib', type=int, default=1980, help='image size (default 1980)')
     ap.add_argument('--volume-name', default='Scratch')
+    ap.add_argument('--rate', type=int, choices=RATES, default=22254,
+                    help='the songs\' sample rate (convert; default 22254, '
+                         'which MacMusic 1.2 needs; 22050 for 1.0 and 1.1)')
     ap.add_argument('--app', default=os.path.join(PROJECT, 'build', 'MacMusic.bin'),
                     help='MacMusic, as MacBinary (default: the project build)')
     ap.add_argument('--hfsutils', default=os.path.join(
         os.environ.get('RETRO68', os.path.expanduser('~/Retro68-build')), 'toolchain', 'bin'))
     a = ap.parse_args()
+    global SAMPLE_RATE
+    SAMPLE_RATE = a.rate
     steps = ['pick', 'convert', 'songs', 'check', 'image'] if a.step == 'all' else [a.step]
     if 'pick' in steps and not a.music:
         ap.error('pick needs --music')

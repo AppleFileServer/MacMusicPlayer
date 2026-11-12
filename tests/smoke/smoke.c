@@ -16,6 +16,7 @@
 #include "version.h"
 #include "fileopen.h"
 #include "songfile.h"
+#include "wav.h"
 #include "library.h"
 #include "libsetup.h"
 #include "playback.h"
@@ -89,7 +90,7 @@ static Boolean Same(ConstStringPtr p, const char *c)
 
 /* ---- The library -------------------------------------------------------- */
 
-#define kSongSamples    (6L * 22050)        /* 6 s */
+#define kSongSeconds    6L
 
 static unsigned char gBuf[4096];
 
@@ -99,17 +100,18 @@ static void SetText(Str63 out, const char *c)
     memcpy(out + 1, c, out[0]);
 }
 
-/* A song file as Import makes it: a quiet 6 s WAV and its details. */
+/* A song file as Import makes it: a quiet 6 s WAV at this rate (22050,
+   or 22254 Hz, 1.2) and its details. */
 static void MakeSong(const LibraryFolder *f, short id, const char *title,
                      const char *artist, const char *album, short track,
-                     short flags)
+                     short flags, long rate)
 {
     Str63 name;
     SongInfo in;
     short ref;
     long c, left, i;
     unsigned char h[44];
-    long n = kSongSamples;
+    long n = kSongSeconds * rate;
 
     name[0] = 8;
     memcpy(name + 1, "IPOD000", 7);
@@ -119,6 +121,8 @@ static void MakeSong(const LibraryFolder *f, short id, const char *title,
         return;
     memcpy(h, "RIFF\0\0\0\0WAVEfmt \20\0\0\0\1\0\1\0\x22\x56\0\0\x22\x56\0\0"
               "\1\0\x08\0data", 40);
+    h[24] = h[28] = rate & 0xFF;                /* rate and byte rate */
+    h[25] = h[29] = (rate >> 8) & 0xFF;
     h[40] = n; h[41] = n >> 8; h[42] = n >> 16; h[43] = 0;
     c = 36 + n;
     h[4] = c; h[5] = c >> 8; h[6] = c >> 16; h[7] = 0;
@@ -135,8 +139,8 @@ static void MakeSong(const LibraryFolder *f, short id, const char *title,
     in.id = id;
     in.flags = flags;
     in.track = track;
-    in.seconds = (n + 11025) / 22050;
-    in.sampleRate = kSongSampleRate;    /* 1.2: the rate is now stored */
+    in.seconds = SongRate_Seconds(n, rate);
+    in.sampleRate = rate;
     in.audioOffset = 44;
     in.audioLength = n;
     in.originalLength = 44 + n;
@@ -146,6 +150,36 @@ static void MakeSong(const LibraryFolder *f, short id, const char *title,
     SetText(in.text[2], album);
     SetText(in.text[5], "smoke.wav");
     SongFile_AddChunk(ref, &in);
+    FSClose(ref);
+}
+
+/* 1.2 (N12-4): a 1 s WAV at this rate, in the default folder. */
+static void MakeWav(ConstStringPtr name, long rate)
+{
+    short v, ref;
+    long c, n = rate;
+    Str63 volume;
+    unsigned char h[44];
+
+    GetVol(volume, &v);
+    HCreate(v, 0, name, 'TVOD', 'WAVE');
+    if (OpenDataFork(v, 0, name, fsRdWrPerm, &ref) != noErr)
+        return;
+    memcpy(h, "RIFF\0\0\0\0WAVEfmt \20\0\0\0\1\0\1\0\0\0\0\0\0\0\0\0"
+              "\1\0\x08\0data", 40);
+    h[24] = h[28] = rate & 0xFF;
+    h[25] = h[29] = (rate >> 8) & 0xFF;
+    h[40] = n; h[41] = n >> 8; h[42] = n >> 16; h[43] = 0;
+    c = 36 + n;
+    h[4] = c; h[5] = c >> 8; h[6] = c >> 16; h[7] = 0;
+    c = 44;
+    FSWrite(ref, &c, h);
+    memset(gBuf, 0x80, sizeof gBuf);
+    for (; n > 0; n -= c)
+    {
+        c = n < (long)sizeof gBuf ? n : (long)sizeof gBuf;
+        FSWrite(ref, &c, gBuf);
+    }
     FSClose(ref);
 }
 
@@ -161,7 +195,8 @@ static long MakeFolder(short vRefNum, long parent, ConstStringPtr name)
     return pb.fileParam.ioDirID;
 }
 
-/* Songs by title: Five, Four, One, Six, Three, Two; an audiobook. */
+/* Songs by title: Five, Four, One, Six, Three, Two; an audiobook. Six
+   is at 22254 Hz (1.2, N12-4), the rest at 22050. */
 static void MakeLibrary(void)
 {
     WDPBRec wd;
@@ -176,13 +211,14 @@ static void MakeLibrary(void)
     f.vRefNum = wd.ioWDVRefNum;
     f.folderID = MakeFolder(f.vRefNum, wd.ioWDDirID, (ConstStringPtr)"\pSmoke Library");
     f.playlistsID = MakeFolder(f.vRefNum, f.folderID, (ConstStringPtr)"\pPlaylists");
-    MakeSong(&f, 1, "One", "Artist A", "Alpha", 1, 0);
-    MakeSong(&f, 2, "Two", "Artist A", "Alpha", 2, 0);
-    MakeSong(&f, 3, "Three", "Artist A", "Alpha", 3, 0);
-    MakeSong(&f, 4, "Four", "Artist B", "Beta", 1, 0);
-    MakeSong(&f, 5, "Five", "Artist B", "Beta", 2, 0);
-    MakeSong(&f, 6, "Six", "Artist C", "", 0, 0);
-    MakeSong(&f, 7, "Seven Chapters", "Reader", "", 0, kSongFlagAudiobook);
+    MakeSong(&f, 1, "One", "Artist A", "Alpha", 1, 0, kSongSampleRate);
+    MakeSong(&f, 2, "Two", "Artist A", "Alpha", 2, 0, kSongSampleRate);
+    MakeSong(&f, 3, "Three", "Artist A", "Alpha", 3, 0, kSongSampleRate);
+    MakeSong(&f, 4, "Four", "Artist B", "Beta", 1, 0, kSongSampleRate);
+    MakeSong(&f, 5, "Five", "Artist B", "Beta", 2, 0, kSongSampleRate);
+    MakeSong(&f, 6, "Six", "Artist C", "", 0, 0, kSongSampleRatePlus);
+    MakeSong(&f, 7, "Seven Chapters", "Reader", "", 0, kSongFlagAudiobook,
+             kSongSampleRate);
     LibSetup_TestUseFolder(&f);
     LibSetup_Rescan();
 }
@@ -298,6 +334,25 @@ void Smoke_Run(void)
     UI_Refresh();
     UI_Render();
 
+    Log("the WAV check (N12-4)");
+    {
+        WavInfo wav;
+        Str255 problem;
+        short v;
+        Str63 volume;
+
+        GetVol(volume, &v);
+        MakeWav((ConstStringPtr)"\pPlus Rate.wav", kSongSampleRatePlus);
+        MakeWav((ConstStringPtr)"\pOld Rate.wav", kSongSampleRate);
+        MakeWav((ConstStringPtr)"\pNear Rate.wav", 22255L);
+        Check(Wav_Read(v, 0, (ConstStringPtr)"\pPlus Rate.wav", &wav, problem)
+              && wav.sampleRate == kSongSampleRatePlus, "a 22254 Hz WAV is accepted");
+        Check(Wav_Read(v, 0, (ConstStringPtr)"\pOld Rate.wav", &wav, problem)
+              && wav.sampleRate == kSongSampleRate, "a 22050 Hz WAV, as before");
+        Check(!Wav_Read(v, 0, (ConstStringPtr)"\pNear Rate.wav", &wav, problem),
+              "a 22255 Hz WAV is refused");
+    }
+
     Log("library");
     CheckNum(Library_SongCount() == 7, "7 songs scanned", Library_SongCount());
     CheckNum(Library_SkippedCount() == 0, "none skipped", Library_SkippedCount());
@@ -348,6 +403,11 @@ void Smoke_Run(void)
     Playback_Seek(length - 20);
     Wait(90);
     Check(Playing("Six"), "at its end, the next song plays on");
+    CheckNum(Library_SongSampleRate(Playback_CurrentSong()) == kSongSampleRatePlus,
+             "Six is a 22254 Hz song (N12-4), played on from a 22050 one",
+             Library_SongSampleRate(Playback_CurrentSong()));
+    CheckNum(Playback_LengthTicks() >= 355 && Playback_LengthTicks() <= 365,
+             "and 6 s long at its own rate (N12-5)", Playback_LengthTicks());
 
     Log("Now Playing modes");
     Send(kEvtSelect);

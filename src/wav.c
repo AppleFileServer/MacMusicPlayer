@@ -7,6 +7,7 @@
 #include "fileopen.h"
 #include "message.h"
 #include "pstr.h"
+#include "song_format.h"
 
 /* WAV is RIFF: "RIFF" <size> "WAVE", then chunks of <id> <size> <data>,
    sizes little-endian, each chunk padded to an even length. Chunks may
@@ -104,8 +105,8 @@ static void DescribeFormat(short channels, unsigned long rate, short bits,
     Str255 number;
 
     problem[0] = 0;
-    PStrAppend(problem, P("Only mono, 22050 Hz, 8-bit PCM WAV files can be "
-                          "imported. This file is "));
+    PStrAppend(problem, P("Only mono, 8-bit PCM WAV files at 22050 or "
+                          "22254 Hz can be imported. This file is "));
     if (channels == 1)
         PStrAppend(problem, P("mono, "));
     else if (channels == 2)
@@ -145,6 +146,7 @@ Boolean Wav_Read(short vRefNum, long dirID, ConstStringPtr name,
 
     info->dataOffset = 0;
     info->dataLength = 0;
+    info->sampleRate = 0;
     info->title[0] = info->artist[0] = info->album[0] = info->genre[0] = 0;
     info->track = 0;
     info->ipodChunkAt = 0;
@@ -238,13 +240,15 @@ Boolean Wav_Read(short vRefNum, long dirID, ConstStringPtr name,
                 "or floating-point). Only uncompressed PCM WAV files can be "
                 "imported."));
 
-    if (channels != 1 || rate != 22050 || bits != 8)
+    /* N12-4: 22050 Hz, or 22254 Hz as the Converter 1.1 makes; nothing
+       else, not even 22255 (the Converter writes exactly 22254). */
+    if (channels != 1 || !SongRate_Valid((long)rate) || bits != 8)
     {
         DescribeFormat(channels, rate, bits, problem);
         return false;
     }
 
-    if (blockAlign != 1 || byteRate != 22050)
+    if (blockAlign != 1 || byteRate != rate)
         return Fail(problem, P("This WAV file's format information is "
                                "inconsistent."));
 
@@ -252,6 +256,8 @@ Boolean Wav_Read(short vRefNum, long dirID, ConstStringPtr name,
         return Fail(problem, P("This WAV file has no audio data."));
     if (info->dataLength == 0)
         return Fail(problem, P("This WAV file's audio is empty."));
+
+    info->sampleRate = (long)rate;
 
     return true;
 }

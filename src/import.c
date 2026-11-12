@@ -116,8 +116,7 @@ static Boolean AskForDetails(ConstStringPtr fileName, const WavInfo *wav,
     details->audiobook = false;
 
     return SongDialog_Run(P("Import"), fileName,
-                          (wav->dataLength + kSongSampleRate / 2)
-                              / kSongSampleRate,
+                          SongRate_Seconds(wav->dataLength, wav->sampleRate),
                           details);
 }
 
@@ -218,7 +217,7 @@ static void FillSongInfo(SongInfo *info, long id, const SongDetails *d,
 
     memset(info, 0, sizeof(*info));
     info->id = id;
-    info->sampleRate = kSongSampleRate;
+    info->sampleRate = wav->sampleRate;     /* N12-5 */
     info->flags = d->audiobook ? kSongFlagAudiobook : 0;
     info->track = d->track;
     info->audioOffset = wav->dataOffset;
