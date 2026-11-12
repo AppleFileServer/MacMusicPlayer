@@ -1,6 +1,8 @@
 /* Song files (songfile.c, song_format.h): the "iPod" chunk added to a
    WAV, read back, checked, rewritten and removed. */
 
+#include <stdint.h>
+
 #include "hosttest.h"
 #include "fileopen.h"
 #include "bytes.h"
@@ -240,6 +242,34 @@ int main(void)
             gA[at + 3] = rates[r];
             TestFS_WriteFile(Root(), "IPOD0007", kSongFileType, kAppCreator, gA, a);
             CHECK(!Read("IPOD0007", &info));
+        }
+    }
+
+    Test("ticks from samples (N12-8): exact, and no overflow past 27 minutes");
+    {
+        static const long rates[] = { 22050, 22254 };
+        static const long lengths[] = { 0, 1, 367, 22049, 22050, 22254, 2206,
+                                        22254L * 60 * 10, 22254L * 60 * 26 + 12345,
+                                        22254L * 60 * 27, 22254L * 60 * 68 + 7,
+                                        22050L * 60 * 68 + 22049 };
+        short r, i;
+
+        for (r = 0; r < 2; r++)
+            for (i = 0; i < (short)(sizeof lengths / sizeof lengths[0]); i++)
+                CHECK_EQ(SongRate_Ticks(lengths[i], rates[r]),
+                         (long)((long long)lengths[i] * 60 / rates[r]));
+        CHECK_EQ(SongRate_Ticks(22254L * 60 * 68, 22254), 60L * 60 * 68);
+
+        /* A long is 64 bits here but 32 on the 68000: in 32-bit sums, 1.1's
+           samples * 60 goes negative for 30 minutes of sound; the new way's
+           parts stay small (at most (rate - 1) * 60, and ticks). */
+        {
+            int32_t len = 22050 * 60 * 30;
+            int32_t old = (int32_t)((uint32_t)len * 60u) / 22050;
+            int32_t part1 = len / 22050 * 60, part2 = len % 22050 * 60;
+
+            CHECK(old < 0);
+            CHECK(part2 < 22254 * 60 && part1 + part2 / 22050 == 60 * 60 * 30);
         }
     }
 

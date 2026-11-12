@@ -57,7 +57,7 @@ static short NewSeq(short position)
    the Plus (R3). */
 static long SamplesToTicks(long samples, long rate)
 {
-    return samples * 60 / rate;
+    return SongRate_Ticks(samples, rate);   /* N12-8: no overflow */
 }
 
 /* The current song's rate (22050 if there's none, as 1.0's). */

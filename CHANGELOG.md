@@ -35,6 +35,10 @@ library conversion. The decision codes in brackets are explained in
   check, and plays a 22,254 Hz song on from a 22,050 one.
   `tools/library-image` has `--rate` (22,254 by default; 22,050 for a
   library 1.0 and 1.1 can read).
+- **Long songs' times (N12-8):** a song longer than about 26.8 minutes
+  showed wrong times and a wrong progress bar, since 1.0: working out its
+  time overflowed a 32-bit number. Found while planning a library of
+  long tracks (2026-11-12). A new host test in `test_songfile`.
 - **The User's Guide for 1.2 (step E1):** `docs/user-guide.md` (and so
   the TeachText Read Me) and the printed guide, now its third edition
   (November 2026): the two rates and the `afconvert` example; "0.9% fast"

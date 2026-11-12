@@ -160,6 +160,15 @@ static inline Boolean SongRate_Valid(long rate)
     return rate == kSongSampleRate || rate == kSongSampleRatePlus;
 }
 
+/* 1.2 (N12-8): samples at a rate, as ticks (sixtieths of a second),
+   rounded down. In two parts, as samples * 60 overflows a long beyond
+   about 26.8 minutes of sound (1.0 to 1.1 got such a song's times
+   wrong). */
+static inline long SongRate_Ticks(long samples, long rate)
+{
+    return samples / rate * 60 + samples % rate * 60 / rate;
+}
+
 /* A song's length in whole seconds, rounded, as stored at offset 10. */
 static inline long SongRate_Seconds(long samples, long rate)
 {
