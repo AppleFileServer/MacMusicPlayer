@@ -13,6 +13,7 @@ typedef struct
     short flags;
     short track;
     long seconds;
+    long sampleRate;            /* kSongSampleRate or kSongSampleRatePlus */
     long audioOffset;           /* first audio byte in the data fork */
     long audioLength;
     unsigned long fingerprint;

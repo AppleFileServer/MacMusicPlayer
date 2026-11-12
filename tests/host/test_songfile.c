@@ -47,7 +47,7 @@ int main(void)
 {
     SongSpec s = { 7, "Here Comes the Sun", "The Beatles", "Abbey Road",
                    "Rock", "George Harrison", 7, kSongFlagAudiobook, 44100,
-                   nil };
+                   nil, 0 };
     SongInfo info, edited;
     long a, b, i;
     short refNum;
@@ -171,6 +171,77 @@ int main(void)
     edited.id = 99;
     CHECK(SongFile_WriteInfo(TestFS_VRefNum(), Root(), PS("IPOD0007"), &edited)
           != noErr);
+
+    Test("22254 Hz (N12-4, N12-5): read, and kept by edits and ratings");
+    {
+        SongSpec p = s;
+        long rateAt;
+
+        p.rate = 22254;
+        p.samples = 22254L * 3 + 100;       /* 3.0 s at 22254, 3.03 at 22050 */
+        CHECK_EQ(MakeSong(Root(), &p), noErr);
+        CHECK(Read("IPOD0007", &info));
+        CHECK_EQ(info.sampleRate, 22254);
+        CHECK_EQ(info.seconds, 3);
+        a = FileBytes(Root(), "IPOD0007", gA, sizeof gA);
+        rateAt = ChunkStart(gA, a) + 8 + kSongOffsetSampleRate;
+        CHECK_EQ(Get32(gA + rateAt), 22254);
+
+        edited = info;                      /* Edit Song's way */
+        edited.track = 3;
+        CHECK_EQ(SongFile_WriteInfo(TestFS_VRefNum(), Root(), PS("IPOD0007"),
+                                    &edited), noErr);
+        CHECK(Read("IPOD0007", &info));
+        CHECK_EQ(info.sampleRate, 22254);
+        CHECK_EQ(info.track, 3);
+        a = FileBytes(Root(), "IPOD0007", gA, sizeof gA);
+        CHECK_EQ(Get32(gA + ChunkStart(gA, a) + 8 + kSongOffsetSampleRate),
+                 22254);
+
+        CHECK_EQ(SongFile_WriteFlags(TestFS_VRefNum(), Root(), PS("IPOD0007"),
+                                     info.id, SongFlags_WithRating(info.flags, 4)),
+                 noErr);                    /* a rating */
+        CHECK(Read("IPOD0007", &info));
+        CHECK_EQ(info.sampleRate, 22254);
+        CHECK_EQ(SongFlags_Rating(info.flags), 4);
+
+        p.rate = 0;                         /* 22050, as before */
+        CHECK_EQ(MakeSong(Root(), &p), noErr);
+        CHECK(Read("IPOD0007", &info));
+        CHECK_EQ(info.sampleRate, 22050);
+        CHECK_EQ(info.seconds, 3);          /* 66862 / 22050 = 3.03 */
+
+        p.samples = 99500;                  /* rounds differently: */
+        p.rate = 22254;
+        CHECK_EQ(MakeSong(Root(), &p), noErr);
+        CHECK(Read("IPOD0007", &info));
+        CHECK_EQ(info.seconds, 4);          /* 99500 / 22254 = 4.47 */
+        p.rate = 0;
+        CHECK_EQ(MakeSong(Root(), &p), noErr);
+        CHECK(Read("IPOD0007", &info));
+        CHECK_EQ(info.seconds, 5);          /* 99500 / 22050 = 4.51 */
+    }
+
+    Test("other rates are refused: 22255, 11025, 44100");
+    {
+        static const long rates[] = { 22255, 11025, 44100, 0 };
+        short r;
+
+        for (r = 0; r < 4; r++)
+        {
+            long at;
+
+            CHECK_EQ(MakeSong(Root(), &s), noErr);
+            a = FileBytes(Root(), "IPOD0007", gA, sizeof gA);
+            at = ChunkStart(gA, a) + 8 + kSongOffsetSampleRate;
+            gA[at] = rates[r] >> 24;
+            gA[at + 1] = rates[r] >> 16;
+            gA[at + 2] = rates[r] >> 8;
+            gA[at + 3] = rates[r];
+            TestFS_WriteFile(Root(), "IPOD0007", kSongFileType, kAppCreator, gA, a);
+            CHECK(!Read("IPOD0007", &info));
+        }
+    }
 
     Test("fingerprints: equal for the same audio, different for other audio");
     {

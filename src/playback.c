@@ -51,12 +51,21 @@ static short NewSeq(short position)
     return seq;
 }
 
-/* Audio position in song time: samples at the song's 22050 Hz, so the
-   times and progress bar reach the song's length exactly at its end even
-   though the Plus plays 0.9% fast (R3). */
-static long SamplesToTicks(long samples)
+/* Audio position in song time: samples at the song's own rate (N12-5:
+   22050 or 22254 Hz), so the times and progress bar reach the song's
+   length exactly at its end, though a 22050 Hz song plays 0.9% fast on
+   the Plus (R3). */
+static long SamplesToTicks(long samples, long rate)
 {
-    return samples * 60 / kSongSampleRate;
+    return samples * 60 / rate;
+}
+
+/* The current song's rate (22050 if there's none, as 1.0's). */
+static long CurrentRate(void)
+{
+    short song = Playback_CurrentSong();
+
+    return song == kNone ? kSongSampleRate : Library_SongSampleRate(song);
 }
 
 PlayState Playback_State(void)  { return gState; }
@@ -79,7 +88,8 @@ long Playback_ElapsedTicks(void)
         return Playback_LengthTicks();  /* moved on; Tick catches up */
     if (Audio_IsAvailable())
         return SamplesToTicks(gState == kPlayPlaying ? Audio_Position()
-                                                     : Audio_PausedPosition());
+                                                     : Audio_PausedPosition(),
+                              CurrentRate());
     if (gState == kPlayPlaying)
         return gElapsedBase + (long)(TickCount() - gResumedAt);
     return gElapsedBase;
@@ -235,8 +245,9 @@ long Playback_LengthTicks(void)
 
     if (song == kNone)
         return 0;
-    /* Exact length from the audio: bytes * 60 / 22050. */
-    return Library_SongAudioLength(song) * 60 / kSongSampleRate;
+    /* Exact length from the audio: bytes * 60 / the song's rate. */
+    return SamplesToTicks(Library_SongAudioLength(song),
+                          Library_SongSampleRate(song));
 }
 
 void Playback_Stop(void)
@@ -350,7 +361,7 @@ void Playback_Previous(void)
 void Playback_Seek(long ticks)
 {
     short song;
-    long length, sample;
+    long length, sample, rate;
 
     if (gState == kPlayStopped)
         return;
@@ -359,13 +370,14 @@ void Playback_Seek(long ticks)
     if (song == kNone)
         return;
     length = Library_SongAudioLength(song);
+    rate = Library_SongSampleRate(song);
     if (ticks < 0)
         ticks = 0;
     /* In two parts, so a long song can't overflow. */
-    sample = ticks / 60 * kSongSampleRate + ticks % 60 * kSongSampleRate / 60;
+    sample = ticks / 60 * rate + ticks % 60 * rate / 60;
     if (sample > length)
         sample = length;
-    gElapsedBase = SamplesToTicks(sample);
+    gElapsedBase = SamplesToTicks(sample, rate);
     gResumedAt = TickCount();
     gLastSecond = -1;
 

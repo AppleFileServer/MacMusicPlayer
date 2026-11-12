@@ -6,6 +6,7 @@
 #include <string.h>
 
 #include "hosttest.h"
+#include "bytes.h"
 
 static LibraryFolder gF;
 static LibFilter gAll;
@@ -131,6 +132,30 @@ static short SongWithID(long id)
         if (Library_SongID(i) == id)
             return i;
     return kNone;
+}
+
+/* 1.2 (N12-6): turns a version 2 cache into 1.1's version 1 (the rate's
+   four bytes zero, the check-sum made again), as 1.1 would have written. */
+static void MakeVersion1(unsigned char *b, long length)
+{
+    SongChecksum sum;
+    long at = 12, size;
+    short i, k;
+
+    SongChecksum_Init(&sum);
+    for (i = 0; i < (short)Get16(b + 6); i++)
+    {
+        size = 36;
+        for (k = 0; k < 6; k++)
+            size += 1 + b[at + size];
+        memset(b + at + 32, 0, 4);
+        SongChecksum_Add(&sum, b + at + 4, size - 4);
+        at += size;
+    }
+    CHECK_EQ(at, length);
+    b[4] = 0;
+    b[5] = 1;
+    Put32(b + 8, SongChecksum_Value(&sum));
 }
 
 int main(void)
@@ -260,6 +285,75 @@ int main(void)
     TestFS_WriteFile(CacheDir(), "Song Details", 'iPdC', kAppCreator, "", 0);
     CHECK(Library_Scan(&gF));
     CHECK_EQ(Library_ReadFromFilesCount(), 20);
+
+    Test("1.2 (N12-6): each song's rate kept in the cache");
+    {
+        SongSpec p = { 0 };
+
+        gF = NewLibrary();
+        p.id = 1; p.title = "Plus Rate"; p.rate = 22254;
+        CHECK_EQ(MakeSong(gF.folderID, &p), noErr);
+        p.id = 2; p.title = "Old Rate"; p.rate = 0;
+        CHECK_EQ(MakeSong(gF.folderID, &p), noErr);
+        CHECK(Library_Scan(&gF));               /* writes version 2 */
+        CHECK(Library_Scan(&gF));               /* reads it */
+        CHECK_EQ(Library_ReadFromFilesCount(), 0);
+        CHECK_EQ(Library_SongSampleRate(Library_SongForID(1)), 22254);
+        CHECK_EQ(Library_SongSampleRate(Library_SongForID(2)), 22050);
+        length = TestFS_ReadFile(CacheDir(), "Song Details", bytes, sizeof bytes);
+        CHECK_EQ(Get16(bytes + 4), 2);
+
+        Test("1.1's cache (version 1) is still used, its songs 22050 Hz");
+        gF = NewLibrary();
+        p.id = 1; p.title = "One"; p.rate = 0;
+        CHECK_EQ(MakeSong(gF.folderID, &p), noErr);
+        p.id = 2; p.title = "Two";
+        CHECK_EQ(MakeSong(gF.folderID, &p), noErr);
+        CHECK(Library_Scan(&gF));
+        length = TestFS_ReadFile(CacheDir(), "Song Details", bytes, sizeof bytes);
+        MakeVersion1(bytes, length);
+        TestFS_WriteFile(CacheDir(), "Song Details", 'iPdC', kAppCreator, bytes, length);
+        CHECK(Library_Scan(&gF));
+        CHECK_EQ(Library_ReadFromFilesCount(), 0);  /* no extra scan */
+        CHECK_EQ(Library_SongSampleRate(Library_SongForID(1)), 22050);
+        CHECK_EQ(Library_SongSampleRate(Library_SongForID(2)), 22050);
+        length = TestFS_ReadFile(CacheDir(), "Song Details", bytes, sizeof bytes);
+        CHECK_EQ(Get16(bytes + 4), 1);          /* nothing changed: kept */
+        CHECK(Library_ScanAll(&gF));            /* Rescan Library writes */
+        length = TestFS_ReadFile(CacheDir(), "Song Details", bytes, sizeof bytes);
+        CHECK_EQ(Get16(bytes + 4), 2);          /* version 2 */
+
+        Test("a version 2 entry with a bad rate: its file is read");
+        gF = NewLibrary();
+        p.id = 1; p.title = "One"; p.rate = 22254;
+        CHECK_EQ(MakeSong(gF.folderID, &p), noErr);
+        p.id = 2; p.title = "Two"; p.rate = 0;
+        CHECK_EQ(MakeSong(gF.folderID, &p), noErr);
+        CHECK(Library_Scan(&gF));               /* writes version 2 */
+        length = TestFS_ReadFile(CacheDir(), "Song Details", bytes, sizeof bytes);
+        {
+            SongChecksum sum;
+            long at = 12, size;
+            short i, k;
+
+            bytes[12 + 32 + 3] ^= 1;            /* the first entry's rate */
+            SongChecksum_Init(&sum);
+            for (i = 0; i < (short)Get16(bytes + 6); i++)
+            {
+                size = 36;
+                for (k = 0; k < 6; k++)
+                    size += 1 + bytes[at + size];
+                SongChecksum_Add(&sum, bytes + at + 4, size - 4);
+                at += size;
+            }
+            Put32(bytes + 8, SongChecksum_Value(&sum));
+        }
+        TestFS_WriteFile(CacheDir(), "Song Details", 'iPdC', kAppCreator, bytes, length);
+        CHECK(Library_Scan(&gF));
+        CHECK_EQ(Library_ReadFromFilesCount(), 1);
+        CHECK_EQ(Library_SongCount(), 2);
+        CHECK_EQ(Library_SongSampleRate(Library_SongForID(1)), 22254);
+    }
 
     Test("a file called MacMusic Cache isn't used or replaced");
     Library(5);

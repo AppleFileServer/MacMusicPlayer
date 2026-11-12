@@ -19,6 +19,15 @@ library conversion. The decision codes in brackets are explained in
   are listed, and played, album by album, each album in track order; songs
   with no album come last. Before, they were by title, as Music › Songs
   still is. From the owner, 2026-11-11.
+- **Songs at 22,254 Hz (N12-4 to N12-7), reading and playing:** song files
+  made at 22,254 Hz, the Plus's own rate, are read, listed and played,
+  with their times and seeking at their own rate, so they play at true
+  speed and pitch; 22,050 Hz songs are as before. Edit Song and ratings
+  keep each song's rate (they always wrote 22,050). The library's cache
+  is version 2, with each song's rate; 1.1's cache is still used, so the
+  first start of 1.2 reads no song file. 1.1 ignores 1.2's cache, and
+  skips 22,254 Hz songs. Importing them comes next (step D2). New host
+  tests in `test_songfile` and `test_cache`.
 
 ## 1.1 (2026-10-13; docs/plans/release-1.1.md)
 

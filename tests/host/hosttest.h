@@ -42,6 +42,7 @@ typedef struct
     short track, flags;
     long samples;
     const char *fileName;
+    long rate;                  /* 0: 22050 Hz (1.2: or 22254) */
 } SongSpec;
 OSErr MakeSong(long dir, const SongSpec *spec);
 

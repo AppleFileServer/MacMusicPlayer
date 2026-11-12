@@ -16,6 +16,7 @@ typedef struct
 {
     long id;
     long seconds;
+    long sampleRate;            /* N12-5: 22050 or 22254 */
     long audioOffset;
     long audioLength;
     unsigned long fingerprint;  /* D31 */
@@ -276,6 +277,7 @@ static Boolean AddSongFile(const LibraryFolder *folder, ConstStringPtr fileName,
 
     song.id = gInfo.id;
     song.seconds = gInfo.seconds;
+    song.sampleRate = gInfo.sampleRate;
     song.audioOffset = gInfo.audioOffset;
     song.audioLength = gInfo.audioLength;
     song.fingerprint = gInfo.fingerprint;
@@ -508,6 +510,7 @@ static void SaveCache(const LibraryFolder *folder)
         memset(&gInfo, 0, sizeof gInfo);
         gInfo.id = song->id;
         gInfo.seconds = song->seconds;
+        gInfo.sampleRate = song->sampleRate;
         gInfo.audioOffset = song->audioOffset;
         gInfo.audioLength = song->audioLength;
         gInfo.fingerprint = song->fingerprint;
@@ -1226,6 +1229,7 @@ ConstStringPtr Library_SongArtistName(short song)   { return PoolString(Songs()[
 ConstStringPtr Library_SongAlbumName(short song)    { return PoolString(Songs()[song].albumName); }
 long Library_SongSeconds(short song)                { return Songs()[song].seconds; }
 long Library_SongAudioLength(short song)            { return Songs()[song].audioLength; }
+long Library_SongSampleRate(short song)             { return Songs()[song].sampleRate; }
 
 short Library_SongAlbum(short song)        { return Songs()[song].album; }
 short Library_SongTrack(short song)        { return Songs()[song].track; }

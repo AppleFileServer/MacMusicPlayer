@@ -218,6 +218,7 @@ static void FillSongInfo(SongInfo *info, long id, const SongDetails *d,
 
     memset(info, 0, sizeof(*info));
     info->id = id;
+    info->sampleRate = kSongSampleRate;
     info->flags = d->audiobook ? kSongFlagAudiobook : 0;
     info->track = d->track;
     info->audioOffset = wav->dataOffset;

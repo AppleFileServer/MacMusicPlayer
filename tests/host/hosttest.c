@@ -94,6 +94,7 @@ OSErr MakeSong(long dir, const SongSpec *spec)
     static char fingerprintBuffer[kSongFingerprintSample];
     char name[32];
     long n = spec->samples > 0 ? spec->samples : 2206, i, c;
+    long rate = spec->rate > 0 ? spec->rate : 22050;
     SongInfo info;
     short refNum;
     OSErr err;
@@ -106,6 +107,8 @@ OSErr MakeSong(long dir, const SongSpec *spec)
                 "\x22\x56\0\0\1\0\x08\0data", 40);
     c = 36 + n;
     wav[4] = c; wav[5] = c >> 8; wav[6] = c >> 16; wav[7] = 0;
+    wav[24] = wav[28] = rate & 0xFF;            /* rate and byte rate */
+    wav[25] = wav[29] = (rate >> 8) & 0xFF;
     wav[40] = n; wav[41] = n >> 8; wav[42] = n >> 16; wav[43] = 0;
     for (i = 0; i < n; i++)
         wav[44 + i] = (unsigned char)(0x80 + ((i * 7 + spec->id * 31) & 0x3F));
@@ -119,7 +122,8 @@ OSErr MakeSong(long dir, const SongSpec *spec)
     info.track = spec->track;
     info.audioOffset = 44;
     info.audioLength = n;
-    info.seconds = (n + 22050 / 2) / 22050;
+    info.seconds = (n + rate / 2) / rate;
+    info.sampleRate = rate;
     info.originalLength = 44 + n;
     info.originalRIFFSize = 36 + n;
     info.originalType = 'WAVE';

@@ -46,7 +46,7 @@ static Boolean ParseChunk(const unsigned char *p, long length,
         return false;
 
     if (Get32(payload + kSongOffsetEncoding) != kSongEncodingPCMu
-        || Get32(payload + kSongOffsetSampleRate) != kSongSampleRate
+        || !SongRate_Valid((long)Get32(payload + kSongOffsetSampleRate))
         || Get16(payload + kSongOffsetBits) != kSongBitsPerSample
         || Get16(payload + kSongOffsetChannels) != kSongChannels)
         return false;
@@ -55,6 +55,7 @@ static Boolean ParseChunk(const unsigned char *p, long length,
     info->flags = (short)Get16(payload + kSongOffsetFlags);
     info->track = (short)Get16(payload + kSongOffsetTrack);
     info->seconds = (long)Get32(payload + kSongOffsetDuration);
+    info->sampleRate = (long)Get32(payload + kSongOffsetSampleRate);
     info->audioOffset = (long)Get32(payload + kSongOffsetAudioOffset);
     info->audioLength = (long)Get32(payload + kSongOffsetAudioLength);
     info->fingerprint = Get32(payload + kSongOffsetFingerprint);
@@ -73,7 +74,7 @@ static Boolean ParseChunk(const unsigned char *p, long length,
         || info->audioOffset > info->originalLength - info->audioLength)
         return false;
 
-    expectedSeconds = (info->audioLength + kSongSampleRate / 2) / kSongSampleRate;
+    expectedSeconds = SongRate_Seconds(info->audioLength, info->sampleRate);
     if (info->seconds != expectedSeconds)
         return false;
 
@@ -219,10 +220,11 @@ long SongFile_BuildChunk(const SongInfo *info, long chunkStart,
     Put32(payload + kSongOffsetID, info->id);
     Put16(payload + kSongOffsetFlags, info->flags);
     Put16(payload + kSongOffsetTrack, info->track);
+    /* N12-5: the song's own rate, so Edit Song and a rating keep it. */
     Put32(payload + kSongOffsetDuration,
-          (info->audioLength + kSongSampleRate / 2) / kSongSampleRate);
+          SongRate_Seconds(info->audioLength, info->sampleRate));
     Put32(payload + kSongOffsetEncoding, kSongEncodingPCMu);
-    Put32(payload + kSongOffsetSampleRate, kSongSampleRate);
+    Put32(payload + kSongOffsetSampleRate, info->sampleRate);
     Put16(payload + kSongOffsetBits, kSongBitsPerSample);
     Put16(payload + kSongOffsetChannels, kSongChannels);
     Put32(payload + kSongOffsetAudioOffset, info->audioOffset);

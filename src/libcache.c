@@ -12,7 +12,7 @@
 /* The cache file (all numbers big-endian):
 
      header   4  'MMca'
-              2  the format's version, 1
+              2  the format's version, 2 (1.1 wrote 1)
               2  the number of songs
               4  a check-sum (SongChecksum) of every entry, less each
                  entry's first 4 bytes
@@ -21,14 +21,22 @@
               4  the file's modification date
               4  ID, 4 seconds, 4 audio offset, 4 audio length,
               4  fingerprint, 2 track, 2 flags
+              4  the sample rate (version 2; 1.1's version 1 has 0 here,
+                 and all its songs are 22050 Hz)
               the file's name, then title, artist, album, genre and
               composer: Pascal strings, packed
 
    A cache whose header, version, check-sum or strings don't add up is
-   ignored. */
+   ignored.
+
+   1.2 (N12-6): version 2 adds each song's sample rate, so 1.1 ignores a
+   1.2 cache (and reads every file, skipping 22254 Hz songs, which it
+   can't play); 1.2 still reads 1.1's version 1, whose songs are all
+   22050 Hz, so upgrading costs no extra scan. */
 
 #define kCacheMagic     'MMca'
-#define kCacheVersion   1
+#define kCacheVersion   2
+#define kCacheVersion1  1           /* 1.1's: read, never written */
 #define kCacheType      'iPdC'
 #define kHeaderSize     12
 #define kFixedSize      36          /* an entry's numbers */
@@ -42,6 +50,7 @@ static Handle gCacheH;              /* the loaded file */
 static long gCacheSize;
 static short gCacheCount;
 static long gCursor;                /* where the next match is likely */
+static short gCacheVersion;         /* the loaded cache's */
 
 /* ---- Finding the folder ------------------------------------------------ */
 
@@ -161,7 +170,8 @@ Boolean LibCache_Load(const LibraryFolder *folder)
     /* Check it: the header, every entry's strings, the check-sum. */
     p = (unsigned char *)*gCacheH;
     end = p + eof;
-    if (Get32(p) != kCacheMagic || Get16(p + 4) != kCacheVersion
+    if (Get32(p) != kCacheMagic
+        || (Get16(p + 4) != kCacheVersion && Get16(p + 4) != kCacheVersion1)
         || Get16(p + 6) > kMaxSongs)
     {
         LibCache_Unload();
@@ -186,6 +196,7 @@ Boolean LibCache_Load(const LibraryFolder *folder)
     }
     gCacheSize = eof;
     gCacheCount = (short)Get16(p + 6);
+    gCacheVersion = (short)Get16(p + 4);
     gCursor = kHeaderSize;
     return true;
 }
@@ -202,6 +213,8 @@ static Boolean Matches(const unsigned char *e, ConstStringPtr name,
 
     return Get32(e) == (unsigned long)length && Get32(e) != kStale
         && Get32(e + 4) == modDate
+        && (gCacheVersion == kCacheVersion1
+            || SongRate_Valid((long)Get32(e + 32)))
         && n[0] == name[0] && memcmp(n + 1, name + 1, name[0]) == 0;
 }
 
@@ -218,6 +231,8 @@ static void Fill(const unsigned char *e, SongInfo *info)
     info->fingerprint = Get32(e + 24);
     info->track = (short)Get16(e + 28);
     info->flags = (short)Get16(e + 30);
+    info->sampleRate = gCacheVersion == kCacheVersion1 ? kSongSampleRate
+                                                       : (long)Get32(e + 32);
     q += 1 + q[0];                      /* past the file's name */
     for (i = 0; i < kSongTagCount; i++)
     {
@@ -319,7 +334,7 @@ long LibCache_SaveEntry(ConstStringPtr name, unsigned long modDate, long length,
     Put32(gEntry + 24, info->fingerprint);
     Put16(gEntry + 28, (unsigned short)info->track);
     Put16(gEntry + 30, (unsigned short)info->flags);
-    Put32(gEntry + 32, 0);              /* spare */
+    Put32(gEntry + 32, (unsigned long)info->sampleRate);
     BlockMove(name, q, name[0] + 1);
     q += 1 + name[0];
     for (i = 0; i < kSongTagCount; i++)

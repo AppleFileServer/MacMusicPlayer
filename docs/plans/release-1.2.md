@@ -99,9 +99,11 @@ The Converter now makes WAVs at 22,254 Hz, the Plus's rate (its 5a3acc7,
   - `src/playback.c:59,239,365`: times and seeking use the current song's
     rate, so gapless mixing of the two rates stays right.
 - **N12-6: the cache goes to version 2,** adding each song's rate.
-  - 1.1 treats a version-2 cache as unknown, ignores it and rewrites its own,
-    and the same happens the other way round. Switching between 1.1 and this
-    release costs one full scan; no files are touched.
+  - 1.1 treats a version-2 cache as unknown, ignores it and rewrites its own.
+    As built (step D1): 1.2 still reads 1.1's version 1, its songs all
+    22,050 Hz, so upgrading costs no scan; only going back to 1.1 does. The
+    rate lives in the entry's four spare bytes; a version 1 cache is kept
+    until a scan changes something.
   - 1.0 ignores the cache.
 - **N12-7: what older versions do with a 22,254 song** (documented, not
   changed): 1.0 and 1.1 skip it with their "not recognised" alert. The file

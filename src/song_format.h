@@ -30,7 +30,7 @@
      8     2   track number (0 = none)
     10     4   duration in seconds, = round(audio length / sample rate)
     14     4   encoding 'PCMu': linear PCM, unsigned samples
-    18     4   sample rate in Hz (22050)
+    18     4   sample rate in Hz: 22050, or 22254 (1.2, N12-4)
     22     2   bits per sample (8)
     24     2   channels (1)
     26     4   audio offset: first byte of the WAV's "data" chunk body
@@ -143,11 +143,28 @@ static inline UInt32 SongChecksum_Value(const SongChecksum *c)
     return (c->b << 16) ^ c->a;
 }
 
-/* The only audio format accepted. */
+/* The audio format accepted: 8-bit unsigned mono PCM at either of two
+   rates. 1.0 and 1.1 took 22050 Hz only. 1.2 (N12-4) also takes 22254
+   Hz, the Macintosh Plus's own rate (it plays 22254.5 samples a second),
+   as the MacMusic Converter 1.1 makes: such songs play at true speed and
+   pitch. Every sample is played at the hardware rate whatever the song's
+   rate; a song's rate decides only its times (N12-5). */
 #define kSongEncodingPCMu       'PCMu'
-#define kSongSampleRate         22050L
+#define kSongSampleRate         22050L  /* 1.0's rate */
+#define kSongSampleRatePlus     22254L  /* the Plus's own (N12-4) */
 #define kSongBitsPerSample      8
 #define kSongChannels           1
+
+static inline Boolean SongRate_Valid(long rate)
+{
+    return rate == kSongSampleRate || rate == kSongSampleRatePlus;
+}
+
+/* A song's length in whole seconds, rounded, as stored at offset 10. */
+static inline long SongRate_Seconds(long samples, long rate)
+{
+    return (samples + rate / 2) / rate;
+}
 
 /* Finder codes (project-specific, unregistered). */
 #define kAppCreator             'iPdM'

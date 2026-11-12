@@ -136,6 +136,7 @@ static void MakeSong(const LibraryFolder *f, short id, const char *title,
     in.flags = flags;
     in.track = track;
     in.seconds = (n + 11025) / 22050;
+    in.sampleRate = kSongSampleRate;    /* 1.2: the rate is now stored */
     in.audioOffset = 44;
     in.audioLength = n;
     in.originalLength = 44 + n;
