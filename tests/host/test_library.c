@@ -213,6 +213,24 @@ int main(void)
     n = Library_ListSongs(&f, gList, kMaxSongs);        /* screen: the same */
     CHECK_LIST(Titles(gList, n), "Middle/First/Alpha/Zeta");
 
+    Test("300 albums, one song each: all listed (N12-9; 1.1 stopped at 256)");
+    gF = NewLibrary();
+    for (i = 1; i <= 300; i++)
+    {
+        char title[16], album[16], artist[16];
+
+        snprintf(title, sizeof title, "Song %d", i);
+        snprintf(album, sizeof album, "Album %d", i);
+        snprintf(artist, sizeof artist, "Artist %d", i);
+        Song(i, title, artist, album, "Pop", 1);
+    }
+    CHECK(Library_Scan(&gF));
+    CHECK_EQ(Library_SongCount(), 300);
+    CHECK_EQ(Library_ListAlbums(&gAll, gList, kMaxSongs), 300);
+    CHECK_EQ(Library_ListArtists(&gAll, gList, kMaxSongs), 300);
+    for (i = 1; i <= 300; i++)
+        CHECK(Library_SongAlbum(Library_SongForID(i)) != kNone);
+
     Test("unreadable files and duplicate IDs are skipped");
     SmallLibrary();
     TestFS_WriteFile(gF.folderID, "Read Me", 'TEXT', 'ttxt', "hello", 5);

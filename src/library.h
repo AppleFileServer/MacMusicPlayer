@@ -12,7 +12,10 @@
    are indexed by number; kNone in a filter field means "any". */
 
 #define kMaxSongs       500
-#define kMaxGroups      256     /* per kind: artists, albums, genres... */
+/* 1.2 (N12-9): as many artists, albums, genres and composers as songs, so
+   no song is left out of its group's list (1.0 and 1.1 had 256: a library
+   of 272 albums left 16 out of Albums). */
+#define kMaxGroups      kMaxSongs   /* per kind: artists, albums, genres... */
 #define kMaxPlaylists   10      /* 8e-2: a MacMusic limit, not the 4G's */
 #define kMaxPlaylistEntries 1000    /* songs read from one playlist file */
 #define kNone           (-1)

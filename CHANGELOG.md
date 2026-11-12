@@ -39,6 +39,11 @@ library conversion. The decision codes in brackets are explained in
   showed wrong times and a wrong progress bar, since 1.0: working out its
   time overflowed a 32-bit number. Found while planning a library of
   long tracks (2026-11-12). A new host test in `test_songfile`.
+- **Up to 500 albums (N12-9):** MacMusic listed at most 256 artists,
+  albums, genres or composers; a library of the owner's 376 songs on 272
+  albums left 16 out of the Albums list (their songs were still under
+  Songs and All). Now as many as songs, 500. New host tests in
+  `test_library` (300 albums) and `test_sorting` (500 names).
 - **The User's Guide for 1.2 (step E1):** `docs/user-guide.md` (and so
   the TeachText Read Me) and the printed guide, now its third edition
   (November 2026): the two rates and the `afconvert` example; "0.9% fast"

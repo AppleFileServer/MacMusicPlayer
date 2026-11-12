@@ -130,17 +130,19 @@ static const char *kComposers[] = {
 #define N(a) ((int)(sizeof(a) / sizeof((a)[0])))
 
 /* 1.1 (N11-32): with gManyNames, each song's names are made from a number
-   of up to 400, in random case, some with "The " or an accent: more names
-   than a group table holds (kMaxGroups), so the full table is tested, and
-   long lists for the binary search. */
-static Boolean gManyNames;
+   of up to 400, in random case, some with "The " or an accent: long lists
+   for the binary search, with names that compare equal. 1.2 (N12-9): with
+   gManyNames 2, from a number of up to 100,000, so nearly every song's
+   names differ and a table fills to kMaxGroups (now kMaxSongs, so it can
+   no longer overflow). */
+static short gManyNames;
 static char gMade[5][kMaxSongs + 1][32];
 
 static const char *ManyName(int kind, short song)
 {
     char *out = gMade[kind][song];
     const char *stem = kind == 0 ? "Artist" : kind == 1 ? "album" : kind == 2 ? "Genre" : "Composer";
-    int n = Pick(400), c;
+    int n = Pick(gManyNames == 2 ? 100000 : 400), c;
 
     snprintf(out, sizeof gMade[0][0], "%s%s %d%s", Pick(4) == 0 ? "The " : "", stem, n,
              Pick(6) == 0 ? " Caf\x8E" : Pick(6) == 0 ? " Cafe" : "");
@@ -319,9 +321,11 @@ int main(void)
     CheckLibrary("1.0's order: 500 songs, many ties", 10, kMaxSongs);
     CheckLibrary("1.0's order: 500 songs, another mix", 11, kMaxSongs);
     CheckLibrary("1.0's order: 499 songs", 12, kMaxSongs - 1);
-    gManyNames = true;
-    CheckLibrary("1.0's groups: 500 songs, more names than fit", 13, kMaxSongs);
+    gManyNames = 1;
+    CheckLibrary("1.0's groups: 500 songs, many names alike", 13, kMaxSongs);
     CheckLibrary("1.0's groups: 200 songs, many names", 14, 200);
-    gManyNames = false;
+    gManyNames = 2;
+    CheckLibrary("1.2's groups: 500 songs, nearly every name different (N12-9)", 15, kMaxSongs);
+    gManyNames = 0;
     return TestsDone("test_sorting");
 }

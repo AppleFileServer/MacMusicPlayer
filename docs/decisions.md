@@ -253,6 +253,7 @@ The click wheel (W: Stage 5c-1)
 | N12-6 | The cache becomes version 2, with each song's rate in the entry's spare four bytes. 1.2 still reads 1.1's version 1 (all its songs 22050 Hz), so upgrading costs no scan; 1.1 ignores version 2 and reads every file | `libcache.c` |
 | N12-7 | 1.0 and 1.1 skip a 22254 Hz song with their "not recognised" alert; its file is left as it is, and comes back when 1.2 opens the library | (documented, nothing changed) |
 | N12-8 | Samples become ticks in two parts (SongRate_Ticks), so a song longer than about 26.8 minutes has the right times and progress bar (1.0 to 1.1 overflowed a long) | `song_format.h`, `playback.c` |
+| N12-9 | As many artists, albums, genres and composers as songs (kMaxGroups = kMaxSongs, 500; was 256), so a group table can't fill and no song is left out of its group's list; 4.9 KB more globals | `library.h` |
 | N12-3 | PROVISIONAL: Albums > All lists its songs by album (D14 order, no album last), then track (D13), then title; Music > Songs and Composers stay by title. Playing from the list follows it (N3) | `library.c`, `ui_lists.c` |
 
 ## *MacMusic Utilities*, the companion manual (`manual-utilities.md`)
