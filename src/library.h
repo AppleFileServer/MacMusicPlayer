@@ -126,6 +126,7 @@ short Library_ListAlbums(const LibFilter *filter, short *out, short max);
 short Library_ListComposers(short *out, short max);
 short Library_ListPlaylists(short *out, short max);
 short Library_ListSongs(const LibFilter *filter, short *out, short max);
+long Library_SongChecks(void);  /* songs looked at by the group lists so far (tests) */
 short Library_ListAudiobooks(short *out, short max);
 
 ConstStringPtr Library_GenreName(short genre);
@@ -150,6 +151,7 @@ long Library_SongSampleRate(short song);    /* N12-5: 22050 or 22254 Hz */
 /* Stage 9c, for Shuffle by album: the song's album (a group number, or
    kNone), track number, and whether it is an audiobook. */
 short Library_SongAlbum(short song);
+short Library_SongArtist(short song);      /* group index or kNone */
 short Library_SongTrack(short song);
 Boolean Library_SongIsAudiobook(short song);
 

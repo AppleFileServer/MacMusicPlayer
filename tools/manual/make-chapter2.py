@@ -611,8 +611,9 @@ TOPICS = [
                "> Click Print, then OK in the printer&rsquo;s Print dialog.",
                "Each list starts on a new page, with your library&rsquo;s "
                "name, the list and the date at the top.",
-               "~ To stop printing, hold down the Command key and type a "
-               "period. If nothing prints, see Appendix D."), "c2-print", double=True),
+               "~ While MacMusic prepares the pages, a box says so. To stop "
+               "printing, hold down the Command key and type a period. If "
+               "nothing prints, see Appendix D."), "c2-print", double=True),
            ]),
 
     Topic("MacMusic and Your Other Applications",

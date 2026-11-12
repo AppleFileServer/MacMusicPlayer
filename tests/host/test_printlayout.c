@@ -250,5 +250,39 @@ int main(void)
     TestMem_SetLimit(0);
     PrintLayout_End();
 
+    Test("the owner's library's size: printed without millions of checks (N12-11)");
+    {
+        /* 376 songs on 272 albums by 204 artists, as the Music disk's
+           library; 1.1 checked every album against every song for each
+           artist (and every artist for each album): about 40 million
+           checks for these two lists, so the Plus seemed to hang. */
+        short i, p, k, lists[2] = { kPrintAlbums, kPrintArtists };
+        long before, used;
+        char title[24], artist[24], album[24];
+
+        gF = NewLibrary();
+        for (i = 1; i <= 376; i++)
+        {
+            snprintf(title, sizeof title, "Song %d", i);
+            snprintf(artist, sizeof artist, "Artist %d", i <= 204 ? i : i % 204 + 1);
+            snprintf(album, sizeof album, "Album %d", i <= 272 ? i : i % 272 + 1);
+            Song(i, title, artist, album, (short)(i % 12), 0, 0);
+        }
+        CHECK(Library_Scan(&gF));
+        page = Page(600, 60);
+        before = Library_SongChecks();
+        for (k = 0; k < 2; k++)
+        {
+            CHECK(PrintLayout_Begin(lists[k], &all, &page));
+            for (p = 1; p <= PrintLayout_PageCount(); p++)
+                for (i = 0; i < PrintLayout_LineCount(p); i++)
+                    (void)Cells(p, i);
+            PrintLayout_End();
+        }
+        used = Library_SongChecks() - before;
+        printf("  songs checked for the two lists: %ld\n", used);
+        CHECK(used < 2000000L);
+    }
+
     return TestsDone("test_printlayout");
 }

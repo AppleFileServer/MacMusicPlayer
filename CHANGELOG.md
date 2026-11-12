@@ -44,6 +44,17 @@ library conversion. The decision codes in brackets are explained in
   albums left 16 out of the Albums list (their songs were still under
   Songs and All). Now as many as songs, 500. New host tests in
   `test_library` (300 albums) and `test_sorting` (500 names).
+- **Printing a large library (N12-11, N12-12):** printing the Albums and
+  Artists lists of the owner's library (376 songs, 272 albums, 204
+  artists) seemed to hang on the real Plus: the wristwatch for 10 minutes,
+  with nothing printed and no way to stop. Finding each artist's albums,
+  and each album's artists, checked every one against every song: about
+  62 million songs looked at before the first page. They're now found in
+  one pass, 256,000 for the same lists, which also quickens the Artists
+  screens. While the pages are prepared, a box says so and that
+  Command-period cancels, and it does. (In 1.1 too: its printing was
+  checked only with small libraries.) New host tests in
+  `test_printlayout` and `test_sorting`.
 - **A Sample Song on the release floppy (N12-10):** beside MacMusic and
   its Read Me, a 28-second MacMusic WAV at 22,254 Hz to try Import Song
   with (from "Chariots of Fire"). It's kept with the private assets, not

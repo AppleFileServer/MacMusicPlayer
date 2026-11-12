@@ -296,6 +296,77 @@ static void ReadGenresAndComposers(void)
     }
 }
 
+/* 1.2 (N12-11): a filter's albums (or artists), from the one-pass lists,
+   are exactly those of the songs the filter takes, in the groups' order. */
+static short gExpect[kMaxSongs], gGot[kMaxSongs], gSongs[kMaxSongs + 1];
+
+static void CheckOneFilter(const LibFilter *f, Boolean albums)
+{
+    short n, i, j, k, g, e = 0, got;
+    Boolean ok;
+
+    n = Library_ListSongs(f, gSongs, kMaxSongs);
+    for (i = 0; i < n; i++)
+    {
+        g = albums ? Library_SongAlbum(gSongs[i]) : Library_SongArtist(gSongs[i]);
+        if (g == kNone)
+            continue;
+        for (j = 0; j < e && gExpect[j] != g; j++)
+            ;
+        if (j < e)
+            continue;
+        for (k = e; k > 0 && gExpect[k - 1] > g; k--)   /* in the groups' order */
+            gExpect[k] = gExpect[k - 1];
+        gExpect[k] = g;
+        e++;
+    }
+    got = albums ? Library_ListAlbums(f, gGot, kMaxSongs) : Library_ListArtists(f, gGot, kMaxSongs);
+    ok = got == e;
+    for (i = 0; ok && i < e; i++)
+        ok = gGot[i] == gExpect[i];
+    CHECK(ok);
+}
+
+static void CheckFilteredGroups(void)
+{
+    LibFilter f;
+    short n, i;
+    short artists[kMaxSongs], albums[kMaxSongs], genres[kMaxSongs];
+    short na, nb, ng;
+
+    LibFilter_Clear(&f);
+    CheckOneFilter(&f, true);
+    CheckOneFilter(&f, false);
+    na = Library_ListArtists(&f, artists, kMaxSongs);
+    nb = Library_ListAlbums(&f, albums, kMaxSongs);
+    ng = Library_ListGenres(genres, kMaxSongs);
+    for (i = 0; i < na; i++)                    /* an artist's albums */
+    {
+        LibFilter_Clear(&f);
+        f.artist = artists[i];
+        CheckOneFilter(&f, true);
+    }
+    for (i = 0; i < nb; i++)                    /* an album's artists */
+    {
+        LibFilter_Clear(&f);
+        f.album = albums[i];
+        CheckOneFilter(&f, false);
+    }
+    for (i = 0; i < ng; i++)                    /* a genre's artists, and albums */
+    {
+        LibFilter_Clear(&f);
+        f.genre = genres[i];
+        CheckOneFilter(&f, false);
+        CheckOneFilter(&f, true);
+        if (na > 0)
+        {
+            f.artist = artists[i % na];         /* a genre and an artist */
+            CheckOneFilter(&f, true);
+        }
+    }
+    (void)n;
+}
+
 static void CheckLibrary(const char *what, unsigned long seed, short count)
 {
     Test(what);
@@ -309,6 +380,7 @@ static void CheckLibrary(const char *what, unsigned long seed, short count)
     CheckGroups("genres", Genre, Library_GenreName, Library_ListGenres, SetGenre);
     CheckGroups("composers", Composer, Library_ComposerName, Library_ListComposers,
                 SetComposer);
+    CheckFilteredGroups();
 }
 
 int main(void)

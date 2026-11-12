@@ -1079,6 +1079,8 @@ OSErr Library_RetitleInPlaylists(long id, ConstStringPtr title)
 
 /* ---- Queries ---------------------------------------------------------- */
 
+static long gSongChecks;    /* songs looked at by the lists, for tests */
+
 static Boolean SongMatches(short s, const LibFilter *f)
 {
     const SongRec *song = &Songs()[s];
@@ -1125,32 +1127,47 @@ short Library_ListPlaylists(short *out, short max)
     return n;
 }
 
+/* 1.2 (N12-11): the groups with a song the filter takes, in one pass over
+   the songs (each group marked), then in the groups' order: the same list
+   as 1.1's, which checked every group against every song (for a library
+   of 204 artists, 272 albums and 376 songs, printing the Albums and
+   Artists lists took tens of millions of checks: the owner's Plus seemed
+   to hang). */
+static Boolean gMarked[kMaxGroups];
+
+static short ListGroups(Boolean albums, short groups, const LibFilter *filter,
+                        short *out, short max)
+{
+    short g, s, n = 0;
+
+    for (g = 0; g < groups; g++)
+        gMarked[g] = false;
+    gSongChecks += gSongCount;
+    for (s = 0; s < gSongCount; s++)
+    {
+        g = albums ? Songs()[s].album : Songs()[s].artist;
+        if (g != kNone && !gMarked[g] && SongMatches(s, filter))
+            gMarked[g] = true;
+    }
+    for (g = 0; g < groups && n < max; g++)
+        if (gMarked[g])
+            out[n++] = g;
+    return n;
+}
+
 short Library_ListArtists(const LibFilter *filter, short *out, short max)
 {
-    short a, s, n = 0;
-
-    for (a = 0; a < gArtists.count && n < max; a++)
-        for (s = 0; s < gSongCount; s++)
-            if (Songs()[s].artist == a && SongMatches(s, filter))
-            {
-                out[n++] = a;
-                break;
-            }
-    return n;
+    return ListGroups(false, gArtists.count, filter, out, max);
 }
 
 short Library_ListAlbums(const LibFilter *filter, short *out, short max)
 {
-    short b, s, n = 0;
+    return ListGroups(true, gAlbums.count, filter, out, max);
+}
 
-    for (b = 0; b < gAlbums.count && n < max; b++)
-        for (s = 0; s < gSongCount; s++)
-            if (Songs()[s].album == b && SongMatches(s, filter))
-            {
-                out[n++] = b;
-                break;
-            }
-    return n;
+long Library_SongChecks(void)
+{
+    return gSongChecks;
 }
 
 /* 1.2 (N12-3, PROVISIONAL): an "All" row's songs by album (in the albums'
@@ -1232,6 +1249,7 @@ long Library_SongAudioLength(short song)            { return Songs()[song].audio
 long Library_SongSampleRate(short song)             { return Songs()[song].sampleRate; }
 
 short Library_SongAlbum(short song)        { return Songs()[song].album; }
+short Library_SongArtist(short song)       { return Songs()[song].artist; }
 short Library_SongTrack(short song)        { return Songs()[song].track; }
 Boolean Library_SongIsAudiobook(short song)
 {

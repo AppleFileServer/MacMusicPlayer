@@ -255,6 +255,8 @@ The click wheel (W: Stage 5c-1)
 | N12-8 | Samples become ticks in two parts (SongRate_Ticks), so a song longer than about 26.8 minutes has the right times and progress bar (1.0 to 1.1 overflowed a long) | `song_format.h`, `playback.c` |
 | N12-9 | As many artists, albums, genres and composers as songs (kMaxGroups = kMaxSongs, 500; was 256), so a group table can't fill and no song is left out of its group's list; 4.9 KB more globals | `library.h` |
 | N12-10 | The release floppy also carries "Sample Song", a MacMusic WAV to try importing (28 s of Vangelis's "Chariots of Fire" at 22,254 Hz), taken from the private assets, never the repository; without it, the floppy is as before | `tools/make-release.sh` |
+| N12-11 | A filter's artists or albums are found in one pass over the songs (each group marked), not by checking every group against every song: the same lists; printing the Albums and Artists lists for a library of 376 songs, 272 albums and 204 artists looks at 256,000 songs, not 62 million | `library.c` |
+| N12-12 | While the pages are prepared (spooled, before the printer's own box), a box says "Preparing the pages to print..." and "To cancel, press Command-period."; Command-period, checked before each list and page, stops the job as Cancel does | `print.c` |
 | N12-3 | PROVISIONAL: Albums > All lists its songs by album (D14 order, no album last), then track (D13), then title; Music > Songs and Composers stay by title. Playing from the list follows it (N3) | `library.c`, `ui_lists.c` |
 
 ## *MacMusic Utilities*, the companion manual (`manual-utilities.md`)

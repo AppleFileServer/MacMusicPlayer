@@ -212,7 +212,8 @@ songs are back the next time MacMusic 1.2 opens the library.
 - The first time you print, Page Setup comes first, so you can choose
   the paper (A4 or US Letter).
 - The music pauses while it prints, and carries on afterwards.
-  **Command-period** stops printing.
+  **Command-period** stops printing. While MacMusic prepares the pages,
+  a box says so, and how to cancel.
 - MacMusic prints on whichever printer is chosen in the Chooser: an
   ImageWriter on the printer port, or an ImageWriter or LaserWriter on
   AppleTalk. With background printing on (a LaserWriter, under

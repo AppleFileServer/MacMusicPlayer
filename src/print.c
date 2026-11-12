@@ -1,4 +1,5 @@
 #include <Dialogs.h>
+#include <Events.h>
 #include <Fonts.h>
 #include <Memory.h>
 #include <OSUtils.h>
@@ -145,6 +146,44 @@ static Boolean PrepareRecord(void)
 }
 
 /* ---- Messages (N11-19) -------------------------------------------------- */
+
+/* 1.2 (N12-12): while MacMusic prepares the pages (with the ImageWriter,
+   it spools every page before the printer's own status box appears), a
+   box says how to stop, and Command-period stops it, as Cancel does. */
+static WindowPtr ShowPreparing(void)
+{
+    Rect r;
+    WindowPtr w;
+    GrafPtr saved;
+    short left = (qd.screenBits.bounds.right - 340) / 2;
+    short top = (qd.screenBits.bounds.bottom - 70) / 2;
+
+    SetRect(&r, left, top, left + 340, top + 70);
+    w = NewWindow(nil, &r, P(""), true, dBoxProc, (WindowPtr)-1, false, 0);
+    if (w == nil)
+        return nil;
+    GetPort(&saved);
+    SetPort(w);
+    TextFont(systemFont);
+    TextSize(12);
+    MoveTo(20, 28);
+    DrawString(P("Preparing the pages to print\xC9"));
+    MoveTo(20, 50);
+    DrawString(P("To cancel, press Command-period."));
+    SetPort(saved);
+    return w;
+}
+
+static Boolean CancelPressed(void)
+{
+    EventRecord event;
+    Boolean cancel = false;
+
+    while (GetOSEvent(keyDownMask | autoKeyMask, &event))
+        if ((event.modifiers & cmdKey) && (event.message & charCodeMask) == '.')
+            cancel = true;
+    return cancel;
+}
 
 static void Problem(OSErr err)
 {
@@ -364,6 +403,7 @@ void Print_Library(void)
     short list, p, lineHeight;
     OSErr err;
     Boolean go;
+    WindowPtr preparing;
 
     if (!ChooseLists())
         return;
@@ -403,6 +443,7 @@ void Print_Library(void)
 
     port = PrOpenDoc(gPrint, nil, nil);
     err = PrError();
+    preparing = err == noErr ? ShowPreparing() : nil;
     if (err == noErr)
     {
         SetPort(&port->gPort);
@@ -423,6 +464,11 @@ void Print_Library(void)
         {
             if (!gChosen[list])
                 continue;
+            if (CancelPressed())
+            {
+                err = iPrAbort;
+                break;
+            }
             if (!PrintLayout_Begin(list, &gOptions, &layout))
             {
                 err = memFullErr;
@@ -430,6 +476,11 @@ void Print_Library(void)
             }
             for (p = 1; p <= PrintLayout_PageCount() && err == noErr; p++)
             {
+                if (CancelPressed())
+                {
+                    err = iPrAbort;
+                    break;
+                }
                 PrOpenPage(port, nil);
                 err = PrError();
                 if (err == noErr)
@@ -444,6 +495,8 @@ void Print_Library(void)
     PrCloseDoc(port);
     if (err == noErr)
         err = PrError();
+    if (preparing != nil)
+        DisposeWindow(preparing);       /* the printer's own box follows */
 
     /* A spooled job (the ImageWriter's, without background printing) is
        printed now, from its spool file. */
