@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.15)
 
-project(MacMusic VERSION 1.1)
+project(MacMusic VERSION 1.2)
 
 # 1.1 (N11-30, M2): optimised by default. With no build type CMake gives
 # GCC no -O flag, and on the real Plus the optimised build read the

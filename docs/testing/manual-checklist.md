@@ -235,6 +235,54 @@ Starting and importing (Part D):
       question. With the library at 499 songs: one more imported, then
       "The MacMusic Library is full" (no question), and the run ends.
 
+## 11. New in 1.2 (`docs/plans/release-1.2.md`)
+
+Test songs: a WAV from the MacMusic Converter 1.1 (22,254 Hz), and the
+same song at 22,050 Hz (an older MacMusic WAV, or
+`afconvert -f WAVE -d UI8@22050 -c 1 --mix song.mp3 old.wav`).
+
+The song details window (N12-1, N12-2):
+- [ ] 11.1 Edit Song: type in Composer, then click just inside the top or
+      bottom edge of Genre's box (between the frame and the text): the
+      typing moves to Genre. The same for each box, and Track.
+- [ ] 11.2 Clicks on the text, Tab, Return and Cancel as before; Import
+      Song's window the same.
+
+Albums > All (N12-3):
+- [ ] 11.3 Music > Albums > All: album by album, each in track order,
+      songs with no album last. Music > Songs: by title.
+- [ ] 11.4 Artists > an artist > All, and Genres > a genre > Albums >
+      All: that artist's (genre's) songs album by album.
+- [ ] 11.5 With Shuffle off, play a song from Albums > All: the next
+      songs follow the list.
+
+Songs at 22,254 Hz (N12-4 to N12-7):
+- [ ] 11.6 Import the 22,254 Hz WAV: its length shown right in the Import
+      window; title from the WAV.
+- [ ] 11.7 Play it: the time reaches the song's length as it ends; seeking
+      and scrubbing land in the right place. Beside the 22,050 Hz copy,
+      it's a touch lower and slower (true pitch).
+- [ ] 11.8 A 22,050 Hz song, then the 22,254, then a 22,050 (an album or
+      a playlist): no gap or click between them.
+- [ ] 11.9 Edit Song and a rating on the 22,254 Hz song: saved; after
+      Rescan Library it still plays at true pitch with the right length.
+- [ ] 11.10 A WAV at another rate (44,100, or 22,255): refused, "Only
+      mono, 8-bit PCM WAV files at 22050 or 22254 Hz can be imported."
+- [ ] 11.11 Library Info, Print Library (Songs) and Export of the
+      22,254 Hz song: its length right; the exported WAV the same as the
+      one imported.
+- [ ] 11.12 The first start of 1.2 with a 1.1 library: as quick as 1.1's
+      later starts (1.1's cache used; no full read).
+- [ ] 11.13 The library in MacMusic 1.1: "files ... were not recognised"
+      for the 22,254 Hz songs; the others as before. Back in 1.2: all the
+      songs, the 22,254 Hz ones included.
+
+On the Plus (the release's BlueSCSI disk):
+- [ ] 11.14 11.1, 11.3, 11.6-11.8 on the Plus.
+- [ ] 11.15 The floppy check (the issues log, 2026-11-11): a floppy
+      read-write-verify while a song plays; how it sounds; the files
+      verified.
+
 ## Problems found
 
 | Item | What happened | How serious |
