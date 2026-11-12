@@ -75,9 +75,8 @@ song and cache formats). Everything is committed and pushed, up to
   session, commit 80ec7d3) takes MacMusic WAVs at 22,254 Hz only; 1.0
   takes only 22,050 Hz. *MacMusic Utilities* Chapter 3 still describes
   1.0 (T3 in `LOOSE-ENDS.md`).
-- **On the BlueSCSI card:** `HD60_512 MacMusic Timing 3.hda`, a timing
-  image no longer needed, can be deleted (it shares SCSI ID 6 with the
-  Pokémon project's disk).
+- **On the BlueSCSI card** (2026-11-12): the Music disk on ID 5, copied
+  and checked; 1.1's Scratch image and the old Timing 3 image are gone.
 - **The manuals stay 7½ x 9 in.** An A5 edition of the User's Guide was
   planned and proofed both ways on 2026-10-25, then not pursued:
   `docs/plans/manual-a5.md` says how, if it's ever wanted.
