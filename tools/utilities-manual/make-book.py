@@ -96,7 +96,7 @@ def book_contents(sections):
 # layout); a "see" entry points to another subject instead.
 INDEX = [
     ("Add Files", ["c3-l1", "c3-to-add-songs", "c3-c-files"]),
-    ("Advanced (Converter)", ["c2-to-change-the-normalise-level", "c2-r-advanced"]),
+    ("Advanced (Converter)", ["c2-r-advanced"]),
     ("Advanced (Transfer Utility)", ["c3-r-advanced"]),
     ("&ldquo;already there&rdquo;", ["c2-if-a-file-is-already-there", "c3-if-an-image-is-already-there",
                                      "c4-to-restore-files-to-a-folder"]),
@@ -148,7 +148,7 @@ INDEX = [
     ("Macintosh Backup Utility", ["c1-intro", "chapter-4", "p-macintosh-backup-utility",
                                   "a-macintosh-backup-utility-1-0"]),
     ("MacMusic Converter Utility", ["c1-intro", "chapter-2", "p-macmusic-converter-utility",
-                                    "a-macmusic-converter-utility-1-0"]),
+                                    "a-macmusic-converter-utility-1-1"]),
     ("MacMusic Transfer Utility", ["c1-intro", "chapter-3", "p-macmusic-transfer-utility",
                                    "a-macmusic-transfer-utility-1-0"]),
     ("MacMusic WAV files", ["c1-intro", "c2-intro", "a-macmusic-wav-files"]),
@@ -161,8 +161,8 @@ INDEX = [
     ("names on the Macintosh", "file names"),
     ("new card, restoring onto", ["c4-to-restore-onto-a-new-card", "a-restoring-onto-a-new-card",
                                   "t-the-card-itself-has-failed"]),
-    ("Normalise", ["c2-to-even-out-the-loudness", "c2-to-change-the-normalise-level",
-                   "c2-c-normalise-to", "t-songs-arent-equally-loud"]),
+    ("loudness", ["c2-about-the-loudness", "t-songs-arent-equally-loud"]),
+    ("Normalise (Converter 1.0)", "loudness"),
     ("Open Anyway", ["c1-l1", "t-a-program-wont-open-the-first-time"]),
     ("power cut", "clean shutdown"),
     ("progress", ["c2-while-it-works", "c3-l1", "c4-l1"]),

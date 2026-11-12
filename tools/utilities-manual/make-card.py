@@ -94,8 +94,8 @@ PAGE_1 = card(
           "made from an MP3 asks first: Re-encode, WAV Only or Cancel."),
          ("To set the title MacMusic shows", "Type it in Title. File name, left empty, follows "
           "the title; Saves as shows the names."),
-         ("To even out the loudness", "Turn on Normalise. Its level is under Advanced, "
-          "Normalise to (&minus;1.0 dBFS to start)."),
+         ("The loudness", "Nothing to set: every song is brought to &minus;16 LUFS, "
+          "with a limiter at &minus;1 dBFS."),
          ("To trim silence at the ends", "Turn on Trim silence at the ends, and choose 2 or 3 "
           "seconds in Longer than."),
          ("To choose where files go", "Under Save To, click Choose. Use Default: the MacMusic "
@@ -104,8 +104,8 @@ PAGE_1 = card(
          ("To cancel", "Click Cancel, or press " + k("Esc") + ". Nothing half-made is kept."),
          ("If a file of that name is there", "Keep Both (the next free name), Replace, or "
           "Cancel.")),
-    '<p class="note">A MacMusic WAV is mono, 22,050 samples a second, 8-bit: about 1.3 MB a '
-    "minute. Its name is at most 31 characters, with .wav.</p>",
+    '<p class="note">A MacMusic WAV is mono, 22,254 samples a second, 8-bit (MacMusic 1.2 '
+    "or later): about 1.3 MB a minute. Its name is at most 31 characters, with .wav.</p>",
     first=True,
 )
 
@@ -239,7 +239,8 @@ PAGE_4 = card(
           "it prints.")),
 
     '<p class="note"><b>Limits:</b> 500 songs and 10 playlists in a library; 640K under '
-    "MultiFinder (it works in 512K); MacMusic WAV files only, mono, 22,050 Hz, 8-bit.</p>",
+    "MultiFinder (it works in 512K); MacMusic WAV files only, mono, 22,254 or 22,050 Hz, "
+    "8-bit.</p>",
     '<p class="foot">See the <i>MacMusic User&rsquo;s Guide</i> for MacMusic, and <i>MacMusic '
     "Utilities</i> for the utilities. &copy; 2026 Jack McAteer. Apple, Macintosh and Mac are "
     "trademarks of Apple Inc.; YouTube is a trademark of Google LLC. For the owner&rsquo;s own "

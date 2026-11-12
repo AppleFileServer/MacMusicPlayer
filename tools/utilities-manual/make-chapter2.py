@@ -1,13 +1,17 @@
 #!/usr/bin/env python3
 """Writes docs/utilities-manual/chapter2.html, Chapter 2 of *MacMusic
-Utilities*, "Converting Songs": the MacMusic Converter Utility 1.0
+Utilities*, "Converting Songs": the MacMusic Converter Utility 1.1
 (Phase 3; docs/utilities-manual/outline.md). Its introduction, two
 lessons, the task pages and the Converter's reference.
 
-Facts come from the Converter's 1.0 source (MainWindowView.swift,
-AppModel.swift, AppDelegate.swift, the engine's messages) and the
-owner's screenshots (figure codes cvNN), with captures of 1.0 made on
-2026-10-10 (cv-...). CHECK marks what no screenshot shows yet (UB7).
+Facts come from the Converter's source (MainWindowView.swift,
+AppModel.swift, AppDelegate.swift, the engine's messages): 1.0's, and
+for 1.1 (MacMusic 1.2, step E2) its levelling by loudness (L10) and the
+22,254 Hz WAV (K1-K6). The pictures are the owner's screenshots of 1.0
+(figure codes cvNN) where 1.1 looks the same, captures of 1.0 made on
+2026-10-10 (cv-...), and captures of 1.1 made on 2026-11-11 (the
+window, Sound, Advanced, Save To, Results, the YouTube lesson). CHECK
+marks what no screenshot shows yet (UB7).
 
 Task pages: the User's Guide sets each task in a column a quarter of the
 page wide, which suits its small Macintosh Plus screens. A modern window
@@ -44,7 +48,7 @@ WINDOW = figure("figures/cv06.png", 1080, 1264, WINDOW_SCALE, [
     ("Make", 139, 60, 488),
     ("Title", 163, 60, 570),
     ("File name", 184, 60, 643),
-    ("Normalise", 236, 60, 827),
+    ("Loudness", 236, 60, 827),
     ("Trim silence|at the ends", 270, 60, 961),
     ("Longer than", 313, 60, 1097),
     ("Convert", 344, 960, 1207),
@@ -56,17 +60,19 @@ INTRO = "".join([
     head("Introduction", "intro"),
     "<p>The <b class=\"term\">MacMusic Converter Utility</b> makes your music "
     "into files that MacMusic can play. MacMusic plays one kind of sound file "
-    "only: a WAV file that is mono, with 22,050 samples a second, 8 bits each "
+    "only: a WAV file that is mono, with 8 bits to each sample "
     "(<i>MacMusic User&rsquo;s Guide</i>, Appendix B). The Converter makes "
-    "exactly that kind, from almost any sound file on your Mac, or from a "
-    "YouTube video you own or have permission to save.</p>",
+    "exactly that kind, at the Macintosh Plus&rsquo;s own 22,254 samples a "
+    "second, from almost any sound file on your Mac, or from a YouTube "
+    "video you own or have permission to save.</p>",
     "<p>It runs on your Mac, not on the Macintosh Plus. Chapter 3 explains how "
     "to take what it makes to the Plus.</p>",
 
     sub("What it makes"),
     "<p>Each time you convert a song, the Converter makes either or both of "
     "these:</p>",
-    steps("* A <b class=\"term\">MacMusic WAV</b>: mono, 22,050 Hz, 8-bit. "
+    steps("* A <b class=\"term\">MacMusic WAV</b>: mono, 22,254 Hz, 8-bit, "
+          "as loud as every other. "
           "It&rsquo;s checked against MacMusic&rsquo;s own rules before it&rsquo;s "
           "kept, and it carries the song&rsquo;s title, so MacMusic fills the "
           "title in for you when you import it.",
@@ -123,17 +129,16 @@ LESSON_1 = "".join([
           "MacMusic WAV, and checking the result. A song of a few minutes "
           "takes a few seconds."),
     fig("cv27-progress", TASK),
-    steps("When it&rsquo;s finished, Results shows the new file, its length, "
-          "size and loudest peak, with a Show in Finder button to find it, and "
-          "what was done to the sound. (The picture shows another song&rsquo;s.)"),
+    steps("Then Results shows the new file, with Show in Finder, and what "
+          "was done to the sound. (The picture shows another song&rsquo;s.)"),
     fig("cv-wav-only-results", TASK),
 ])
 
 LESSON_2 = "".join([
     lesson(2, "Converting a YouTube Video"),
     "<p>Now you make a MacMusic WAV and an MP3 from a YouTube video. Use one "
-    "you own or have permission to save; the pictures show a piece of music "
-    "its channel offers free of copyright.</p>",
+    "you own or have permission to save; the pictures show one of your own, "
+    "&ldquo;MacMusic.&rdquo;</p>",
     steps("> Click YouTube at the top of the window.",
           "> In your web browser, copy the video&rsquo;s address. Then click in "
           "the box under YouTube Video, and choose Paste from the Edit menu.",
@@ -145,11 +150,11 @@ LESSON_2 = "".join([
     steps("~ If the address is of a video in a playlist, the playlist is "
           "ignored: only the one video is converted.",
           "> Under Output, click Both.",
-          "> Type a shorter title: Chill Dreamy.",
-          "The title of a video is often long. MacMusic shows up to 63 "
+          "The Title is the video&rsquo;s. Saves as shows the two files "
+          "you&rsquo;ll get.",
+          "~ A video&rsquo;s title is often long. MacMusic shows up to 63 "
           "characters of a title, and the WAV file&rsquo;s name can be no more "
-          "than 31, so a short title is best. Saves as shows the two files "
-          "you&rsquo;ll get."),
+          "than 31, so type a shorter title if it needs one."),
     fig("cv18-output", TASK),
     steps("> Click Convert.",
           "The Converter fetches the sound from YouTube first, then makes each "
@@ -158,9 +163,10 @@ LESSON_2 = "".join([
     steps("Results shows what was done, and the files made. Click Show in "
           "Finder to see them in their folder."),
     fig("cv28-results", TASK),
-    steps("~ This video was normalised by &minus;2.4 dB, and its last three "
-          "seconds of silence trimmed: those are choices under Sound, "
-          "described in the tasks that follow."),
+    steps("~ This video was brought up by 8.7 dB to the Converter&rsquo;s "
+          "loudness, and the limiter took up to 2.7 dB off its loudest "
+          "moments; it had no long silence at the ends to trim. &ldquo;The "
+          "Sound,&rdquo; in the tasks that follow, explains both."),
 ])
 
 TOPICS = [
@@ -244,28 +250,25 @@ TOPICS = [
            ]),
 
     Topic("The Sound",
-          "<p>Two choices under Sound change the music a little, and both "
-          "start off. The Converter remembers them for next time.</p>",
-          [T("To Even Out the Loudness", steps(
-               "> Turn on Normalise.",
-               "The song is made louder or quieter so that its loudest moment "
-               "comes to a set level (&minus;1.0 dBFS, just below the most a "
-               "file can hold). Songs from different places then play at more "
-               "nearly the same volume.",
-               "~ It sets the loudest peak, not how loud a song sounds overall, "
-               "so songs may still sound different."), "cv06-sound"),
+          "<p>Every song is brought to the same loudness. One choice under "
+          "Sound, trimming silence, changes the music a little more; the "
+          "Converter remembers it for next time.</p>",
+          [T("About the Loudness", steps(
+               "There&rsquo;s nothing to set. Each song is made louder or "
+               "quieter to the same loudness, &minus;16 LUFS, a measure of how "
+               "loud music sounds to the ear, so songs from different places "
+               "play at the same volume.",
+               "A limiter keeps the loudest moments under &minus;1 dBFS, just "
+               "below the most a file can hold. Results says how much a song "
+               "was raised or lowered, and how much the limiter took off.",
+               "~ A song is raised by 20 dB at most, so a very quiet one may "
+               "stay a little quiet."), "cv06-sound"),
            T("To Trim Silence at the Ends", steps(
                "> Turn on &ldquo;Trim silence at the ends,&rdquo; and choose 2 or 3 "
                "seconds in Longer than.",
                "Silence longer than that at the start or the end is cut down to "
                "half a second. Silence in the middle of a song is never "
                "touched.")),
-           T("To Change the Normalise Level", steps(
-               "> Click Advanced, near the foot of the window, to open it.",
-               "> Click the arrows beside Normalise to.",
-               "The level goes from &minus;6.0 to 0.0 dBFS, half a step at a "
-               "time. The window&rsquo;s description of Normalise changes to "
-               "match."), "cv15-advanced"),
            ]),
 
     Topic("Saving",
@@ -281,7 +284,7 @@ TOPICS = [
                "file of that name. When you click Convert, the Converter "
                "asks:",
                "* <b>Keep Both</b> saves the new file under the next free name: "
-               "Chill Dreamy 2.wav, say.",
+               "MacMusic 2.wav, say.",
                "* <b>Replace</b> puts the new file in place of the old one.",
                "* <b>Cancel</b> makes nothing.",
                "~ The song you&rsquo;re converting from is never replaced: if it "
@@ -337,16 +340,18 @@ REFERENCE = "".join([
         "shows. File name: what the files are called (empty: named after the "
         "title). Saves as: the names they&rsquo;ll have, with a mark if a file "
         "of that name is already there."),
-    cmd("Sound", "Normalise; Trim silence at the ends; Longer than (2 or 3 "
+    cmd("Sound", "Loudness: every song is brought to &minus;16 LUFS, with "
+        "nothing to set. Trim silence at the ends, and Longer than (2 or 3 "
         "seconds)."),
     cmd("Save To", "The folder the files are saved in, with Choose and, if "
         "you&rsquo;ve chosen one, Use Default."),
     cmd("Advanced", "Click it to open or close it: see &ldquo;Advanced&rdquo; "
         "below."),
-    cmd("Results", "After a conversion: what was done to the sound "
-        "(normalised by how much, trimmed by how much), and each file made, with "
-        "its length, size and loudest peak, and Show in Finder. If something "
-        "went wrong, the message is here."),
+    cmd("Results", "After a conversion: what was done to the sound (levelled "
+        "from what loudness, by how much, what the limiter took off, what was "
+        "trimmed), and each file made, with its length, size, loudest peak and "
+        "loudness, and Show in Finder. If something went wrong, the message is "
+        "here."),
     cmd("Convert and Cancel", "Convert starts (or press Return); it&rsquo;s "
         "dimmed until there&rsquo;s a song to convert. While it works, the foot "
         "of the window shows what it&rsquo;s doing, a progress bar, and Cancel "
@@ -359,28 +364,28 @@ REFERENCE = "".join([
           ("Retrieving the audio from YouTube", "With YouTube only: fetches the "
            "video&rsquo;s sound, not its pictures."),
           ("Checking the file", "Reads the song, and makes sure it holds sound."),
-          ("Analysing the sound", "Finds its loudest peak and any silence at the "
-           "ends, if Normalise or Trim is on."),
-          ("Making the MacMusic WAV, Making the MP3", "Makes each file, in a "
-           "hidden place in the folder."),
+          ("Analysing the sound", "Measures its loudness and loudest peak, and "
+           "finds any silence at the ends."),
+          ("Making the MacMusic WAV, Making the MP3", "Makes each file, levelled, "
+           "in a hidden place in the folder."),
           ("Checking the results", "Checks each file is what it should be (a "
-           "MacMusic WAV by MacMusic&rsquo;s own rules) before giving it its "
-           "name."), cls="ref stages"),
+           "MacMusic WAV by MacMusic&rsquo;s own rules), and measures its "
+           "loudness, before giving it its name."), cls="ref stages"),
     "</div>",
     "<p>Nothing is given its name until it&rsquo;s been checked, so a file you "
     "see in the folder is always complete.</p>",
 
     section("Advanced"),
     fig("cv15-advanced", TEXT),
-    cmd("Normalise to", "The level Normalise brings the loudest peak to: "
-        "&minus;6.0 to 0.0 dBFS, in half steps; &minus;1.0 to start with."),
-    cmd("MacMusic WAV", "Fixed: 22,050 Hz, mono, 8-bit, what MacMusic plays."),
+    cmd("MacMusic WAV", "Fixed: 22,254 Hz, mono, 8-bit, the Macintosh "
+        "Plus&rsquo;s own rate, so songs play at their true speed and pitch "
+        "(in MacMusic 1.2 or later)."),
     cmd("MP3", "192 kbps, stereo if the song is. An MP3 made from a compressed "
         "song (an MP3, or YouTube&rsquo;s sound) is no better than the song."),
     cmd("FFmpeg, yt-dlp and Deno", "The programs inside the Converter that do "
         "the work: FFmpeg reads and makes the sound, yt-dlp and Deno fetch from "
         "YouTube. Their versions are shown here; see Appendix D."),
-    cmd("Version", "The Converter&rsquo;s version, 1.0. Licences opens the "
+    cmd("Version", "The Converter&rsquo;s version. Licences opens the "
         "licences of the programs inside it, a file called THIRD-PARTY-NOTICES.md, "
         "in the app your Mac uses for such files."),
 
@@ -403,7 +408,9 @@ REFERENCE = "".join([
           ("YouTube", "One video at a time; no playlists; no signing in"),
           ("A MacMusic WAV&rsquo;s name", "31 characters at most, with .wav"),
           ("A title, as MacMusic keeps it", "63 characters"),
-          ("Normalise to", "&minus;6.0 to 0.0 dBFS"),
+          ("Loudness", "&minus;16 LUFS; the limiter at &minus;1 dBFS; raised "
+           "20 dB at most"),
+          ("A MacMusic WAV", "22,254 Hz, mono, 8-bit"),
           ("Trim silence longer than", "2 or 3 seconds"),
           ("MP3", "192 kbps"), cls="ref spec"),
 ])
@@ -442,7 +449,7 @@ PART = re.sub(r'(<div class="margin">(?:(?!</div>).)*</div>(?:</div>)?)(\s*<p.*?
               r'<div class="keep">\1\2</div>', PART, flags=re.S)
 
 DRAFT = draft_title("Chapter 2: Converting Songs",
-                    "A draft for review, 10 October 2026. In the finished book this "
+                    "A draft for review, 12 November 2026 (Converter 1.1). In the finished book this "
                     "chapter follows Chapter 1, and its pages are numbered on from "
                     "there.")
 

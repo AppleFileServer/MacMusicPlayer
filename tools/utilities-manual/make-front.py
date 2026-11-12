@@ -117,7 +117,7 @@ ABOUT = "".join([
 
     margin_sub("What you need"),
     boxes("a Mac with Apple silicon and macOS 26;",
-          "a Macintosh Plus with System 6.0.7 and MacMusic 1.0;",
+          "a Macintosh Plus with System 6.0.7 and MacMusic 1.2 or later;",
           "a BlueSCSI in the Plus, and a way to read its SD card on your Mac;",
           "for YouTube, an internet connection."),
 
@@ -198,8 +198,10 @@ GLOSSARY = [
      "verified. It holds no snapshot, and can be cleared."),
     ("kbps", "Thousands of bits a second: how much an MP3 uses for each second "
      "of sound. The Converter&rsquo;s MP3s are 192 kbps."),
+    ("LUFS", "How loud music sounds to the ear. The Converter brings every "
+     "song to &minus;16 LUFS."),
     ("MacMusic WAV", "The one kind of sound file MacMusic plays: a WAV file, "
-     "mono, with 22,050 samples a second, 8 bits each. The Converter makes "
+     "mono, with 22,254 samples a second, 8 bits each. The Converter makes "
      "them."),
     ("manifest", "A snapshot&rsquo;s record of every file in it, with its "
      "size and check-sum."),
@@ -210,8 +212,6 @@ GLOSSARY = [
     ("MP3", "A kind of sound file that takes much less room than a WAV file, "
      "for listening on your Mac or elsewhere. MacMusic doesn&rsquo;t play "
      "them."),
-    ("normalise", "To make a song louder or quieter, so that its loudest moment "
-     "reaches a set level."),
     ("peak", "A song&rsquo;s loudest moment."),
     ("register", "In the Backup Utility, to give a card a name, so it&rsquo;s "
      "recognised whenever it&rsquo;s inserted and its backups are kept "
@@ -221,7 +221,7 @@ GLOSSARY = [
      "another compressed kind), which loses a little quality."),
     ("Results", "The part of the Converter&rsquo;s window that shows what a "
      "conversion made."),
-    ("sample rate", "How many times a second a sound is measured: 22,050 for a "
+    ("sample rate", "How many times a second a sound is measured: 22,254 for a "
      "MacMusic WAV, 44,100 for a CD."),
     ("Saves as", "In the Converter, the names the files will have, shown before "
      "you convert."),

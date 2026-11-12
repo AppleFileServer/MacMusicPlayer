@@ -115,10 +115,10 @@ A = "".join([
         "the MP3 anyway, or just the MacMusic WAV?"),
         "Re-encode makes the MP3 anyway; WAV Only makes just the MacMusic WAV; "
         "Cancel makes nothing.", ("cv-reencode", 180)),
-    msg("<b>" + q("Chill Dreamy.mp3") + " already exists in " + q("MacMusic Files") + "</b><br>"
+    msg("<b>" + q("MacMusic.wav") + " already exists in " + q("Music Downloads") + "</b><br>"
         + q("Keep Both saves the new file under the next free name. Replace puts it in "
             "place of what&rsquo;s there."),
-        "Keep Both gives the new file the next free name (Chill Dreamy 2.mp3); "
+        "Keep Both gives the new file the next free name (MacMusic 2.wav); "
         "Replace puts it in place of the old one; Cancel makes nothing. The song "
         "you&rsquo;re converting from is never replaced.", ("cv23", 180)),
     msg(q("The folder to save to isn&rsquo;t available, or can&rsquo;t be written to. "
@@ -142,12 +142,24 @@ A = "".join([
     sub("In the Results"),
     "<p>After a conversion, Results says what was done to the sound, and may add "
     "a note. Notes are for your information; the file is fine.</p>",
-    msg(q("Normalised by &minus;2.4 dB.") + ", or " + q("... (the most allowed)."),
-        "How much louder (+) or quieter (&minus;) Normalise made the song. A song is "
-        "raised by 20 dB at most, so a very quiet one may not reach the level: "
-        "&ldquo;the most allowed.&rdquo;"),
-    msg(q("The source is too quiet to normalise: it never rises above &minus;50 dBFS."),
-        "The song is nearly silent, so Normalise left it alone."),
+    msg(q("Levelled from &minus;24.7 LUFS by +8.7 dB; the limiter took up to 2.7 dB off "
+          "the loudest moments."),
+        "How loud the song was, and how much louder (+) or quieter (&minus;) it was "
+        "made to reach the Converter&rsquo;s loudness, &minus;16 LUFS; then how much "
+        "the limiter took off its loudest moments, if it took anything. A song is "
+        "raised by 20 dB at most, so a very quiet one may not reach the loudness: "
+        "&ldquo;(the most allowed).&rdquo;"),
+    msg(q("The source is too quiet to level: it never rises above &minus;50 dBFS."),
+        "The song is nearly silent, so it was left as it was."),
+    msg(q("Levelling it took up to ... dB off its loudest moments, so it may sound "
+          "squashed. A lower loudness target would take off less."),
+        "The limiter had to work hard (more than 6 dB) to bring a song with very "
+        "loud moments to the loudness. Listen to it; the Converter&rsquo;s loudness "
+        "can&rsquo;t be changed."),
+    msg(q("It comes out at ... LUFS, not the &minus;16.0 LUFS asked for: the limiter took "
+          "more off its loudest moments."),
+        "The song is a little quieter than the others, because the limiter took "
+        "off more than expected. Nothing is wrong."),
     msg(q("Trimmed 0.0 s from the start and 3.0 s from the end.") + ", "
         + q("No long silence at the ends to trim.") + " and "
         + q("The whole source is silent, so nothing was trimmed."),
@@ -156,21 +168,20 @@ A = "".join([
           "damaged or cut short."),
         "The song ends sooner than it should. The file made has what could be read."),
     msg(q("The source peaks above full scale (... dBFS), so its loudest moments are clipped "
-          "slightly. Normalise would lower it."),
-        "The song is too loud for a file to hold. Turn on Normalise and convert it again."),
+          "slightly."),
+        "The song you started from was already too loud for a file to hold, and "
+        "being made no quieter, its loudest moments stay clipped. Nothing more can "
+        "be done with that copy."),
     msg(q("The title has nothing MacMusic can show, so the WAV has none."),
         "The title uses only letters the Macintosh can&rsquo;t show (Japanese, say). "
         "Type one MacMusic can show, or type it in MacMusic when you import."),
-    msg(q("The WAV peaks at ... dBFS, below the target: its channels differ, and mixing them "
-          "into one lowers the peak."),
-        "A stereo song&rsquo;s two channels are mixed into one for MacMusic, and the "
-        "mix is a little quieter. Nothing is wrong."),
     msg(q("The MP3 peaks at ... dBFS: encoding pushed it past full scale, so it may clip on "
           "playback."),
-        "Making the MP3 made it a fraction too loud. Lower Normalise to (Advanced) a "
-        "little, and convert it again."),
+        "Making the MP3 made it a fraction too loud, so it may crackle at its loudest "
+        "moments on your Mac. The MacMusic WAV isn&rsquo;t affected."),
     msg(q("failed: nothing was saved"),
-        "A file failed its final checks (its length, its format or its sound), so it "
+        "A file failed its final checks (its length, its format, its sound or its "
+        "loudness), so it "
         "wasn&rsquo;t kept; the reason is shown under it. Convert it again. This "
         "shouldn&rsquo;t happen: if it does again, note the message."),
 
@@ -355,11 +366,14 @@ A = "".join([
 B = "".join([
     sub("MacMusic WAV Files"),
     "<p>MacMusic plays one kind of sound file only: a WAV file of plain sound "
-    "(&ldquo;PCM&rdquo;), mono, with 22,050 samples a second, each of 8 bits. "
-    "The <i>MacMusic User&rsquo;s Guide</i>, Appendix B, explains why. The "
-    "Converter makes exactly this kind, and puts the song&rsquo;s title inside "
-    "it, where MacMusic finds it when you import the song.</p>",
-    "<p>A MacMusic WAV takes 22,050 bytes for each second of sound:</p>",
+    "(&ldquo;PCM&rdquo;), mono, with 8 bits to each sample, at 22,254 or 22,050 "
+    "samples a second. The <i>MacMusic User&rsquo;s Guide</i>, Appendix B, "
+    "explains why. The Converter makes them at 22,254, the Macintosh "
+    "Plus&rsquo;s own rate, so they play at their true speed and pitch "
+    "(MacMusic 1.2 or later; earlier versions play only 22,050). It puts the "
+    "song&rsquo;s title inside the file, where MacMusic finds it when you "
+    "import the song.</p>",
+    "<p>A MacMusic WAV takes 22,254 bytes for each second of sound:</p>",
     table(("", "Holds"),
           ("A minute of music", "about 1.3 MB"),
           ("A 3&frac12;-minute song", "about 4.6 MB"),
@@ -451,10 +465,11 @@ C = "".join([
             "(tools/update-yt-dlp.sh). Converting files from your Mac still works "
             "meanwhile."),
     trouble("Songs aren&rsquo;t equally loud",
-            "Normalise evens out each song&rsquo;s loudest moment, not how loud it "
-            "sounds overall, so a quiet song with one loud drum may still sound "
-            "quieter than others. MacMusic&rsquo;s own volume sets the level you "
-            "hear."),
+            "Songs made by the Converter 1.1 are all brought to the same loudness. "
+            "Songs made by the Converter 1.0 had only their loudest moments evened "
+            "out, so they may sound quieter or louder than the rest: convert them "
+            "again. A very quiet song can be raised only 20 dB, and may stay a "
+            "little quiet."),
     trouble("A file name has changed",
             "A MacMusic WAV&rsquo;s name is at most 31 characters, with no colons: "
             "see Appendix B, &ldquo;Names on the Macintosh.&rdquo; Type a shorter "
@@ -504,19 +519,21 @@ D = "".join([
     sub("What You Need"),
     table(("", ""),
           ("Your Mac", "a Mac with Apple silicon and macOS 26"),
-          ("The Macintosh", "a Macintosh Plus with System 6.0.7, MacMusic 1.0, and a "
+          ("The Macintosh", "a Macintosh Plus with System 6.0.7, MacMusic 1.2 or later, and a "
            "BlueSCSI (for the Transfer Utility&rsquo;s disks)"),
           ("YouTube", "an internet connection; the Converter doesn&rsquo;t sign in"),
           ("Backups", "a slot or reader for SD cards; room on your Mac for the "
            "snapshots"),
           cls="ref spec"),
 
-    sub("MacMusic Converter Utility 1.0"),
+    sub("MacMusic Converter Utility 1.1"),
     table(("", ""),
           ("Reads", "a sound file (MP3, AAC or M4A, WAV, FLAC, Opus and most others), "
            "or one YouTube video"),
-          ("Makes", "a MacMusic WAV (mono, 22,050 Hz, 8-bit), an MP3 (192 kbps), or both"),
-          ("Normalise", "the loudest peak to &minus;6.0 to 0.0 dBFS (&minus;1.0 to start)"),
+          ("Makes", "a MacMusic WAV (mono, 22,254 Hz, 8-bit; for MacMusic 1.2 or later), "
+           "an MP3 (192 kbps), or both"),
+          ("Loudness", "every song to &minus;16 LUFS, a limiter at &minus;1 dBFS; raised "
+           "20 dB at most"),
           ("Trim silence", "longer than 2 or 3 seconds at the start or end, to half a second"),
           ("Saves to", "~/Music/MacMusic Converter, or a folder you choose"),
           cls="ref spec"),

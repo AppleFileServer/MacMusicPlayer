@@ -40,8 +40,9 @@ how to use the book; conventions (your Mac and the Macintosh Plus).
 The MacMusic Converter Utility. The title is fixed by the User's Guide.
 
 - Opener spread; contents (3 pages).
-- **Introduction** (2): what it makes (MacMusic WAV: mono, 22,050 Hz,
-  8-bit; MP3: 192 kbps; or both); where songs come from (a file, or a
+- **Introduction** (2): what it makes (MacMusic WAV: mono, 22,254 Hz,
+  8-bit, for MacMusic 1.2; MP3: 192 kbps; or both); every song levelled
+  to the same loudness (Converter 1.1); where songs come from (a file, or a
   YouTube video you own or may save); what it never does (change the
   source, leave anything half-made).
 - **Lesson 1: Converting a Song From a File** (3): Choose File, the
@@ -56,8 +57,8 @@ The MacMusic Converter Utility. The title is fixed by the User's Guide.
   - Choosing What to Make: To Make a MacMusic WAV, an MP3 or Both; If
     the Source Is Already an MP3 (Re-encode, WAV Only). CV11, CV13, CV14.
   - Naming: To Set the Title MacMusic Shows; To Set the File Name.
-  - The Sound: To Normalise (or Not); To Trim Silence at the Ends; To
-    Change the Normalise Level.
+  - The Sound: About the Loudness (nothing to set, Converter 1.1); To
+    Trim Silence at the Ends.
   - Saving: To Choose Where Files Are Saved; If a File Already Exists
     (Keep Both, Replace). CV15, CV22, CV23.
   - While It Works: To Cancel; Quitting While It Works (CHECK).
@@ -69,12 +70,14 @@ The MacMusic Converter Utility. The title is fixed by the User's Guide.
     progress bar. CV06, CV07, CV15, CV28.
   - What each stage does: retrieving, analysing the sound, making the
     WAV or MP3, checking it.
-  - Advanced: Normalise to; the fixed formats; FFmpeg, yt-dlp and Deno;
+  - Advanced: the fixed formats; FFmpeg, yt-dlp and Deno;
     Version; Licences (CHECK: the Licences window).
   - The menus: the application menu, Edit, View, Window, Help.
     CV29-CV34; the About box, CV30.
   - Limits: names of 31 characters at most; one video at a time, no
-    playlists; no sign-in; peak normalising, not loudness levelling.
+    playlists; no sign-in; loudness &minus;16 LUFS, limiter &minus;1 dBFS.
+  - Updated for the Converter 1.1 (MacMusic 1.2, step E2), with captures
+    of 1.1 made on 2026-11-11.
 
 ## Chapter 3: Moving Songs to the Macintosh (16 pages as drafted, 2026-10-10)
 

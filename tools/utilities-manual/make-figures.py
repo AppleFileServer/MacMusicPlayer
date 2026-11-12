@@ -68,10 +68,16 @@ REGION_ALERT = ((20, 20, 539, 555), 56)        # "Stop ... and quit?"
 RESTORE_CONFLICT = ((20, 20, 539, 719), 56)    # "... is already there"
 ORIGIN = ((0, 0, 0, 0), 0)                     # a part cut straight from a capture
 T = "taken-2026-10-10/"
+# The captures of 2026-11-11 (Claude's, with the owner's leave): the
+# Converter 1.1, each window alone (1080 x 1264), so a part is cut from
+# the whole window, W.
+T2 = "taken-2026-11-11/"
+W = ((0, 0, 1079, 1263), 36)
 SHEETS = {      # sheets and alerts, measured within their windows' captures
     "cv-reencode": ((280, 378, 799, 885), 56),
     "bu-restore": ((440, 306, 1559, 1093), 72),
     "bu-delete": ((740, 464, 1259, 935), 56),
+    "cv23": ((280, 394, 799, 869), 56),         # Converter 1.1 (T2)
 }
 
 # A part of a window: (left, top, right, bottom) within it, in the
@@ -85,14 +91,14 @@ def section(top, bottom, heading=75, below=20):
 FIGURES = {
     **{"cv%02d" % n: ("converter/cv%02d" % n, "window", FINDER) for n in (1, 3, 4, 5)},
     "cv02": ("converter/cv02", "window", ARCHIVE),
-    "cv06": ("converter/cv06", "window", CONVERTER_A),
+    "cv06": (T2 + "cv06", "window", whole(36)),      # Converter 1.1
     "cv07": ("converter/cv07", "window", CONVERTER_A),
     "cv08": ("converter/cv08", "window", OPEN_PANEL),
     "cv09": ("converter/cv09", "window", OPEN_PANEL),
     "cv10": ("converter/cv10", "window", OPEN_PANEL),
     **{"cv%02d" % n: ("converter/cv%02d" % n, "window", CONVERTER_B)
        for n in list(range(11, 23)) + list(range(24, 29))},
-    "cv23": ("converter/cv23", "window", ALERT),
+    "cv23": (T2 + "cv23", "window", None),           # its sheet, in SHEETS
     "cv29": ("converter/cv29", "menu", APP_MENU),
     "cv30": ("converter/cv30", "window", ABOUT),
     "cv31": ("converter/cv31", "menu", APP_MENU),
@@ -114,8 +120,8 @@ FIGURES = {
     "plus-wav-files": (T + "p03", "part", (ORIGIN, (0, 64, 2048, 1432))),
     "cv-refused": (T + "c01", "window", whole(36)),
     "cv-not-retrieved": (T + "c04", "window", whole(36)),
-    "cv-reencode": (T + "c05", "window", None),           # its sheet, measured below
-    "cv-wav-only": (T + "c06", "window", whole(36)),
+    "cv-reencode": (T2 + "cv-reencode", "window", None),  # its sheet, in SHEETS
+    "cv-wav-only": (T2 + "cv-wav-only", "window", whole(36)),
     "cv-cancelled": (T + "c10", "window", whole(36)),
     "cv-finder": (T + "c07", "window", whole(56)),
     "cv-quit": (T + "c11", "window", REGION_ALERT),
@@ -144,7 +150,7 @@ FIGURES = {
     "tu-refused-files": (None, "partof", ("tu-refused", (0, 100, 1520, 790))),
     "tu-progress-foot": (None, "partof", ("tu-progress", (0, 1300, 1520, 1436))),
     "tu-checked-result": (None, "partof", ("tu-checked", (0, 460, 1520, 1290))),
-    "cv-wav-only-results": (None, "partof", ("cv-wav-only", (0, 850, 1080, 1130))),
+    "cv-wav-only-results": (None, "partof", ("cv-wav-only", (0, 850, 1080, 1125))),
     "cv-cancelled-results": (None, "partof", ("cv-cancelled", (0, 970, 1080, 1130))),
     "cv-refused-source": (None, "partof", ("cv-refused", (0, 186, 1080, 497))),
     "cv-not-retrieved-youtube": (None, "partof", ("cv-not-retrieved", (0, 186, 1080, 583))),
@@ -156,24 +162,25 @@ FIGURES = {
     "tu07-advanced": (None, "partof", ("tu07", (0, 1085, 1520, 1290))),
     "tu01-build": (None, "partof", ("tu01", (0, 1320, 1520, 1436))),
     # Parts, for the task pages.
-    "cv06-source": ("converter/cv06", "part", (CONVERTER_A, section(261, 330))),
-    "cv06-sound": ("converter/cv06", "part", (CONVERTER_A, section(801, 1125))),
-    "cv06-convert": ("converter/cv06", "part", (CONVERTER_A, (4, 1140, 1076, 1242))),
+    "cv06-source": (T2 + "cv06", "part", (W, section(261, 330))),
+    "cv06-sound": (T2 + "cv06", "part", (W, section(801, 1125))),
+    "cv06-convert": (T2 + "cv06", "part", (W, (4, 1140, 1076, 1242))),
     "cv11-source": ("converter/cv11", "part", (CONVERTER_B, section(261, 418))),
     "cv11-output": ("converter/cv11", "part", (CONVERTER_B, section(549, 934))),
     "cv12-output": ("converter/cv12", "part", (CONVERTER_B, section(314, 597))),
     "cv14-output": ("converter/cv14", "part", (CONVERTER_B, section(314, 733))),
-    "cv15-save-to": ("converter/cv15", "part", (CONVERTER_B, section(414, 497))),
-    "cv15-advanced": ("converter/cv15", "part", (CONVERTER_B, (0, 526, 1080, 1110))),
-    "cv16-youtube": ("converter/cv16", "part", (CONVERTER_B, section(261, 508))),
-    "cv17-youtube": ("converter/cv17", "part", (CONVERTER_B, section(261, 508))),
-    "cv18-output": ("converter/cv18", "part", (CONVERTER_B, section(639, 956))),
-    "cv22-output": ("converter/cv22", "part", (CONVERTER_B, section(639, 956))),
-    "cv20-progress": ("converter/cv20", "part", (CONVERTER_B, (4, 1130, 1076, 1242))),
-    "cv27-progress": ("converter/cv27", "part", (CONVERTER_B, (4, 1130, 1076, 1242))),
-    "cv28-results": ("converter/cv28", "part", (CONVERTER_B, section(927, 1100))),
+    # Converter 1.1 (T2): the YouTube video is the owner's own "MacMusic".
+    "cv15-save-to": (T2 + "cv15", "part", (W, (0, 345, 1080, 545))),
+    "cv15-advanced": (T2 + "cv15", "part", (W, (0, 545, 1080, 1125))),
+    "cv16-youtube": (T2 + "cv16", "part", (W, (0, 150, 1080, 410))),
+    "cv17-youtube": (T2 + "cv17", "part", (W, (0, 150, 1080, 440))),
+    "cv18-output": (T2 + "cv17", "part", (W, (0, 470, 1080, 890))),
+    "cv22-output": (T2 + "cv22", "part", (W, (0, 470, 1080, 890))),
+    "cv20-progress": (T2 + "cv20", "part", (W, (4, 1130, 1076, 1242))),
+    "cv27-progress": (T2 + "cv27b", "part", (W, (4, 1130, 1076, 1242))),
+    "cv28-results": (T2 + "cv28", "part", (W, (0, 700, 1080, 1125))),
     # Chapter openers: (window, the part enlarged across the spread).
-    "c2-opener": ("converter/cv17", "opener", (CONVERTER_B, (0, 0, 1080, 648))),
+    "c2-opener": (T2 + "cv17", "opener", (W, (0, 0, 1080, 648))),
     "c4-opener": ("backup/bu08", "opener", (BACKUP, (0, 0, 2000, 1200))),
     "c3-opener": ("new-2026-10-10/n01", "opener", (TRANSFER, (0, 0, 1520, 912))),
     "c1-opener": ("converter/cv05", "opener", (FINDER, (0, 0, 2096, 1230))),

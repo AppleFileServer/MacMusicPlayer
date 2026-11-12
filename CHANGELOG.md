@@ -41,6 +41,15 @@ library conversion. The decision codes in brackets are explained in
   only for 22,050 Hz songs; All in an Albums list, album by album; what
   1.0 and 1.1 do with a 1.2 library (a new troubleshooting entry, "An
   earlier MacMusic leaves songs out"); the import refusal's new wording.
+- ***MacMusic Utilities* for the Converter 1.1 (step E2):** Chapter 2,
+  Appendixes A, B and D, the glossary, the index and the Quick Reference
+  Card: every song levelled to -16 LUFS with a limiter at -1 dBFS, with
+  nothing to set, in place of Normalise; the MacMusic WAV at 22,254 Hz,
+  for MacMusic 1.2; Results' and the notes' new wording, quoted from the
+  Converter 1.1's source; the YouTube lesson with the owner's own video.
+  New captures of the Converter 1.1 (2026-11-11) for the window, Sound,
+  Advanced, Save To, Results, the YouTube lesson and the two questions
+  (`make-figures.py`). Still 110 pages.
 
 ## 1.1 (2026-10-13; docs/plans/release-1.1.md)
 
