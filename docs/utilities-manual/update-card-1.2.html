@@ -1,0 +1,42 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<title>MacMusic 1.2 Update</title>
+<link rel="stylesheet" href="manual.css">
+<link rel="stylesheet" href="utilities.css">
+<script>window.PagedConfig = { after: () => { window.__pagedDone = true; } };</script>
+<script src="paged.polyfill.js"></script>
+</head><body>
+<style>
+@page card { margin: 30pt 40pt 34pt 40pt; }
+.card { page: card; font: 9pt/11pt var(--serif); }
+.card .top { border-top: 2.2pt solid var(--red); padding-top: 9pt; margin-bottom: 4pt; }
+.card .title { font: 19pt/22pt var(--serif); margin: 0 0 1pt 0; }
+.card .title .apple { color: var(--red); font-family: var(--sans); }
+.card .where { font: 9pt/11pt var(--serif); font-style: italic; color: #555; margin: 0 0 4pt 0; }
+.card h2 { font: bold 10pt/12pt var(--serif); margin: 10pt 0 3pt 0; padding-left: 13pt; position: relative;
+           break-after: avoid; }
+.card h2::before { content: ""; position: absolute; left: 0; top: 2.5pt; width: 6.5pt; height: 6.5pt;
+                   background: var(--red); }
+.card h3 { font: italic bold 8.5pt/10pt var(--serif); margin: 4pt 0 1pt 0; }
+.card table { width: 100%; border-collapse: collapse; break-inside: avoid; }
+.card td { vertical-align: top; padding: 2pt 0 2.5pt 0; border-bottom: 0.5pt solid #777; }
+.card td:first-child { width: 42%; padding-right: 10pt; }
+.card table.three td:first-child { width: 36%; }
+.card table.three td:nth-child(2) { width: 34%; padding-right: 8pt; }
+.card th { font: italic bold 8.5pt/10pt var(--serif); text-align: left; padding: 0 0 2pt 0; }
+.card ul { margin: 1pt 0 0 0; padding-left: 10pt; }
+.card li { margin: 0; list-style: square; }
+.card .note { font: 8pt/10pt var(--serif); color: #555; margin: 3pt 0 0 0; }
+.card ol.journey { margin: 2pt 0 0 0; padding-left: 14pt; }
+.card ol.journey li { list-style: decimal; margin: 0 0 1.5pt 0; }
+.card kbd { font-size: 7.5pt; line-height: 9.5pt; }
+.card .foot { font: 7.5pt/9.5pt var(--serif); color: #555; margin-top: 14pt; }
+</style>
+<style>
+.card .title .logo { height: 17pt; width: auto; vertical-align: -2pt; margin-right: 5pt; }
+.card .intro { font: 9.5pt/12pt var(--serif); margin: 4pt 0 2pt 0; }
+</style>
+<div class="card"><div class="top"><p class="title"><img class="logo" src="private/rainbow-logo.png">MacMusic 1.2 Update</p><p class="where">What&rsquo;s new since MacMusic 1.1</p></div><p class="intro">MacMusic 1.2 plays songs at the Macintosh Plus&rsquo;s own rate, lists an artist&rsquo;s or a genre&rsquo;s songs album by album, and makes the song details window easier to click. Everything else works as before.</p><h2>Songs at their true speed</h2><table class=""><tr><td>22,254 Hz songs</td><td>MacMusic now plays WAV files made at 22,254 samples a second, the Plus&rsquo;s own rate, as well as 22,050. They play at their true speed and pitch. <i>Guide</i>, page 68.</td></tr><tr><td>The MacMusic Converter 1.1</td><td>Makes its MacMusic WAVs at 22,254, and brings every song to the same loudness (<i>MacMusic Utilities</i>, Chapter 2).</td></tr><tr><td>Songs at 22,050</td><td>Play as before, about 0.9% fast; the times shown are right. To have one at its true speed, convert it again and import it. <i>Guide</i>, page 72.</td></tr><tr><td>Importing</td><td>Import Song takes either rate. A WAV of any other kind is refused, with a message saying what&rsquo;s needed. <i>Guide</i>, page 34.</td></tr></table><h2>All, album by album</h2><table class=""><tr><td>All in an Albums list</td><td>Gives the songs album by album, each album in track order, as you&rsquo;d play the records. That&rsquo;s All in Albums, and All in an artist&rsquo;s or a genre&rsquo;s albums. <i>Guide</i>, page 25.</td></tr><tr><td>Songs</td><td>Music &gt; Songs still lists every song by title.</td></tr></table><h2>Smaller changes</h2><table class=""><tr><td>The song details window</td><td>A click anywhere inside a box&rsquo;s frame now selects that box, even right at its edge. Before, a click near the frame missed, and the typing stayed in the last box. <i>Guide</i>, page 36.</td></tr><tr><td>Edit Song and ratings</td><td>Keep each song&rsquo;s rate when they save its details.</td></tr></table></div>
+<div class="card page-break"><div class="top"><p class="title">Moving up from MacMusic 1.1</p><p class="where">Your songs, playlists and settings come with you</p></div><h2>Installing MacMusic 1.2</h2><table class=""><tr><td>To install it</td><td>Quit MacMusic. Drag the new MacMusic from its disk to where the old one is on your hard disk, and click OK when the Finder asks to replace it.</td></tr><tr><td>Your libraries</td><td>Stay as they are: songs, playlists, ratings and the libraries MacMusic remembers. So do your settings.</td></tr><tr><td>The first start</td><td>As quick as before: MacMusic 1.2 uses 1.1&rsquo;s note of your songs. <i>Guide</i>, page 47.</td></tr><tr><td>Memory</td><td>As 1.1: 640K under MultiFinder, at least 512K.</td></tr></table><h2>Going back to 1.1 or 1.0</h2><table class=""><tr><td>Songs at 22,254 Hz</td><td>MacMusic 1.0 and 1.1 can&rsquo;t play them: they leave them out, saying some files weren&rsquo;t recognised. The files aren&rsquo;t changed, and the songs are back when 1.2 opens the library again. <i>Guide</i>, page 73.</td></tr><tr><td>The first start in 1.1</td><td>Reads every song file once, as 1.1 doesn&rsquo;t know 1.2&rsquo;s note of your songs.</td></tr><tr><td>Songs at 22,050 Hz</td><td>Are the same in every version, so they can go back and forth.</td></tr></table><h2>What hasn&rsquo;t changed</h2><table class=""><tr><td>The iPod</td><td>Its screens, the click wheel, Now Playing, Shuffle and Repeat, the Clock.</td></tr><tr><td>The library</td><td>500 songs and 10 playlists at most; printing, as in 1.1.</td></tr><tr><td>The utilities</td><td>The Converter 1.1 makes songs for 1.2. The Transfer Utility 1.0 takes only 22,050 Hz songs for now.</td></tr></table><p class="foot">Everything in MacMusic 1.2 is described in the <i>MacMusic User&rsquo;s Guide</i>, third edition (November 2026), and in brief in the MacMusic Read Me on its disk. &copy; 2026 Jack McAteer. Apple, Macintosh and Mac are trademarks of Apple Inc. For the owner&rsquo;s own use.</p></div>
+
+</body></html>

@@ -50,6 +50,10 @@ library conversion. The decision codes in brackets are explained in
   New captures of the Converter 1.1 (2026-11-11) for the window, Sound,
   Advanced, Save To, Results, the YouTube lesson and the two questions
   (`make-figures.py`). Still 110 pages.
+- **The *MacMusic 1.2 Update* card (step E3):** what's new since 1.1,
+  and moving up from it (and back), with the User's Guide's pages, as
+  1.1's card (MD10): `tools/utilities-manual/make-update-card-1.2.py`;
+  1.1's card is left as it was.
 
 ## 1.1 (2026-10-13; docs/plans/release-1.1.md)
 
