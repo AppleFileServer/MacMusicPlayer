@@ -58,8 +58,11 @@ song and cache formats). Everything is committed and pushed, up to
    heading's date; tag `v1.2`; `tools/make-release.sh` for the final
    files; and the extras below (the BlueSCSI disk, both editions of the
    PDFs, the 1.2 Update card's, `SHA256SUMS`).
-3. **Tell the Converter session:** its 1.1 release waits for MacMusic
-   1.2.
+3. **The MacMusic Converter Utility 1.1 is already released**
+   (2026-11-12, tag `v1.1` in its repository; installed in
+   Applications), by the owner's choice ahead of MacMusic 1.2: its WAVs
+   are 22,254 Hz, so until 1.2 is released only the candidate (and the
+   Music disk) plays them. Its release notes say so.
 
 **Also open:**
 
