@@ -5,7 +5,7 @@ minutes to read; about an hour to be fixing bugs.
 
 ## What this is
 
-MacMusic 1.1 (October 2026; 1.0 a week before): a 2004 iPod as a
+MacMusic 1.1 (October 2026; 1.0 a week before; 1.2 on the way): a 2004 iPod as a
 Macintosh Plus program, in C, built on this Mac with the **Retro68** cross-compiler and tested
 in the **Mini vMac** emulator and on the real Plus (BlueSCSI). Everything
 about it is in this folder; `README.md` is the overview.
@@ -13,15 +13,65 @@ about it is in this folder; `README.md` is the overview.
 **The latest release is 1.1** (2026-10-13, tag `v1.1`): faster start-up,
 printing, importing several songs. Its files, manuals included, are in
 `~/MacPlusProjects/releases/MacMusic-1.1/` (checked against its
-`SHA256SUMS` on 2026-10-25). Where it was left (2026-10-13, put aside;
-looked at again 2026-10-25):
+`SHA256SUMS` on 2026-10-25).
 
-- **Not yet checked on the real Plus** (it was released without the
-  full manual checklist, `docs/testing/runs/1.1.md`): printing on the
-  ImageWriter, the time of a first start or Rescan Library, a 1 MB Plus.
-  Anything found goes in `docs/issues-found.md`, for 1.1.1.
-- **Open issues, for review after 1.1:** I4, I6, I8 and I9 in
-  `docs/outstanding-issues.md`. The issues log has nothing open.
+**MacMusic 1.2 is built and waiting for its checks** (2026-11-12;
+`docs/plans/release-1.2.md`, approved 2026-11-11; asked for as 1.1.1 by
+the Converter session, named 1.2 by the owner because it changes the
+song and cache formats). Everything is committed and pushed, up to
+`ee1077a`:
+
+- **What's in it** (`CHANGELOG.md`, decisions N12-1 to N12-9): a click
+  anywhere in a box of the song details window selects it; Albums › All
+  lists songs by album, then track (PROVISIONAL); songs at 22,254 Hz,
+  the Plus's own rate, as the MacMusic Converter 1.1 makes them, are
+  read, played at true speed, edited and imported (22,050 Hz as before;
+  the cache is version 2, and 1.1's is still read); songs over about 27
+  minutes get their times right; up to 500 albums, artists, genres and
+  composers (was 256).
+- **Done:** the User's Guide (third edition) and its Read Me, *MacMusic
+  Utilities* Chapter 2 for the Converter 1.1 (with its captures of
+  2026-11-11), the *MacMusic 1.2 Update* card
+  (`tools/utilities-manual/make-update-card-1.2.py`), the version (1.2),
+  and the checklist's section 11 for 1.2.
+- **The candidate:** `~/MacPlusProjects/releases/MacMusic-1.2-candidate-ee1077a/`
+  (both test scripts passed when it was made).
+- **The Music disk for the Plus:**
+  `~/MacPlusProjects/library-work-1.2/HD50_512 Music 1984 MB.hda`
+  (1,984 MiB, volume "Music", SCSI ID 5, to replace 1.1's Scratch image
+  on the card): the candidate's MacMusic and a library of the owner's 376
+  songs up to 10 minutes, at 22,254 Hz, levelled to −16 LUFS by the
+  Converter's own engine, with full details. Made with
+  `tools/library-image` (`--ffprobe`, `--converter`, `--trim 2`); its
+  `wav` and `songs` folders are kept, so it can be remade quickly.
+
+**Left for 1.2**, in order (`release-1.2.md` step F):
+
+1. **The owner's checks:** section 11 of `docs/testing/runs/1.2.md`, in
+   Mini vMac (`tools/run-persistent.sh`; the MusicTest disk has a
+   22,254 and a 22,050 Hz test WAV) and on the Plus from the Music disk,
+   including the **floppy read-write-verify** while a song plays (11.15;
+   the issues log, 2026-11-11: the sound goes odd while a disk is read).
+   Anything found goes in `docs/issues-found.md`.
+2. **Then:** close I4 in `docs/outstanding-issues.md` (accepted for
+   22,050 Hz songs, fixed for 22,254 Hz ones); the `CHANGELOG.md`
+   heading's date; tag `v1.2`; `tools/make-release.sh` for the final
+   files; and the extras below (the BlueSCSI disk, both editions of the
+   PDFs, the 1.2 Update card's, `SHA256SUMS`).
+3. **Tell the Converter session:** its 1.1 release waits for MacMusic
+   1.2.
+
+**Also open:**
+
+- **1.1's Plus checks** (`docs/testing/runs/1.1.md`): start-up and
+  importing passed 2026-11-11; printing on the ImageWriter still to come;
+  the 1 MB Plus won't be tested (it means taking SIMMs out).
+- **Open issues:** I6, I8 and I9 in `docs/outstanding-issues.md`; a 1.x
+  idea in its roadmap (removing a library from the File menu's list).
+- **The utilities:** the Macintosh Transfer Utility 2.0 (its own
+  session, commit 80ec7d3) takes MacMusic WAVs at 22,254 Hz only; 1.0
+  takes only 22,050 Hz. *MacMusic Utilities* Chapter 3 still describes
+  1.0 (T3 in `LOOSE-ENDS.md`).
 - **On the BlueSCSI card:** `HD60_512 MacMusic Timing 3.hda`, a timing
   image no longer needed, can be deleted (it shares SCSI ID 6 with the
   Pokémon project's disk).
@@ -97,11 +147,20 @@ Mini vMac to 1x speed (Control-S, then 1) for realistic timing.
    - the manuals' PDFs, if they changed: `tools/manual/make-book.py`
      (the guide, then again with `MANUAL_ASSETS=/nonexistent` for the
      plain edition, then once more so `docs/manual/book.html` is the
-     own-use one), `tools/utilities-manual/make-card.py`, and for a
-     version with changes a user would notice, an update card like
-     `make-update-card.py` (MD10 in `docs/plans/manual-1.1-part-d.md`);
-     each built with `tools/utilities-manual/build-pdf.sh`;
+     own-use one), *MacMusic Utilities* if it changed
+     (`tools/utilities-manual/make-book.py`, after `make-figures.py`),
+     `tools/utilities-manual/make-card.py`, and for a version with
+     changes a user would notice, an update card (`make-update-card.py`
+     for 1.1, `make-update-card-1.2.py` for 1.2; MD10 in
+     `docs/plans/manual-1.1-part-d.md`); each built with
+     `tools/utilities-manual/build-pdf.sh`;
    - then `shasum -a 256` of each into the release's `SHA256SUMS`.
+6. **A test disk of real songs at 22,254 Hz** (as for 1.2's Music disk):
+   `tools/library-image/library_image.py` with `--ffprobe` (the
+   Converter's ffprobe) for the tags, `--converter` (an `mmc-convert`
+   built from the Converter's source) with `--tools-bin` and `--trim 2`,
+   and `image --size-mib 1984 --volume-name Music --app` the release's
+   `.bin`.
 
 ## Where to look
 
